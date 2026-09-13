@@ -83,6 +83,16 @@ public struct BACCurve: Sendable {
 /// The type is deliberately a pure value and free of UI concerns: SwiftData
 /// `@Model` classes call into this, never the other way round.
 public struct BACEngine: Sendable {
+
+    /// Bumped whenever a change to the model would alter the numbers it
+    /// produces for the same inputs.
+    ///
+    /// Stored summaries carry the version they were computed with, so a model
+    /// improvement invalidates them instead of silently leaving stale figures
+    /// in the history. Do not bump it for refactors that keep the output
+    /// identical — that would needlessly recompute every past session.
+    public static let version = 1
+
     /// Integration step in minutes.
     public var stepMinutes: Double
     /// Sampling interval in minutes.
