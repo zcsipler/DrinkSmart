@@ -6,27 +6,54 @@ import BACKit
 ///
 /// The decision is made before the drink is poured, so the projected peak
 /// belongs here rather than on the main screen afterwards.
+///
+/// The same sheet corrects an already logged drink. Passing `editing` prefills
+/// every control and switches the wording; the projection then compares the
+/// session without that drink against the session with the corrected version.
 struct AddDrinkSheet: View {
     let store: SessionStore
+
+    /// Non-nil when correcting a drink that is already in the session.
+    let editing: Drink?
+
     @Environment(\.dismiss) private var dismiss
 
-    @State private var template = DrinkCatalog.all[0]
-    @State private var volumeMl: Double = 500
-    @State private var abv: Double = 5
-    @State private var stomach: StomachState = .light
-    @State private var consumedAt: Date = .now
+    @State private var template: DrinkTemplate
+    @State private var volumeMl: Double
+    @State private var abv: Double
+    @State private var stomach: StomachState
+    @State private var consumedAt: Date
     @State private var showsTimePicker = false
 
     /// A stable identifier, so that dragging a slider does not mint a new
-    /// drink-equivalent object on every redraw.
-    @State private var draftID = UUID()
+    /// drink-equivalent object on every redraw. When editing, this is the
+    /// existing drink's id, which is what lets `update(_:)` find it.
+    @State private var draftID: UUID
+
+    init(store: SessionStore, editing: Drink? = nil) {
+        self.store = store
+        self.editing = editing
+
+        let template = editing.map(DrinkCatalog.template(for:)) ?? DrinkCatalog.all[0]
+        _template = State(initialValue: template)
+        _volumeMl = State(initialValue: editing?.volumeMl ?? template.defaultVolumeMl)
+        _abv = State(initialValue: editing?.abvPercent ?? template.defaultAbv)
+        _stomach = State(initialValue: editing?.stomach ?? .light)
+        _consumedAt = State(initialValue: editing?.consumedAt ?? .now)
+        _draftID = State(initialValue: editing?.id ?? UUID())
+        // "15 min ago" is meaningless when correcting a drink from hours back,
+        // so an edit opens straight on the exact-time picker.
+        _showsTimePicker = State(initialValue: editing != nil)
+    }
+
+    private var isEditing: Bool { editing != nil }
 
     /// The simulation is not cheap, so it runs once when the input changes
     /// rather than inside `body`.
     @State private var cachedProjection: BandedProjection?
 
     private var projection: BandedProjection {
-        cachedProjection ?? store.project(candidate)
+        cachedProjection ?? store.project(candidate, excluding: editing?.id)
     }
 
     /// Inputs to the projection. We only recompute when this changes.
@@ -69,7 +96,7 @@ struct AddDrinkSheet: View {
             }
             .background(Theme.background)
             .scrollIndicators(.hidden)
-            .navigationTitle(Text("Add drink"))
+            .navigationTitle(isEditing ? Text("Edit drink") : Text("Add drink"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -85,7 +112,7 @@ struct AddDrinkSheet: View {
     }
 
     private func recalculate() {
-        cachedProjection = store.project(candidate)
+        cachedProjection = store.project(candidate, excluding: editing?.id)
     }
 
     // MARK: Projection
@@ -93,8 +120,10 @@ struct AddDrinkSheet: View {
     private var projectionCard: some View {
         VStack(spacing: 16) {
             HStack(alignment: .top, spacing: 0) {
+                // "Now" is wrong for a drink logged hours ago: when editing,
+                // the left column is the session without this drink at all.
                 projectionColumn(
-                    title: "Now",
+                    title: isEditing ? "Without this" : "Now",
                     value: store.unit.formatRange(projection.currentRange),
                     tint: Theme.tint(for: projection.currentRange.upperBound)
                 )
@@ -106,7 +135,7 @@ struct AddDrinkSheet: View {
                     .padding(.top, 18)
 
                 projectionColumn(
-                    title: "Projected peak",
+                    title: isEditing ? "With this" : "Projected peak",
                     value: store.unit.formatRange(projection.peakRange),
                     tint: Theme.tint(for: projection.peakRange.upperBound)
                 )
@@ -412,12 +441,20 @@ struct AddDrinkSheet: View {
 
     private var confirmBar: some View {
         Button {
-            store.add(candidate)
+            if isEditing {
+                store.update(candidate)
+            } else {
+                store.add(candidate)
+            }
             dismiss()
         } label: {
             HStack {
-                Image(systemName: "plus.circle.fill")
-                Text("Add")
+                Image(systemName: isEditing ? "checkmark.circle.fill" : "plus.circle.fill")
+                if isEditing {
+                    Text("Save changes")
+                } else {
+                    Text("Add")
+                }
             }
             .font(.system(size: 16, weight: .semibold, design: .rounded))
             .foregroundStyle(Theme.background)
@@ -457,6 +494,18 @@ struct AddDrinkSheet: View {
     }
 }
 
-#Preview {
+private struct EditSheetPreview: View {
+    private let store = SessionStore.preview
+
+    var body: some View {
+        AddDrinkSheet(store: store, editing: store.drinks.last)
+    }
+}
+
+#Preview("Add") {
     AddDrinkSheet(store: .preview)
+}
+
+#Preview("Edit") {
+    EditSheetPreview()
 }

@@ -410,6 +410,23 @@
         }
       }
     },
+    "Delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Törlés"
+          }
+        }
+      }
+    },
     "Display": {
       "extractionState": "manual",
       "localizations": {
@@ -525,6 +542,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Az alkalom italai"
+          }
+        }
+      }
+    },
+    "Edit drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ital szerkesztése"
           }
         }
       }
@@ -1090,19 +1124,19 @@
         }
       }
     },
-    "Remove drink": {
+    "Save changes": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remove drink"
+            "value": "Save changes"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ital törlése"
+            "value": "Mentés"
           }
         }
       }
@@ -1651,6 +1685,40 @@
         }
       }
     },
+    "With this": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With this"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezzel"
+          }
+        }
+      }
+    },
+    "Without this": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without this"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enélkül"
+          }
+        }
+      }
+    },
     "YOUR LIMIT %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1817,6 +1885,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "engedd el a visszatéréshez"
+          }
+        }
+      }
+    },
+    "tap to edit · swipe to delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tap to edit · swipe to delete"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "koppints a szerkesztéshez · húzd a törléshez"
           }
         }
       }

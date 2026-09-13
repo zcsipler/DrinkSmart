@@ -6,6 +6,12 @@ struct RootView: View {
     @State private var showsAddDrink = false
     @State private var showsProfile = false
 
+    /// The drink being corrected. Non-nil presents the sheet in edit mode.
+    @State private var editingDrink: Drink?
+
+    /// Which row is swiped open, so only one can be open at a time.
+    @State private var openRowID: UUID?
+
     /// Ticks every half minute — this does not change the band, only where
     /// on it we read.
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -38,6 +44,13 @@ struct RootView: View {
         .onReceive(clock) { _ in store.tick() }
         .sheet(isPresented: $showsAddDrink) { AddDrinkSheet(store: store) }
         .sheet(isPresented: $showsProfile) { ProfileSheet(store: store) }
+        .sheet(item: $editingDrink) { drink in
+            AddDrinkSheet(store: store, editing: drink)
+        }
+        // A swiped-open row should not stay open behind a sheet or after the
+        // session is cleared.
+        .onChange(of: store.drinks.count) { openRowID = nil }
+        .onChange(of: editingDrink?.id) { openRowID = nil }
     }
 
     // MARK: Hero
@@ -151,64 +164,32 @@ struct RootView: View {
             emptyState
         } else {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Drinks this session")
-                    .font(.sectionLabel)
-                    .textCase(.uppercase)
-                    .foregroundStyle(Theme.secondaryText)
+                HStack {
+                    Text("Drinks this session")
+                        .font(.sectionLabel)
+                        .textCase(.uppercase)
+                    Spacer()
+                    Text("tap to edit · swipe to delete")
+                        .font(.system(size: 10, design: .rounded))
+                }
+                .foregroundStyle(Theme.secondaryText)
 
                 VStack(spacing: 1) {
                     ForEach(store.drinks.reversed()) { drink in
-                        drinkRow(drink)
+                        DrinkRow(
+                            drink: drink,
+                            openRowID: $openRowID,
+                            onEdit: { editingDrink = drink },
+                            onDelete: { withAnimation { store.remove(drink) } }
+                        )
                     }
                 }
-                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+                // Each row paints its own surface, so the 1 pt gaps left by
+                // the stack spacing become hairline separators.
+                .background(Theme.hairline)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
-    }
-
-    private func drinkRow(_ drink: Drink) -> some View {
-        HStack(spacing: 13) {
-            Image(systemName: DrinkCatalog.icon(for: drink))
-                .font(.system(size: 15))
-                .foregroundStyle(Theme.calm)
-                .frame(width: 26)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(DrinkCatalog.name(for: drink))
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(Theme.primaryText)
-
-                HStack(spacing: 4) {
-                    Text(verbatim: "\(drink.volumeMl.formatted(.number.precision(.fractionLength(0)))) ml")
-                    Text(verbatim: "·")
-                    Text(verbatim: "\(drink.abvPercent.formatted(.number.precision(.fractionLength(1))))%")
-                    Text(verbatim: "·")
-                    Text(drink.stomach.shortLabel)
-                }
-                .font(.system(size: 11, design: .rounded))
-                .foregroundStyle(Theme.secondaryText)
-            }
-
-            Spacer()
-
-            Text(verbatim: drink.consumedAt.hourMinute)
-                .font(.system(size: 13, design: .rounded).monospacedDigit())
-                .foregroundStyle(Theme.secondaryText)
-
-            Button {
-                withAnimation { store.remove(drink) }
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.secondaryText.opacity(0.6))
-                    .frame(width: 26, height: 26)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("Remove drink"))
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
     }
 
     private var emptyState: some View {

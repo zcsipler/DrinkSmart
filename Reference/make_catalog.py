@@ -78,7 +78,6 @@ TRANSLATIONS = {
     "Units": "Egység",
     "Expected to clear": "Várhatóan ekkorra ürül ki",
     "Drinks this session": "Az alkalom italai",
-    "Remove drink": "Ital törlése",
     "No drinks logged yet": "Még nincs felvitt ital",
     "Add your first one and you'll see how your level develops over time.":
         "Vidd fel az elsőt, és látni fogod, hogyan alakul a szinted az idő múlásával.",
@@ -86,6 +85,14 @@ TRANSLATIONS = {
     "Actual values vary considerably between individuals. Never use this to decide whether you can drive.":
         "A tényleges érték egyénenként jelentősen eltérhet. Soha ne használd annak eldöntésére, hogy vezethetsz-e.",
     "Add drink": "Ital hozzáadása",
+
+    # --- Editing an already logged drink ---
+    "Edit drink": "Ital szerkesztése",
+    "Save changes": "Mentés",
+    "Without this": "Enélkül",
+    "With this": "Ezzel",
+    "Delete": "Törlés",
+    "tap to edit · swipe to delete": "koppints a szerkesztéshez · húzd a törléshez",
 
     # --- AddDrinkSheet ---
     "Cancel": "Mégse",

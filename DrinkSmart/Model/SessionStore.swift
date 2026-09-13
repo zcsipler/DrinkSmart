@@ -135,6 +135,16 @@ final class SessionStore {
         persist()
     }
 
+    /// Replaces an already logged drink. Re-sorts, because an edit can move
+    /// the drink to a different point in the session.
+    func update(_ drink: Drink) {
+        guard let index = drinks.firstIndex(where: { $0.id == drink.id }) else { return }
+        drinks[index] = drink
+        drinks.sort { $0.consumedAt < $1.consumedAt }
+        rebuild()
+        persist()
+    }
+
     func remove(_ drink: Drink) {
         drinks.removeAll { $0.id == drink.id }
         rebuild()
@@ -148,8 +158,13 @@ final class SessionStore {
     }
 
     /// What would happen if the user had this drink.
-    func project(_ candidate: Drink) -> BandedProjection {
-        engine.projectBand(profile: profile, consumed: drinks, candidate: candidate, limit: limit)
+    ///
+    /// When correcting an already logged drink, pass its id as `excluding`:
+    /// the comparison is then "the session without it" against "the session
+    /// with the corrected version", rather than counting the drink twice.
+    func project(_ candidate: Drink, excluding excludedID: UUID? = nil) -> BandedProjection {
+        let others = excludedID.map { id in drinks.filter { $0.id != id } } ?? drinks
+        return engine.projectBand(profile: profile, consumed: others, candidate: candidate, limit: limit)
     }
 
     func tick() {
