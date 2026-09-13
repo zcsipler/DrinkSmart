@@ -19,21 +19,21 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var label: String {
+    var label: LocalizedStringResource {
         switch self {
-        case .rarely: "Ritkán"
-        case .occasional: "Havonta párszor"
-        case .regular: "Hetente többször"
-        case .daily: "Szinte naponta"
+        case .rarely: "Rarely"
+        case .occasional: "A few times a month"
+        case .regular: "Several times a week"
+        case .daily: "Almost daily"
         }
     }
 
-    var detail: String {
+    var detail: LocalizedStringResource {
         switch self {
-        case .rarely: "Évente néhány alkalom"
-        case .occasional: "Alkalmi, társasági fogyasztás"
-        case .regular: "Heti rendszeresség"
-        case .daily: "Napi vagy majdnem napi"
+        case .rarely: "A few occasions a year"
+        case .occasional: "Social drinking"
+        case .regular: "Weekly routine"
+        case .daily: "Daily or nearly daily"
         }
     }
 

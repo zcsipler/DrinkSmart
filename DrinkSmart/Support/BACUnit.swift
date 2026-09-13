@@ -9,6 +9,7 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Szimbólum. Szándékosan nem lokalizált: a ‰ és a % nemzetközi jel.
     var suffix: String {
         switch self {
         case .perMille: "‰"
@@ -16,10 +17,12 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
         }
     }
 
-    var label: String {
+    /// A szimbólum szándékosan nincs benne: egy literál `%` a katalógusban
+    /// formátumspecifikátornak látszana. A nézet külön fűzi hozzá.
+    var label: LocalizedStringResource {
         switch self {
-        case .perMille: "Ezrelék (‰)"
-        case .percent: "Százalék (%)"
+        case .perMille: "Per mille"
+        case .percent: "Percent"
         }
     }
 
@@ -37,9 +40,10 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// A `.number` stílus a rendszer nyelvét követi, tehát magyarul
+    /// tizedesvesszőt ad, angolul tizedespontot — kézi formázás nélkül.
     func format(_ gramsPerLiter: Double) -> String {
-        let value = convert(gramsPerLiter)
-        return value.formatted(
+        convert(gramsPerLiter).formatted(
             .number
                 .precision(.fractionLength(fractionDigits))
                 .grouping(.never)
@@ -65,30 +69,33 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
     }
 }
 
+extension TimeInterval {
+    /// Rövid időtartam a rendszer nyelvén: „3 ó 20 p”, illetve „3h 20m”.
+    ///
+    /// A `Duration.UnitsFormatStyle` maga lokalizál, ezért ezt a szöveget
+    /// nem kell fordítanunk — és a nulla órát is elhagyja.
+    var compactDuration: String {
+        guard self > 0 else { return "—" }
+        let minutes = Int((self / 60).rounded())
+        return Duration.seconds(minutes * 60).formatted(
+            .units(allowed: [.hours, .minutes], width: .narrow, zeroValueUnits: .hide)
+        )
+    }
+}
+
+extension Date {
+    /// Óra és perc a rendszer beállítása szerint — magyarul 24 órás,
+    /// angol locale-ban 12 órás AM/PM alakban.
+    var hourMinute: String {
+        formatted(date: .omitted, time: .shortened)
+    }
+}
+
 extension ClosedRange where Bound == Date {
     /// Időtartomány: „19:00–22:00”, vagy egyetlen időpont, ha egybeesnek.
     var hourMinuteRange: String {
         let from = lowerBound.hourMinute
         let to = upperBound.hourMinute
         return from == to ? from : "\(from)–\(to)"
-    }
-}
-
-extension TimeInterval {
-    /// „3 ó 20 p" alakú, rövid időtartam.
-    var compactDuration: String {
-        guard self > 0 else { return "—" }
-        let totalMinutes = Int(rounded() / 60)
-        let hours = totalMinutes / 60
-        let minutes = totalMinutes % 60
-        if hours == 0 { return "\(minutes) p" }
-        if minutes == 0 { return "\(hours) ó" }
-        return "\(hours) ó \(minutes) p"
-    }
-}
-
-extension Date {
-    var hourMinute: String {
-        formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
     }
 }

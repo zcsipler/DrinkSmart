@@ -25,11 +25,11 @@ struct ProfileSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(Theme.background)
-            .navigationTitle("Profil")
+            .navigationTitle(Text("Profile"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Kész") { dismiss() }
+                    Button("Done") { dismiss() }
                         .foregroundStyle(Theme.calm)
                 }
             }
@@ -41,36 +41,44 @@ struct ProfileSheet: View {
 
     private var bodySection: some View {
         Section {
-            Picker("Nem", selection: Binding(
+            Picker(selection: Binding(
                 get: { store.profile.sex },
                 set: { store.profile.sex = $0 }
             )) {
-                Text("Férfi").tag(Sex.male)
-                Text("Nő").tag(Sex.female)
+                Text("Male").tag(Sex.male)
+                Text("Female").tag(Sex.female)
+            } label: {
+                Text("Sex")
             }
             .pickerStyle(.segmented)
 
             stepperRow(
-                title: "Testsúly",
+                title: "Weight",
                 value: Binding(get: { store.profile.weightKg }, set: { store.profile.weightKg = $0 }),
-                range: 35...200, step: 1, format: "%.0f kg"
+                range: 35...200, step: 1, unit: "kg"
             )
 
             stepperRow(
-                title: "Magasság",
+                title: "Height",
                 value: Binding(get: { store.profile.heightCm }, set: { store.profile.heightCm = $0 }),
-                range: 130...220, step: 1, format: "%.0f cm"
+                range: 130...220, step: 1, unit: "cm"
             )
 
             stepperRow(
-                title: "Életkor",
+                title: "Age",
                 value: Binding(get: { store.profile.age }, set: { store.profile.age = $0 }),
-                range: 18...100, step: 1, format: "%.0f év"
+                range: 18...100, step: 1, unit: "yrs"
             )
         } header: {
-            Text("Testalkat")
+            Text("Body")
         } footer: {
-            Text("Ebből számoljuk a teljes testvizet a Watson-formulával, ami az alkohol eloszlási terét adja meg.")
+            // A Watson-féle női egyenlet nem tartalmazza az életkort. Ha ezt
+            // nem mondjuk meg, a mozdulatlan érték bugnak látszik.
+            if store.profile.sex == .female {
+                Text("Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result.")
+            } else {
+                Text("Total body water comes from the Watson equations, which set the volume alcohol distributes into.")
+            }
         }
         .listRowBackground(Theme.surface)
     }
@@ -79,7 +87,7 @@ struct ProfileSheet: View {
 
     private var metabolismSection: some View {
         Section {
-            Picker("Fogyasztás gyakorisága", selection: Binding(
+            Picker(selection: Binding(
                 get: { store.frequency },
                 set: { store.frequency = $0 }
             )) {
@@ -92,15 +100,97 @@ struct ProfileSheet: View {
                     }
                     .tag(option)
                 }
+            } label: {
+                Text("Drinking frequency")
             }
             .pickerStyle(.inline)
             .labelsHidden()
         } header: {
-            Text("Milyen gyakran iszol?")
+            Text("How often do you drink?")
         } footer: {
-            Text("Ebből becsüljük a lebontási sebességet. A rendszeres fogyasztás indukálja a máj CYP2E1 útvonalát, ezért a gyakori fogyasztók gyorsabban bontják le az alkoholt. Ez a modell leggyengébb pontja — ezért mutat az app tartományt egyetlen szám helyett.")
+            Text("This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. This is the weakest point of the model — which is why the app shows a range instead of a single number.")
         }
         .listRowBackground(Theme.surface)
+    }
+
+    // MARK: Saját határ
+
+    private var limitSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Your limit")
+                    Spacer()
+                    Text(verbatim: store.unit.formatted(store.limit))
+                        .font(.system(.body, design: .rounded).monospacedDigit())
+                        .foregroundStyle(Theme.tint(for: store.limit))
+                }
+                Slider(
+                    value: Binding(get: { store.limit }, set: { store.limit = $0 }),
+                    in: 0.2...2.0, step: 0.05
+                )
+                .tint(Theme.tint(for: store.limit))
+                .accessibilityLabel(Text("Your limit"))
+            }
+        } header: {
+            Text("Your limit")
+        } footer: {
+            Text("Your own reference number, not a legal limit. The app tells you when a planned drink would take you past it, and for how long you would stay above.")
+        }
+        .listRowBackground(Theme.surface)
+    }
+
+    // MARK: Mértékegység
+
+    private var unitSection: some View {
+        Section {
+            Picker(selection: Binding(
+                get: { store.unit },
+                set: { store.unit = $0 }
+            )) {
+                ForEach(BACUnit.allCases) { unit in
+                    HStack(spacing: 5) {
+                        Text(unit.label)
+                        Text(verbatim: "(\(unit.suffix))")
+                            .foregroundStyle(Theme.secondaryText)
+                    }
+                    .tag(unit)
+                }
+            } label: {
+                Text("Unit")
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } header: {
+            Text("Display")
+        }
+        .listRowBackground(Theme.surface)
+    }
+
+    // MARK: Származtatott értékek
+
+    private var derivedSection: some View {
+        Section {
+            derived("Total body water", "\(store.profile.totalBodyWater.formatted(.number.precision(.fractionLength(1)))) L")
+            derived("Distribution volume", "\(store.profile.distributionVolume.formatted(.number.precision(.fractionLength(1)))) L")
+            derived("Widmark factor", store.profile.widmarkFactor.formatted(.number.precision(.fractionLength(3))))
+        } header: {
+            Text("Calculated values")
+        } footer: {
+            Text("The Widmark factor is typically around 0.68 for men and 0.55 for women. If yours is far from that, it is worth checking the values above.")
+        }
+        .listRowBackground(Theme.surface)
+    }
+
+    private func derived(_ title: LocalizedStringKey, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(Theme.secondaryText)
+            Spacer()
+            Text(verbatim: value)
+                .font(.system(.body, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.primaryText)
+        }
     }
 
     // MARK: Haladó
@@ -110,9 +200,9 @@ struct ProfileSheet: View {
             DisclosureGroup(isExpanded: $showsAdvanced) {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Lebontási sebesség")
+                        Text("Elimination rate")
                         Spacer()
-                        Text(store.unit.formatted(store.profile.beta) + "/óra")
+                        Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
                             .font(.system(.body, design: .rounded).monospacedDigit())
                             .foregroundStyle(Theme.calm)
                     }
@@ -121,14 +211,15 @@ struct ProfileSheet: View {
                         in: 0.10...0.25, step: 0.005
                     )
                     .tint(Theme.calm)
+                    .accessibilityLabel(Text("Elimination rate"))
                 }
                 .padding(.vertical, 4)
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Bizonytalanság")
+                        Text("Uncertainty")
                         Spacer()
-                        Text("± " + store.unit.formatted(store.profile.betaUncertainty))
+                        Text(verbatim: "± " + store.unit.formatted(store.profile.betaUncertainty))
                             .font(.system(.body, design: .rounded).monospacedDigit())
                             .foregroundStyle(Theme.calm)
                     }
@@ -140,114 +231,46 @@ struct ProfileSheet: View {
                         in: 0.005...0.06, step: 0.005
                     )
                     .tint(Theme.calm)
+                    .accessibilityLabel(Text("Uncertainty"))
                 }
                 .padding(.vertical, 4)
 
                 HStack {
-                    Text("Sáv")
+                    Text("Range")
                         .foregroundStyle(Theme.secondaryText)
                     Spacer()
-                    Text(store.unit.formatRange(store.profile.betaRange) + "/óra")
+                    Text(verbatim: store.unit.formatRange(store.profile.betaRange) + " /h")
                         .font(.system(.body, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.primaryText)
                 }
             } label: {
-                Text("Haladó beállítások")
+                Text("Advanced")
             }
         } footer: {
-            Text("Csak akkor állítsd kézzel, ha van mihez igazítanod — például ha valaha alkoholszondával visszamérted magad, és tudod, mennyire tért el a becslés.")
+            Text("Only set these by hand if you have something to calibrate against — for example an actual breathalyser reading you can compare the estimate to.")
         }
         .listRowBackground(Theme.surface)
-    }
-
-    // MARK: Saját határ
-
-    private var limitSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Saját határ")
-                    Spacer()
-                    Text(store.unit.formatted(store.limit))
-                        .font(.system(.body, design: .rounded).monospacedDigit())
-                        .foregroundStyle(Theme.tint(for: store.limit))
-                }
-                Slider(
-                    value: Binding(get: { store.limit }, set: { store.limit = $0 }),
-                    in: 0.2...2.0, step: 0.05
-                )
-                .tint(Theme.tint(for: store.limit))
-            }
-        } header: {
-            Text("Saját határ")
-        } footer: {
-            Text("A te referenciaszámod, nem jogi limit. Az app jelzi, ha egy tervezett ital átvinne rajta — és azt is, mennyi ideig maradnál fölötte.")
-        }
-        .listRowBackground(Theme.surface)
-    }
-
-    // MARK: Mértékegység
-
-    private var unitSection: some View {
-        Section {
-            Picker("Mértékegység", selection: Binding(
-                get: { store.unit },
-                set: { store.unit = $0 }
-            )) {
-                ForEach(BACUnit.allCases) { unit in
-                    Text(unit.label).tag(unit)
-                }
-            }
-            .pickerStyle(.inline)
-            .labelsHidden()
-        } header: {
-            Text("Megjelenítés")
-        }
-        .listRowBackground(Theme.surface)
-    }
-
-    // MARK: Származtatott értékek
-
-    private var derivedSection: some View {
-        Section {
-            derived("Teljes testvíz", "\(store.profile.totalBodyWater.formatted(.number.precision(.fractionLength(1)))) L")
-            derived("Eloszlási térfogat", "\(store.profile.distributionVolume.formatted(.number.precision(.fractionLength(1)))) L")
-            derived("Widmark-faktor", store.profile.widmarkFactor.formatted(.number.precision(.fractionLength(3))))
-        } header: {
-            Text("Számított értékek")
-        } footer: {
-            Text("A Widmark-faktor tipikusan 0,68 körül van férfiaknál és 0,55 körül nőknél. Ha a tiéd messze esik ettől, érdemes ellenőrizni a megadott adatokat.")
-        }
-        .listRowBackground(Theme.surface)
-    }
-
-    private func derived(_ title: String, _ value: String) -> some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(Theme.secondaryText)
-            Spacer()
-            Text(value)
-                .font(.system(.body, design: .rounded).monospacedDigit())
-                .foregroundStyle(Theme.primaryText)
-        }
     }
 
     // MARK: Segéd
 
     private func stepperRow(
-        title: String,
+        title: LocalizedStringKey,
         value: Binding<Double>,
         range: ClosedRange<Double>,
         step: Double,
-        format: String
+        unit: LocalizedStringKey
     ) -> some View {
         Stepper(value: value, in: range, step: step) {
             HStack {
                 Text(title)
                 Spacer()
-                Text(String(format: format, value.wrappedValue))
-                    .font(.system(.body, design: .rounded).monospacedDigit())
-                    .foregroundStyle(Theme.calm)
+                HStack(spacing: 3) {
+                    Text(verbatim: value.wrappedValue.formatted(.number.precision(.fractionLength(0))))
+                    Text(unit)
+                }
+                .font(.system(.body, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.calm)
             }
         }
     }

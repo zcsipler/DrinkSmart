@@ -98,8 +98,9 @@ C   = A_felszívódott / Vd
 ```
 
 **A női egyenletben nincs életkor** — ez a Watson-formula sajátossága, nem hiba.
-Ha nőt állítunk be, a kor csúszkája nem mozdít semmit. A UI-ban ezt még jelezni
-kell, mert különben bugnak látszik. *(nyitott feladat)*
+Ha nőt állítunk be, a kor csúszkája nem mozdít semmit. A `ProfileSheet` testalkat
+szekciójának lábjegyzete ezt ki is mondja, ha a nem „nő" — különben bugnak
+látszana.
 
 A `widmarkFactor` (= `TBW / (0,85 · súly)`) csak kijelzésre és sanity checkre
 van: 0,667 férfi / 0,589 nő a referenciaprofilokra, ami a klasszikus 0,68 / 0,55
@@ -189,18 +190,51 @@ cd BACKit && swift test
 cd Reference && python3 validate.py && python3 check_tests.py
 ```
 
-## 7. Konvenciók
+## 7. Lokalizáció
 
-- **A UI szövege és a kódkommentek magyarul.** A típus- és tagnevek angolul.
+**Forrásnyelv angol, a magyar fordítás String Catalogban.** Az app annyit tud,
+amennyit az iOS nyelvi beállítása kér: magyar rendszeren magyar, minden más
+esetben angol.
+
+- `DrinkSmart/Localizable.xcstrings` — 100 kulcs, `en` és `hu`.
+- A kulcs maga az **angol forrásszöveg**. Interpolációnál `%@`.
+- A nézetekben `LocalizedStringKey` (sima `Text("...")`), a modellrétegben
+  `LocalizedStringResource` (enum `label` / `detail` / `explanation`).
+- Ami **nem** fordítandó, az `Text(verbatim:)`-mel megy: számok, időpontok,
+  a ‰ és % jelek, az SF Symbol nevek. Ez nem kozmetika — a `Text(String)`
+  amúgy sem lokalizálna, a `verbatim` viszont kimondja a szándékot.
+- A `Drink.name` a **sablon azonosítóját** tárolja (`"beer"`), nem a nevét.
+  Különben a mentett adat nyelvhez kötődne, és nyelvváltás után angol nevek
+  maradnának a magyar felületen.
+- A `BACUnit.label` szándékosan nem tartalmazza a `%` jelet: egy literál
+  százalékjel a katalógusban formátumspecifikátornak látszana. A nézet fűzi
+  hozzá külön.
+- Szám- és időformázás **soha nem kézzel**: `.formatted(.number...)`,
+  `Duration.UnitsFormatStyle` és `formatted(date:time:)`. Ezek maguk
+  lokalizálnak — tizedesvessző magyarul, 24 órás idő magyarul, 12 órás AM/PM
+  angolul.
+
+A katalógust a `Reference/make_catalog.py` állítja elő és **ellenőrzi**: minden
+kulcsnak szerepelnie kell a forrásban, minden lokalizált forrásszövegnek kell
+hogy legyen magyar párja, és a `%@` specifikátorok számának egyeznie kell.
+Új szöveg felvitele: beírod a Swift forrásba angolul, felveszed a
+`TRANSLATIONS` szótárba, és lefuttatod a szkriptet.
+
+```bash
+cd Reference && python3 make_catalog.py
+```
+
+## 8. Konvenciók
+
+- **A kódkommentek magyarul**, a típus- és tagnevek angolul.
 - A kommentek a **miértet** magyarázzák, nem a mit. Ami a kódból látszik, azt
   ne írjuk le újra.
-- Tizedesvessző a megjelenítésben (magyar locale), tizedespont a kódban.
 - A `BACKit` nem importál SwiftUI-t. Soha.
 - A `SessionStore` csak akkor számol újra, ha a bemenet változik — az óra
   ketyegése (`tick()`) csak a `now`-t mozgatja.
 - A chart ~220 pontra ritkít, de a csúcsot mindig megtartja.
 
-## 8. App Store kontextus
+## 9. App Store kontextus
 
 A guideline 1.4.3 a fal, de **nem abszolút**: több tisztán szoftveres BAC-app
 él ma is a store-ban 2024–2025-ös azonosítóval. Két érv egy esetleges appealhez:
@@ -215,10 +249,10 @@ distribution, notarizációval, App Review tartalmi elbírálása nélkül (Alte
 Terms Addendum kell hozzá). Saját használatra dev account sideload vagy belső
 TestFlight (100 eszköz, Beta App Review nélkül).
 
-## 9. Állapot
+## 10. Állapot
 
 **Kész:** a motor sávval együtt, a chart, ital felvitele élő előrejelzéssel,
-profil, perzisztencia, 44 teszt.
+profil, perzisztencia, 44 teszt, angol/magyar lokalizáció.
 
 **Hátralévő:**
 - HealthKit: testadatok beolvasása, BAC és kalória visszaírása
@@ -226,10 +260,11 @@ profil, perzisztencia, 44 teszt.
 - Korábbi alkalmak és statisztika — itt jön be a SwiftData
 - watchOS-kiegészítő a gyors felvitelhez
 - Kalibráció szondás visszamérésből
-- A női Watson-formula korfüggetlenségének jelzése a UI-ban
 - A hero kijelző tartományos elrendezésének élő ellenőrzése (48pt + skálázás)
+- Az angol locale 12 órás AM/PM időformátuma szélesebb címkéket ad a charton;
+  a `strideHours` már ritkít, de élőben ellenőrizni kell
 
-## 10. Megjegyzés a hangnemhez
+## 11. Megjegyzés a hangnemhez
 
 Zoltán iOS fejlesztő, a technikai mélységet bírja és igényli. A termékdöntéseket
 érvekkel vitatja — ha valami rossz UX vagy rossz modellezés, mondjuk ki, és

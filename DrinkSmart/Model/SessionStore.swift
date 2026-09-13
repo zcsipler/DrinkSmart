@@ -201,11 +201,12 @@ final class SessionStore {
 extension SessionStore {
     static var preview: SessionStore {
         let store = SessionStore()
+        // A `name` a sablon azonosítóját hordozza, nem a megjelenített nevet.
         store.drinks = [
-            Drink(consumedAt: .now.addingTimeInterval(-9000), volumeMl: 500, abvPercent: 5, stomach: .full, name: "Sör"),
-            Drink(consumedAt: .now.addingTimeInterval(-5400), volumeMl: 500, abvPercent: 5, stomach: .light, name: "Sör"),
-            Drink(consumedAt: .now.addingTimeInterval(-2700), volumeMl: 150, abvPercent: 12, stomach: .light, name: "Bor"),
-            Drink(consumedAt: .now.addingTimeInterval(-900), volumeMl: 40, abvPercent: 40, stomach: .light, name: "Tömény"),
+            Drink(consumedAt: .now.addingTimeInterval(-9000), volumeMl: 500, abvPercent: 5, stomach: .full, name: "beer"),
+            Drink(consumedAt: .now.addingTimeInterval(-5400), volumeMl: 500, abvPercent: 5, stomach: .light, name: "beer"),
+            Drink(consumedAt: .now.addingTimeInterval(-2700), volumeMl: 150, abvPercent: 12, stomach: .light, name: "wine"),
+            Drink(consumedAt: .now.addingTimeInterval(-900), volumeMl: 40, abvPercent: 40, stomach: .light, name: "spirit"),
         ]
         store.rebuildForPreview()
         return store

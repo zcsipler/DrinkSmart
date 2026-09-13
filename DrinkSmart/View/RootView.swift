@@ -6,7 +6,7 @@ struct RootView: View {
     @State private var showsAddDrink = false
     @State private var showsProfile = false
 
-    /// Percenként lép — a görbe nem változik tőle, csak a leolvasás pontja.
+    /// Fél percenként lép — a sáv nem változik tőle, csak a leolvasás pontja.
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -49,12 +49,13 @@ struct RootView: View {
                         .font(.system(size: 20))
                         .foregroundStyle(Theme.secondaryText)
                 }
+                .accessibilityLabel(Text("Profile"))
 
                 Spacer()
 
                 if !store.drinks.isEmpty {
                     Button { store.clearSession() } label: {
-                        Text("Alkalom lezárása")
+                        Text("End session")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(Theme.secondaryText)
                     }
@@ -63,7 +64,7 @@ struct RootView: View {
             .padding(.horizontal, 20)
 
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(store.unit.formatRange(store.currentRange))
+                Text(verbatim: store.unit.formatRange(store.currentRange))
                     .font(.readout(store.drinks.isEmpty ? 64 : 48))
                     .foregroundStyle(Theme.tint(for: store.currentBAC))
                     .lineLimit(1)
@@ -71,16 +72,22 @@ struct RootView: View {
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.3), value: store.currentBAC)
 
-                Text(store.unit.suffix)
+                Text(verbatim: store.unit.suffix)
                     .font(.system(size: 22, weight: .light, design: .rounded))
                     .foregroundStyle(Theme.secondaryText)
             }
             .padding(.horizontal, 20)
 
-            Text(store.drinks.isEmpty ? "becsült szint" : "becsült tartomány")
-                .font(.system(size: 11, weight: .medium, design: .rounded))
-                .foregroundStyle(Theme.secondaryText)
-                .textCase(.uppercase)
+            Group {
+                if store.drinks.isEmpty {
+                    Text("estimated level")
+                } else {
+                    Text("estimated range")
+                }
+            }
+            .font(.system(size: 11, weight: .medium, design: .rounded))
+            .foregroundStyle(Theme.secondaryText)
+            .textCase(.uppercase)
         }
         .padding(.top, 8)
         .padding(.bottom, 18)
@@ -91,21 +98,22 @@ struct RootView: View {
     private var statRow: some View {
         VStack(spacing: 12) {
             HStack(spacing: 0) {
-                stat("Tartam", store.sessionDuration.compactDuration)
+                stat("Elapsed", store.sessionDuration.compactDuration)
                 divider
-                stat("Italok", "\(store.drinks.count)")
+                stat("Drinks", store.drinks.count.formatted())
                 divider
-                stat("Egység", store.totalUnits.formatted(.number.precision(.fractionLength(1))))
+                stat("Units", store.totalUnits.formatted(.number.precision(.fractionLength(1))))
             }
 
             if let sober = store.soberRange {
                 Divider().overlay(Theme.hairline).padding(.horizontal, 14)
 
                 VStack(spacing: 3) {
-                    Text("Várhatóan ekkorra ürül ki".uppercased())
+                    Text("Expected to clear")
                         .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .textCase(.uppercase)
                         .foregroundStyle(Theme.secondaryText)
-                    Text(sober.hourMinuteRange)
+                    Text(verbatim: sober.hourMinuteRange)
                         .font(.system(size: 17, weight: .medium, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.primaryText)
                 }
@@ -121,12 +129,13 @@ struct RootView: View {
             .frame(width: 1, height: 26)
     }
 
-    private func stat(_ title: String, _ value: String) -> some View {
+    private func stat(_ title: LocalizedStringKey, _ value: String) -> some View {
         VStack(spacing: 4) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)
-            Text(value)
+            Text(verbatim: value)
                 .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
                 .foregroundStyle(Theme.primaryText)
         }
@@ -141,8 +150,9 @@ struct RootView: View {
             emptyState
         } else {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Az alkalom italai".uppercased())
+                Text("Drinks this session")
                     .font(.sectionLabel)
+                    .textCase(.uppercase)
                     .foregroundStyle(Theme.secondaryText)
 
                 VStack(spacing: 1) {
@@ -163,17 +173,24 @@ struct RootView: View {
                 .frame(width: 26)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(drink.name ?? "Ital")
+                Text(DrinkCatalog.name(for: drink))
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.primaryText)
-                Text("\(Int(drink.volumeMl)) ml · \(drink.abvPercent.formatted(.number.precision(.fractionLength(1))))% · \(drink.stomach.shortLabel)")
-                    .font(.system(size: 11, design: .rounded))
-                    .foregroundStyle(Theme.secondaryText)
+
+                HStack(spacing: 4) {
+                    Text(verbatim: "\(drink.volumeMl.formatted(.number.precision(.fractionLength(0)))) ml")
+                    Text(verbatim: "·")
+                    Text(verbatim: "\(drink.abvPercent.formatted(.number.precision(.fractionLength(1))))%")
+                    Text(verbatim: "·")
+                    Text(drink.stomach.shortLabel)
+                }
+                .font(.system(size: 11, design: .rounded))
+                .foregroundStyle(Theme.secondaryText)
             }
 
             Spacer()
 
-            Text(drink.consumedAt.hourMinute)
+            Text(verbatim: drink.consumedAt.hourMinute)
                 .font(.system(size: 13, design: .rounded).monospacedDigit())
                 .foregroundStyle(Theme.secondaryText)
 
@@ -187,6 +204,7 @@ struct RootView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text("Remove drink"))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -197,10 +215,10 @@ struct RootView: View {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(.system(size: 26, weight: .light))
                 .foregroundStyle(Theme.secondaryText.opacity(0.6))
-            Text("Még nincs felvitt ital")
+            Text("No drinks logged yet")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.primaryText)
-            Text("Vidd fel az elsőt, és látni fogod, hogyan alakul a szinted az idő múlásával.")
+            Text("Add your first one and you'll see how your level develops over time.")
                 .font(.system(size: 12, design: .rounded))
                 .foregroundStyle(Theme.secondaryText)
                 .multilineTextAlignment(.center)
@@ -217,10 +235,10 @@ struct RootView: View {
 
     private var disclaimer: some View {
         VStack(spacing: 6) {
-            Text("Ez egy becslés, nem mérés.")
+            Text("This is an estimate, not a measurement.")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(Theme.secondaryText)
-            Text("A tényleges érték egyénenként jelentősen eltérhet. Soha ne használd annak eldöntésére, hogy vezethetsz-e — Magyarországon a határ nulla.")
+            Text("Actual values vary considerably between individuals. Never use this to decide whether you can drive.")
                 .font(.system(size: 11, design: .rounded))
                 .foregroundStyle(Theme.secondaryText.opacity(0.75))
                 .multilineTextAlignment(.center)
@@ -235,7 +253,7 @@ struct RootView: View {
             HStack(spacing: 9) {
                 Image(systemName: "plus")
                     .font(.system(size: 15, weight: .bold))
-                Text("Ital hozzáadása")
+                Text("Add drink")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
             }
             .foregroundStyle(Theme.background)

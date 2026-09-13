@@ -49,7 +49,7 @@ struct AddDrinkSheet: View {
             volumeMl: volumeMl,
             abvPercent: abv,
             stomach: stomach,
-            name: template.name
+            name: template.id
         )
     }
 
@@ -69,11 +69,11 @@ struct AddDrinkSheet: View {
             }
             .background(Theme.background)
             .scrollIndicators(.hidden)
-            .navigationTitle("Ital hozzáadása")
+            .navigationTitle(Text("Add drink"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Mégse") { dismiss() }
+                    Button("Cancel") { dismiss() }
                         .foregroundStyle(Theme.secondaryText)
                 }
             }
@@ -94,7 +94,7 @@ struct AddDrinkSheet: View {
         VStack(spacing: 16) {
             HStack(alignment: .top, spacing: 0) {
                 projectionColumn(
-                    title: "Most",
+                    title: "Now",
                     value: store.unit.formatRange(projection.currentRange),
                     tint: Theme.tint(for: projection.currentRange.upperBound)
                 )
@@ -106,7 +106,7 @@ struct AddDrinkSheet: View {
                     .padding(.top, 18)
 
                 projectionColumn(
-                    title: "Vetített csúcs",
+                    title: "Projected peak",
                     value: store.unit.formatRange(projection.peakRange),
                     tint: Theme.tint(for: projection.peakRange.upperBound)
                 )
@@ -115,9 +115,9 @@ struct AddDrinkSheet: View {
             Divider().overlay(Theme.hairline)
 
             HStack(spacing: 0) {
-                detail("Csúcs ekkor", projection.peakDate.hourMinute + " körül")
-                detail("Csúcsig", projection.timeToPeak.compactDuration)
-                detail("Kiürül", projection.soberRange?.hourMinuteRange ?? "—")
+                detail("Peak at", projection.peakDate.hourMinute)
+                detail("Time to peak", projection.timeToPeak.compactDuration)
+                detail("Clears", projection.soberRange?.hourMinuteRange ?? "—")
             }
 
             if projection.outcome.exceedsPossible {
@@ -141,24 +141,29 @@ struct AddDrinkSheet: View {
         }
     }
 
-    private func projectionColumn(title: String, value: String, tint: Color) -> some View {
+    private func projectionColumn(title: LocalizedStringKey, value: String, tint: Color) -> some View {
         VStack(spacing: 4) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.sectionLabel)
+                .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)
-            Text(value)
-                .font(.readout(30))
+            Text(verbatim: value)
+                .font(.readout(28))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .foregroundStyle(tint)
         }
         .frame(maxWidth: .infinity)
     }
 
-    private func detail(_ title: String, _ value: String) -> some View {
+    private func detail(_ title: LocalizedStringKey, _ value: String) -> some View {
         VStack(spacing: 3) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.secondaryText)
-            Text(value)
+            Text(verbatim: value)
                 .font(.system(size: 14, weight: .medium, design: .rounded).monospacedDigit())
                 .foregroundStyle(Theme.primaryText)
         }
@@ -178,17 +183,21 @@ struct AddDrinkSheet: View {
                 .font(.system(size: 12))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(projection.outcome == .above
-                     ? "Átlépnéd a saját határod"
-                     : "Átlépheted a saját határod")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-
-                Text(projection.outcome == .above
-                     ? detailAbove
-                     : "A lassabb lebontás esetén igen, a gyorsabbnál nem. Ez a becslés bizonytalansága.")
-                    .font(.system(size: 11, design: .rounded))
-                    .foregroundStyle(outcomeTint.opacity(0.85))
-                    .fixedSize(horizontal: false, vertical: true)
+                if projection.outcome == .above {
+                    Text("This would cross your limit")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    Text("Around \(crossingTime), for up to \(projection.maxTimeAboveLimit.compactDuration).")
+                        .font(.system(size: 11, design: .rounded))
+                        .foregroundStyle(outcomeTint.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("This might cross your limit")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    Text("With slower metabolism yes, with faster no. That's the uncertainty of the estimate.")
+                        .font(.system(size: 11, design: .rounded))
+                        .foregroundStyle(outcomeTint.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Spacer()
         }
@@ -197,17 +206,14 @@ struct AddDrinkSheet: View {
         .background(outcomeTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private var detailAbove: String {
-        guard let crossed = projection.limitCrossedAt else {
-            return "Legfeljebb \(projection.maxTimeAboveLimit.compactDuration) hosszan maradnál fölötte."
-        }
-        return "\(crossed.hourMinute) körül, legfeljebb \(projection.maxTimeAboveLimit.compactDuration) hosszan."
+    private var crossingTime: String {
+        projection.limitCrossedAt?.hourMinute ?? candidate.consumedAt.hourMinute
     }
 
     // MARK: Italtípus
 
     private var typePicker: some View {
-        section("Típus") {
+        section("Type") {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
                 ForEach(DrinkCatalog.all) { item in
                     Button {
@@ -218,6 +224,8 @@ struct AddDrinkSheet: View {
                                 .font(.system(size: 18))
                             Text(item.name)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -246,14 +254,14 @@ struct AddDrinkSheet: View {
     // MARK: Térfogat
 
     private var volumeSection: some View {
-        section("Mennyiség", trailing: "\(Int(volumeMl)) ml") {
+        section("Amount", trailing: "\(volumeMl.formatted(.number.precision(.fractionLength(0)))) ml") {
             VStack(spacing: 12) {
                 HStack(spacing: 8) {
                     ForEach(template.volumeOptions, id: \.self) { option in
                         Button {
                             withAnimation(.easeOut(duration: 0.15)) { volumeMl = option }
                         } label: {
-                            Text("\(Int(option))")
+                            Text(verbatim: option.formatted(.number.precision(.fractionLength(0))))
                                 .font(.system(size: 13, weight: .medium, design: .rounded).monospacedDigit())
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 9)
@@ -269,6 +277,7 @@ struct AddDrinkSheet: View {
 
                 Slider(value: $volumeMl, in: 10...1000, step: 10)
                     .tint(Theme.calm)
+                    .accessibilityLabel(Text("Amount"))
             }
         }
     }
@@ -276,15 +285,16 @@ struct AddDrinkSheet: View {
     // MARK: Alkoholfok
 
     private var abvSection: some View {
-        section("Alkoholfok", trailing: abv.formatted(.number.precision(.fractionLength(1))) + " %") {
+        section("Strength", trailing: abv.formatted(.number.precision(.fractionLength(1))) + " %") {
             VStack(spacing: 6) {
                 Slider(value: $abv, in: template.abvRange, step: 0.5)
                     .tint(Theme.calm)
+                    .accessibilityLabel(Text("Strength"))
 
                 HStack {
-                    Text("\(candidate.standardUnits.formatted(.number.precision(.fractionLength(1)))) egység")
+                    Text("\(candidate.standardUnits.formatted(.number.precision(.fractionLength(1)))) units")
                     Spacer()
-                    Text("\(candidate.gramsEthanol.formatted(.number.precision(.fractionLength(0)))) g alkohol")
+                    Text("\(candidate.gramsEthanol.formatted(.number.precision(.fractionLength(0)))) g alcohol")
                 }
                 .font(.system(size: 11, design: .rounded))
                 .foregroundStyle(Theme.secondaryText)
@@ -295,7 +305,7 @@ struct AddDrinkSheet: View {
     // MARK: Gyomorállapot
 
     private var stomachSection: some View {
-        section("Gyomor") {
+        section("Stomach") {
             VStack(spacing: 10) {
                 HStack(spacing: 8) {
                     ForEach(StomachState.allCases, id: \.self) { state in
@@ -307,6 +317,8 @@ struct AddDrinkSheet: View {
                                     .font(.system(size: 15))
                                 Text(state.shortLabel)
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -337,23 +349,35 @@ struct AddDrinkSheet: View {
     // MARK: Időpont
 
     private var timeSection: some View {
-        section("Időpont", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
+        section("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
             VStack(spacing: 10) {
                 if showsTimePicker {
-                    DatePicker("", selection: $consumedAt, displayedComponents: .hourAndMinute)
-                        .datePickerStyle(.wheel)
-                        .labelsHidden()
+                    DatePicker(
+                        selection: $consumedAt,
+                        in: ...Date.now,
+                        displayedComponents: .hourAndMinute
+                    ) {
+                        Text("When")
+                    }
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
                 } else {
                     HStack(spacing: 8) {
-                        quickTime("Most", minutesAgo: 0)
-                        quickTime("15 perce", minutesAgo: 15)
-                        quickTime("30 perce", minutesAgo: 30)
-                        quickTime("1 órája", minutesAgo: 60)
+                        quickTime("Now", minutesAgo: 0)
+                        quickTime("15 min ago", minutesAgo: 15)
+                        quickTime("30 min ago", minutesAgo: 30)
+                        quickTime("1 hr ago", minutesAgo: 60)
                     }
                 }
 
-                Button(showsTimePicker ? "Kész" : "Pontos idő megadása") {
+                Button {
                     withAnimation(.easeInOut(duration: 0.2)) { showsTimePicker.toggle() }
+                } label: {
+                    if showsTimePicker {
+                        Text("Done")
+                    } else {
+                        Text("Set exact time")
+                    }
                 }
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.calm)
@@ -362,7 +386,7 @@ struct AddDrinkSheet: View {
         }
     }
 
-    private func quickTime(_ label: String, minutesAgo: Int) -> some View {
+    private func quickTime(_ label: LocalizedStringKey, minutesAgo: Int) -> some View {
         let target = Date.now.addingTimeInterval(-Double(minutesAgo) * 60)
         let isSelected = abs(consumedAt.timeIntervalSince(target)) < 60
 
@@ -371,6 +395,8 @@ struct AddDrinkSheet: View {
         } label: {
             Text(label)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 9)
                 .background(
@@ -391,7 +417,7 @@ struct AddDrinkSheet: View {
         } label: {
             HStack {
                 Image(systemName: "plus.circle.fill")
-                Text("Hozzáadás")
+                Text("Add")
             }
             .font(.system(size: 16, weight: .semibold, design: .rounded))
             .foregroundStyle(Theme.background)
@@ -409,18 +435,19 @@ struct AddDrinkSheet: View {
     // MARK: Szekció-keret
 
     private func section<Content: View>(
-        _ title: String,
+        _ title: LocalizedStringKey,
         trailing: String? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(title.uppercased())
+                Text(title)
                     .font(.sectionLabel)
+                    .textCase(.uppercase)
                     .foregroundStyle(Theme.secondaryText)
                 Spacer()
                 if let trailing {
-                    Text(trailing)
+                    Text(verbatim: trailing)
                         .font(.system(size: 12, weight: .medium, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.primaryText)
                 }

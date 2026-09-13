@@ -52,30 +52,8 @@ struct BACChartView: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            if let scrubDate {
-                labelledValue(
-                    title: scrubDate.hourMinute,
-                    value: unit.formatRange(band.range(at: scrubDate)),
-                    tint: Theme.tint(for: band.value(at: scrubDate))
-                )
-            } else if let peak = store.upcomingPeak, let range = store.peakRange {
-                labelledValue(
-                    title: "Várható csúcs \(peak.date.hourMinute) körül",
-                    value: unit.formatRange(range),
-                    tint: Theme.tint(for: peak.bac)
-                )
-            } else if let peak = store.peak, let range = store.peakRange, peak.bac > 0 {
-                labelledValue(
-                    title: "Csúcs volt \(peak.date.hourMinute) körül",
-                    value: unit.formatRange(range),
-                    tint: Theme.secondaryText
-                )
-            } else {
-                labelledValue(title: "Nincs aktív alkalom", value: "—", tint: Theme.secondaryText)
-            }
-
+            headline
             Spacer()
-
             if store.isRising, scrubDate == nil, !store.drinks.isEmpty {
                 risingBadge
             }
@@ -83,12 +61,42 @@ struct BACChartView: View {
         .animation(.easeInOut(duration: 0.2), value: scrubDate)
     }
 
-    private func labelledValue(title: String, value: String, tint: Color) -> some View {
+    @ViewBuilder
+    private var headline: some View {
+        if let scrubDate {
+            labelledValue(
+                title: Text(verbatim: scrubDate.hourMinute),
+                value: unit.formatRange(band.range(at: scrubDate)),
+                tint: Theme.tint(for: band.value(at: scrubDate))
+            )
+        } else if let peak = store.upcomingPeak, let range = store.peakRange {
+            labelledValue(
+                title: Text("Expected peak around \(peak.date.hourMinute)"),
+                value: unit.formatRange(range),
+                tint: Theme.tint(for: peak.bac)
+            )
+        } else if let peak = store.peak, let range = store.peakRange, peak.bac > 0 {
+            labelledValue(
+                title: Text("Peaked around \(peak.date.hourMinute)"),
+                value: unit.formatRange(range),
+                tint: Theme.secondaryText
+            )
+        } else {
+            labelledValue(
+                title: Text("No active session"),
+                value: "—",
+                tint: Theme.secondaryText
+            )
+        }
+    }
+
+    private func labelledValue(title: Text, value: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title.uppercased())
+            title
                 .font(.sectionLabel)
+                .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)
-            Text(value)
+            Text(verbatim: value)
                 .font(.readout(26))
                 .foregroundStyle(tint)
         }
@@ -100,7 +108,7 @@ struct BACChartView: View {
         HStack(spacing: 5) {
             Image(systemName: "arrow.up.right")
                 .font(.system(size: 10, weight: .bold))
-            Text("Még emelkedik")
+            Text("Still rising")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
         }
         .foregroundStyle(Theme.caution)
@@ -136,9 +144,9 @@ struct BACChartView: View {
     private var uncertaintyBand: some ChartContent {
         ForEach(displaySamples, id: \.date) { sample in
             AreaMark(
-                x: .value("Idő", sample.date),
-                yStart: .value("Alsó becslés", sample.low),
-                yEnd: .value("Felső becslés", sample.high)
+                x: .value("Time", sample.date),
+                yStart: .value("Lower estimate", sample.low),
+                yEnd: .value("Upper estimate", sample.high)
             )
             .foregroundStyle(bandGradient)
             .interpolationMethod(.monotone)
@@ -149,8 +157,8 @@ struct BACChartView: View {
     private var centerLine: some ChartContent {
         ForEach(displaySamples, id: \.date) { sample in
             LineMark(
-                x: .value("Idő", sample.date),
-                y: .value("Szint", sample.mid)
+                x: .value("Time", sample.date),
+                y: .value("Level", sample.mid)
             )
             .foregroundStyle(Theme.tint(for: store.peakRange?.upperBound ?? 0))
             .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
@@ -174,11 +182,11 @@ struct BACChartView: View {
 
     @ChartContentBuilder
     private var limitRule: some ChartContent {
-        RuleMark(y: .value("Saját határ", store.limit))
+        RuleMark(y: .value("Personal limit", store.limit))
             .foregroundStyle(Theme.elevated.opacity(0.55))
             .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
             .annotation(position: .top, alignment: .trailing, spacing: 3) {
-                Text("SAJÁT HATÁR \(unit.formatted(store.limit))")
+                Text("YOUR LIMIT \(unit.formatted(store.limit))")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.elevated.opacity(0.85))
             }
@@ -187,13 +195,13 @@ struct BACChartView: View {
     @ChartContentBuilder
     private var drinkMarkers: some ChartContent {
         ForEach(store.drinks) { drink in
-            RuleMark(x: .value("Ital", drink.consumedAt))
+            RuleMark(x: .value("Drink", drink.consumedAt))
                 .foregroundStyle(Color.white.opacity(0.07))
                 .lineStyle(StrokeStyle(lineWidth: 1))
 
             PointMark(
-                x: .value("Ital", drink.consumedAt),
-                y: .value("Szint", 0)
+                x: .value("Drink", drink.consumedAt),
+                y: .value("Level", 0)
             )
             .symbolSize(0)
             .annotation(position: .top, spacing: 2) {
@@ -210,16 +218,16 @@ struct BACChartView: View {
             let date = scrubDate ?? store.now
             let range = band.range(at: date)
 
-            RuleMark(x: .value("Most", date))
+            RuleMark(x: .value("Now", date))
                 .foregroundStyle(Color.white.opacity(scrubDate == nil ? 0.18 : 0.4))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: scrubDate == nil ? [3, 3] : []))
 
             // A fókuszpont is tartomány: két végjelölő, nem egyetlen pötty.
-            PointMark(x: .value("Most", date), y: .value("Alsó", range.lowerBound))
+            PointMark(x: .value("Now", date), y: .value("Lower", range.lowerBound))
                 .symbolSize(38)
                 .foregroundStyle(Theme.tint(for: range.lowerBound).opacity(0.7))
 
-            PointMark(x: .value("Most", date), y: .value("Felső", range.upperBound))
+            PointMark(x: .value("Now", date), y: .value("Upper", range.upperBound))
                 .symbolSize(38)
                 .foregroundStyle(Theme.tint(for: range.upperBound).opacity(0.7))
         }
@@ -232,7 +240,7 @@ struct BACChartView: View {
             AxisGridLine().foregroundStyle(Theme.hairline)
             AxisValueLabel {
                 if let date = value.as(Date.self) {
-                    Text(date.hourMinute)
+                    Text(verbatim: date.hourMinute)
                         .font(.system(size: 10, design: .rounded))
                         .foregroundStyle(Theme.secondaryText)
                 }
@@ -241,12 +249,13 @@ struct BACChartView: View {
     }
 
     /// Hosszabb alkalomnál ritkítjuk a címkéket, hogy ne torlódjanak.
+    /// Angol locale-ban az AM/PM miatt szélesebbek, ezért eggyel korábban.
     private var strideHours: Int {
         let hours = store.visibleRange.upperBound
             .timeIntervalSince(store.visibleRange.lowerBound) / 3600
         return switch hours {
-        case ..<8: 1
-        case ..<16: 2
+        case ..<7: 1
+        case ..<14: 2
         default: 4
         }
     }
@@ -256,7 +265,7 @@ struct BACChartView: View {
             AxisGridLine().foregroundStyle(Theme.hairline)
             AxisValueLabel {
                 if let level = value.as(Double.self) {
-                    Text(unit.format(level))
+                    Text(verbatim: unit.format(level))
                         .font(.system(size: 10, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.secondaryText)
                 }
@@ -272,12 +281,16 @@ struct BACChartView: View {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(Theme.calm.opacity(0.35))
                     .frame(width: 16, height: 9)
-                Text("lehetséges tartomány")
+                Text("possible range")
             }
 
-            Text("·")
+            Text(verbatim: "·")
 
-            Text(scrubDate == nil ? "húzd a leolvasáshoz" : "engedd el a visszatéréshez")
+            if scrubDate == nil {
+                Text("drag to read values")
+            } else {
+                Text("release to go back")
+            }
 
             Spacer()
         }
