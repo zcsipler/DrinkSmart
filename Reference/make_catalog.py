@@ -1,9 +1,9 @@
 """
-Localizable.xcstrings eloallitasa es ellenorzese.
+Generates and verifies Localizable.xcstrings.
 
-Forrasnyelv: angol. A magyar forditas kezzel karbantartott.
-A szkript ellenorzi, hogy minden kulcs tenyleg szerepel a forrasban, es hogy
-a forrasban nem maradt lokalizalt szoveg forditas nelkul.
+Source language is English; the Hungarian translations are maintained here by
+hand. The script checks that every key really occurs in the source, and that
+no localized string in the source was left without a translation.
 """
 
 import json
@@ -13,13 +13,13 @@ import sys
 
 APP = pathlib.Path("/sessions/affectionate-admiring-hawking/mnt/test/DrinkSmart/DrinkSmart")
 
-# en -> hu.  Az interpolalt kulcsokban %@ all a behelyettesitett ertek helyen.
+# en -> hu. In interpolated keys, %@ stands in for the substituted value.
 TRANSLATIONS = {
     # --- BACUnit ---
     "Per mille": "Ezrelék",
     "Percent": "Százalék",
 
-    # --- DrinkCatalog: italtipusok ---
+    # --- DrinkCatalog: drink types ---
     "Beer": "Sör",
     "Wine": "Bor",
     "Sparkling": "Pezsgő",
@@ -27,7 +27,7 @@ TRANSLATIONS = {
     "Cocktail": "Koktél",
     "Custom": "Egyedi",
 
-    # --- DrinkCatalog: gyomorallapot ---
+    # --- DrinkCatalog: stomach state ---
     "Empty stomach": "Éhgyomor",
     "Moderately full": "Közepesen telt",
     "Full stomach": "Teli has",
@@ -155,7 +155,7 @@ TRANSLATIONS = {
 
 
 def swift_sources() -> str:
-    """A forrasfajlok osszefuzve, kommentek nelkul."""
+    """All Swift sources concatenated, with comments stripped."""
     parts = []
     for f in sorted(APP.rglob("*.swift")):
         src = f.read_text()
@@ -164,8 +164,8 @@ def swift_sources() -> str:
 
 
 def source_key(key: str) -> str:
-    """A katalogus kulcsabol visszaallitja, hogyan nez ki a Swift forrasban."""
-    # a %@ helyere barmilyen interpolacio kerulhet (akar tobb szintu zarojellel)
+    """Turns a catalog key back into the pattern it takes in the Swift source."""
+    # %@ may stand for any interpolation, including nested parentheses
     escaped = re.escape(key)
     for token in (re.escape("%@"), "%@"):
         escaped = escaped.replace(token, r"\\\([^\n]+?\)+?")
@@ -176,37 +176,37 @@ def main() -> int:
     sources = swift_sources()
     problems = []
 
-    # 1. minden kulcs szerepel-e a forrasban
+    # 1. every key must occur in the source
     for key in TRANSLATIONS:
         pattern = source_key(key)
         if not re.search(pattern, sources, re.S):
-            problems.append(f"NINCS A FORRASBAN: {key!r}")
+            problems.append(f"NOT IN SOURCE: {key!r}")
 
-    # 2. van-e a forrasban lokalizalt szoveg, ami kimaradt a forditasbol
+    # 2. no localized string in the source may be missing a translation
     literals = set()
-    # Text("..."), Button("...") - a Text(verbatim:) szandekosan kimarad,
-    # mert azt nem fordítjuk (szamok, idopontok, szimbolumok).
+    # Text("..."), Button("...") - Text(verbatim:) is deliberately excluded,
+    # because those are not translated (numbers, times, symbols).
     for m in re.finditer(r'\b(?:Text|Button)\(\s*"((?:[^"\\]|\\.)*)"', sources):
         literals.add(m.group(1))
 
-    # Csak a LocalizedStringResource-t ado tulajdonsagok switch agai.
-    # A `suffix` es az `icon` sima String - SF Symbol nevek es ‰/% jelek,
-    # ezeket nem szabad forditani.
+    # Only the switch arms of properties returning LocalizedStringResource.
+    # `suffix` and `icon` are plain Strings - SF Symbol names and the ‰/%
+    # signs - and must not be translated.
     for block in re.finditer(
         r"var \w+: LocalizedStringResource \{(.*?)\n    \}", sources, re.S
     ):
         for m in re.finditer(r'case \.\w+:\s*"((?:[^"\\]|\\.)*)"', block.group(1)):
             literals.add(m.group(1))
 
-    # A DrinkTemplate-ek neve is LocalizedStringResource. Csak a sablon
-    # konstruktoraban keresunk: a Drink(name:) a sablon AZONOSITOJAT tarolja,
-    # az nem forditando.
+    # DrinkTemplate names are LocalizedStringResource too. We only look
+    # inside the template constructor: Drink(name:) stores the template
+    # IDENTIFIER, which must not be translated.
     for block in re.finditer(r"DrinkTemplate\((.*?)\n        \)", sources, re.S):
         for m in re.finditer(r'name:\s*"((?:[^"\\]|\\.)*)"', block.group(1)):
             literals.add(m.group(1))
 
     def normalize(lit: str) -> str:
-        """A `\\(...)` interpolaciokat %@-ra csereli, zarojel-egyensulyt tartva."""
+        """Replaces `\\(...)` interpolations with %@, keeping parens balanced."""
         out, i = [], 0
         while i < len(lit):
             if lit.startswith("\\(", i):
@@ -227,17 +227,17 @@ def main() -> int:
     for lit in sorted(literals):
         norm = normalize(lit)
         if norm not in TRANSLATIONS:
-            problems.append(f"NINCS FORDITAS: {norm!r}")
+            problems.append(f"NO TRANSLATION: {norm!r}")
 
-    # 3. formatumspecifikatorok egyezese
+    # 3. format specifiers must match on both sides
     for en, hu in TRANSLATIONS.items():
         if en.count("%@") != hu.count("%@"):
-            problems.append(f"SPECIFIKATOR-ELTERES: {en!r} ({en.count('%@')}) vs {hu!r} ({hu.count('%@')})")
+            problems.append(f"SPECIFIER MISMATCH: {en!r} ({en.count('%@')}) vs {hu!r} ({hu.count('%@')})")
         if "%" in en.replace("%@", ""):
-            problems.append(f"GYANUS SZAZALEKJEL: {en!r}")
+            problems.append(f"SUSPICIOUS PERCENT SIGN: {en!r}")
 
     if problems:
-        print("PROBLEMAK:")
+        print("PROBLEMS:")
         for p in problems:
             print("  -", p)
         return 1
@@ -259,7 +259,7 @@ def main() -> int:
 
     out = APP / "Localizable.xcstrings"
     out.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n")
-    print(f"OK - {len(TRANSLATIONS)} kulcs -> {out}")
+    print(f"OK - {len(TRANSLATIONS)} keys -> {out}")
     return 0
 
 

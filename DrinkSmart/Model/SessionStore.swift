@@ -2,21 +2,21 @@ import Foundation
 import Observation
 import BACKit
 
-/// Az app egyetlen állapotforrása.
+/// The app's single source of state.
 ///
-/// A sávot csak akkor számolja újra, amikor a bemenet tényleg változik
-/// (ital, profil) — az óra ketyegése csak a `now`-t mozgatja, ami a
-/// leolvasást frissíti, de nem indít új szimulációt.
+/// The band is recomputed only when an input actually changes (a drink, the
+/// profile). The clock tick just moves `now`, which refreshes the readout
+/// without starting a new simulation.
 @Observable
 final class SessionStore {
 
-    // MARK: Állapot
+    // MARK: State
 
     var profile: BodyProfile {
         didSet { rebuild(); persist() }
     }
 
-    /// A felhasználó saját határa g/L-ben. Nem jogi limit — személyes referencia.
+    /// The user's own limit in g/L. Not a legal limit — a personal reference.
     var limit: Double {
         didSet { persist() }
     }
@@ -25,23 +25,23 @@ final class SessionStore {
         didSet { persist() }
     }
 
-    /// A béta proxyja. Ennek az állítása írja át a profil béta értékeit.
+    /// Proxy for beta. Changing this rewrites the profile's beta values.
     var frequency: DrinkingFrequency {
         didSet {
             guard frequency != oldValue else { return }
-            frequency.apply(to: &profile)   // a profil didSet-je újraszámol és ment
+            frequency.apply(to: &profile)   // the profile's didSet rebuilds and persists
         }
     }
 
     private(set) var drinks: [Drink] = []
     private(set) var band: BACBand = .empty
 
-    /// A jelenlegi idő. Percenként frissül.
+    /// The current time. Refreshed every half minute.
     var now: Date = .now
 
     private let engine = BACEngine()
 
-    // MARK: Élettartam
+    // MARK: Lifecycle
 
     init(
         profile: BodyProfile = .init(sex: .male, age: 35, heightCm: 180, weightKg: 80),
@@ -56,14 +56,15 @@ final class SessionStore {
         rebuild()
     }
 
-    // MARK: Származtatott értékek
+    // MARK: Derived values
 
-    /// A jelenlegi szint tartománya. Ez a fő kijelző adata.
+    /// The range of possible current levels. This is what the main readout shows.
     var currentRange: ClosedRange<Double> {
         drinks.isEmpty ? 0...0 : band.range(at: now)
     }
 
-    /// A középérték — ott kell, ahol egyetlen szám muszáj (színezés, animáció).
+    /// The centre value — needed where a single number is unavoidable, such as
+    /// tinting and animation.
     var currentBAC: Double {
         drinks.isEmpty ? 0 : band.value(at: now)
     }
@@ -71,7 +72,7 @@ final class SessionStore {
     var peakRange: ClosedRange<Double>? { band.peakRange }
     var peak: BACSample? { band.peak }
 
-    /// A csúcs csak akkor „várható", ha még előttünk van.
+    /// The peak is only "expected" while it is still ahead of us.
     var upcomingPeak: BACSample? {
         guard let peak, peak.date > now.addingTimeInterval(60) else { return nil }
         return peak
@@ -102,7 +103,8 @@ final class SessionStore {
         return .below
     }
 
-    /// A görbe emelkedik-e éppen. A felszálló ág az, ahol a szonda alulmérne.
+    /// Whether the curve is currently rising. The absorption limb is where a
+    /// breathalyser would read low.
     var isRising: Bool {
         !drinks.isEmpty && currentRate > 0.01
     }
@@ -111,7 +113,8 @@ final class SessionStore {
         band.center.samples.last { $0.date <= now }?.rate ?? 0
     }
 
-    /// A megjelenítendő időablak. Legalább hat óra, de a teljes kiürülést befogja.
+    /// The visible time window. At least six hours, but wide enough to contain
+    /// the full clearance.
     var visibleRange: ClosedRange<Date> {
         let start = (sessionStart ?? now).addingTimeInterval(-15 * 60)
         let naturalEnd = soberRange?.upperBound ?? now.addingTimeInterval(4 * 3600)
@@ -123,7 +126,7 @@ final class SessionStore {
         max((peakRange?.upperBound ?? 0) * 1.3, limit * 1.4, 0.5)
     }
 
-    // MARK: Műveletek
+    // MARK: Actions
 
     func add(_ drink: Drink) {
         drinks.append(drink)
@@ -144,7 +147,7 @@ final class SessionStore {
         persist()
     }
 
-    /// Mi történne, ha a felhasználó meginná ezt az italt.
+    /// What would happen if the user had this drink.
     func project(_ candidate: Drink) -> BandedProjection {
         engine.projectBand(profile: profile, consumed: drinks, candidate: candidate, limit: limit)
     }
@@ -157,10 +160,10 @@ final class SessionStore {
         band = drinks.isEmpty ? .empty : engine.simulateBand(profile: profile, drinks: drinks)
     }
 
-    // MARK: Perzisztencia
+    // MARK: Persistence
     //
-    // Egyelőre UserDefaults + Codable. A SwiftData réteg akkor kerül be,
-    // amikor a korábbi alkalmak statisztikája is kell.
+    // UserDefaults + Codable for now. The SwiftData layer arrives when we need
+    // statistics across past sessions.
 
     private struct Snapshot: Codable {
         var profile: BodyProfile
@@ -190,18 +193,18 @@ final class SessionStore {
         limit = snapshot.limit
         unit = snapshot.unit
         frequency = snapshot.frequency
-        // Csak az elmúlt 24 óra italait tartjuk meg — ami régebbi, az már kiürült.
+        // Keep only the last 24 hours — anything older has already cleared.
         let cutoff = Date.now.addingTimeInterval(-24 * 3600)
         drinks = snapshot.drinks.filter { $0.consumedAt > cutoff }.sorted { $0.consumedAt < $1.consumedAt }
     }
 }
 
-// MARK: - Előnézeti adat
+// MARK: - Preview data
 
 extension SessionStore {
     static var preview: SessionStore {
         let store = SessionStore()
-        // A `name` a sablon azonosítóját hordozza, nem a megjelenített nevet.
+        // `name` holds the template identifier, not the displayed name.
         store.drinks = [
             Drink(consumedAt: .now.addingTimeInterval(-9000), volumeMl: 500, abvPercent: 5, stomach: .full, name: "beer"),
             Drink(consumedAt: .now.addingTimeInterval(-5400), volumeMl: 500, abvPercent: 5, stomach: .light, name: "beer"),

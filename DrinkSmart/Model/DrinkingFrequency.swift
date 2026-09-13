@@ -1,16 +1,15 @@
 import Foundation
 import BACKit
 
-/// A lebontási sebesség proxyja.
+/// A proxy for the elimination rate.
 ///
-/// A béta önmagában megválaszolhatatlan kérdés egy felhasználónak — viszont
-/// azt mindenki tudja magáról, milyen gyakran iszik. A krónikus bevitel
-/// indukálja a CYP2E1/MEOS útvonalat, ezért a rendszeres fogyasztók
-/// eliminációs rátája mérhetően magasabb.
+/// Beta on its own is an unanswerable question for a user — but everyone knows
+/// how often they drink. Chronic intake induces the CYP2E1/MEOS pathway, so
+/// regular drinkers have a measurably higher elimination rate.
 ///
-/// A számok az irodalmi 0,10–0,25 g/L/h tartományon belül mozognak; a
-/// bizonytalanság szándékosan széles, mert ez a becslés marad a modell
-/// leggyengébb pontja.
+/// The values stay inside the 0.10–0.25 g/L/h range reported in the
+/// literature; the uncertainty is deliberately wide, because this estimate
+/// remains the model's weakest point.
 enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
     case rarely
     case occasional
@@ -37,7 +36,7 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// A béta középértéke g/L/h-ban.
+    /// Centre value of beta in g/L/h.
     var beta: Double {
         switch self {
         case .rarely: 0.13
@@ -47,8 +46,8 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// ± bizonytalanság. Az egyének közti szórás a ritkán fogyasztóknál is
-    /// jelentős, a gyakoriaknál pedig tovább nő.
+    /// ± uncertainty. Between-individual spread is substantial even among
+    /// infrequent drinkers, and grows with frequency.
     var uncertainty: Double {
         switch self {
         case .rarely: 0.025
@@ -58,8 +57,8 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// A legközelebbi fokozat egy meglévő béta értékhez — a haladó
-    /// beállításokban kézzel állított értéket is vissza tudjuk vetíteni.
+    /// The closest step to an existing beta value, so a value set by hand in
+    /// the advanced settings can still be mapped back.
     static func closest(toBeta beta: Double) -> DrinkingFrequency {
         allCases.min { abs($0.beta - beta) < abs($1.beta - beta) } ?? .occasional
     }

@@ -1,13 +1,13 @@
 import SwiftUI
 import BACKit
 
-/// Testalkat, anyagcsere és a saját határ beállítása.
+/// Body composition, metabolism and the personal limit.
 ///
-/// A lebontási sebesség szándékosan nem nyers számként jelenik meg: arra a
-/// kérdésre, hogy „hány ‰/óra a bétád", egy felhasználó sem tud válaszolni,
-/// és a találomra állított érték rontja a becslést. Helyette a fogyasztás
-/// gyakoriságát kérdezzük — amit mindenki tud magáról —, a nyers paraméterek
-/// pedig a haladó beállítások közé kerültek.
+/// The elimination rate deliberately does not appear as a raw number: no user
+/// can answer "what is your beta in per mille per hour", and a value set at
+/// random makes the estimate worse. We ask about drinking frequency instead —
+/// something everyone knows about themselves — and the raw parameters live
+/// under advanced settings.
 struct ProfileSheet: View {
     let store: SessionStore
     @Environment(\.dismiss) private var dismiss
@@ -37,7 +37,7 @@ struct ProfileSheet: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: Testalkat
+    // MARK: Body
 
     private var bodySection: some View {
         Section {
@@ -72,8 +72,8 @@ struct ProfileSheet: View {
         } header: {
             Text("Body")
         } footer: {
-            // A Watson-féle női egyenlet nem tartalmazza az életkort. Ha ezt
-            // nem mondjuk meg, a mozdulatlan érték bugnak látszik.
+            // The Watson equation for women does not include age. Without
+            // saying so, the unmoving value looks like a bug.
             if store.profile.sex == .female {
                 Text("Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result.")
             } else {
@@ -83,7 +83,7 @@ struct ProfileSheet: View {
         .listRowBackground(Theme.surface)
     }
 
-    // MARK: Anyagcsere
+    // MARK: Metabolism
 
     private var metabolismSection: some View {
         Section {
@@ -113,7 +113,7 @@ struct ProfileSheet: View {
         .listRowBackground(Theme.surface)
     }
 
-    // MARK: Saját határ
+    // MARK: Personal limit
 
     private var limitSection: some View {
         Section {
@@ -140,7 +140,7 @@ struct ProfileSheet: View {
         .listRowBackground(Theme.surface)
     }
 
-    // MARK: Mértékegység
+    // MARK: Unit
 
     private var unitSection: some View {
         Section {
@@ -167,7 +167,7 @@ struct ProfileSheet: View {
         .listRowBackground(Theme.surface)
     }
 
-    // MARK: Származtatott értékek
+    // MARK: Derived values
 
     private var derivedSection: some View {
         Section {
@@ -193,7 +193,7 @@ struct ProfileSheet: View {
         }
     }
 
-    // MARK: Haladó
+    // MARK: Advanced
 
     private var advancedSection: some View {
         Section {
@@ -252,7 +252,7 @@ struct ProfileSheet: View {
         .listRowBackground(Theme.surface)
     }
 
-    // MARK: Segéd
+    // MARK: Helpers
 
     private func stepperRow(
         title: LocalizedStringKey,

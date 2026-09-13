@@ -2,36 +2,36 @@ import Testing
 import Foundation
 @testable import BACKit
 
-/// A várt értékek a `bac_model.py` referencia-implementációból származnak.
-/// Ha a Swift és a Python eltér, az algoritmus csúszott el valahol — nem a teszt rossz.
+/// Expected values come from the `Reference/bac_model.py` implementation.
+/// If Swift and Python disagree, the algorithm drifted — not the test.
 private let reference = BodyProfile(sex: .male, age: 35, heightCm: 180, weightKg: 80)
 private let t0 = Date(timeIntervalSince1970: 0)
 private let engine = BACEngine()
 
 private func minute(_ m: Double) -> Date { t0.addingTimeInterval(m * 60) }
 
-// MARK: - Antropometria
+// MARK: - Anthropometry
 
-@Suite("Testalkat")
+@Suite("Body profile")
 struct BodyProfileTests {
 
-    @Test("Watson TBW egyezik a referenciával")
+    @Test("Watson total body water matches the reference")
     func totalBodyWater() {
         #expect(abs(reference.totalBodyWater - 45.344400) < 1e-4)
         #expect(abs(reference.distributionVolume - 53.346353) < 1e-4)
     }
 
-    @Test("A levezetett Widmark-faktor a klasszikus tartományban van")
+    @Test("Derived Widmark factor lands in the classic range")
     func widmarkInExpectedRange() {
         #expect(abs(reference.widmarkFactor - 0.666829) < 1e-4)
 
         let female = BodyProfile(sex: .female, age: 35, heightCm: 167, weightKg: 62)
-        // Klasszikus irodalmi értékek: férfi ~0.68–0.70, nő ~0.55–0.60
+        // Classic literature values: men around 0.68–0.70, women 0.55–0.60.
         #expect((0.62...0.72).contains(reference.widmarkFactor))
         #expect((0.53...0.63).contains(female.widmarkFactor))
     }
 
-    @Test("A nő ugyanakkora dózisra magasabb szintet ér el")
+    @Test("A woman reaches a higher level from the same dose")
     func sexDifference() {
         let female = BodyProfile(sex: .female, age: 35, heightCm: 167, weightKg: 62)
         let drink = Drink(consumedAt: t0, volumeMl: 100, abvPercent: 40, stomach: .empty)
@@ -42,19 +42,19 @@ struct BodyProfileTests {
     }
 }
 
-// MARK: - Ital
+// MARK: - Drink
 
-@Suite("Ital")
+@Suite("Drink")
 struct DrinkTests {
 
-    @Test("Etanoltartalom és standard egység")
+    @Test("Ethanol content and standard units")
     func ethanolContent() {
         let beer = Drink(consumedAt: t0, volumeMl: 500, abvPercent: 5)
         #expect(abs(beer.gramsEthanol - 19.725) < 1e-6)
         #expect(abs(beer.standardUnits - 1.9725) < 1e-6)
     }
 
-    @Test("A teli gyomor csökkenti a biohasznosulást")
+    @Test("A full stomach reduces bioavailability")
     func bioavailability() {
         let volume = 40.0, abv = 40.0
         let empty = Drink(consumedAt: t0, volumeMl: volume, abvPercent: abv, stomach: .empty)
@@ -64,12 +64,12 @@ struct DrinkTests {
     }
 }
 
-// MARK: - Szimuláció
+// MARK: - Simulation
 
-@Suite("BAC görbe")
+@Suite("BAC curve")
 struct BACEngineTests {
 
-    @Test("Egy feles éhgyomorra — numerikus egyezés a Python referenciával")
+    @Test("Single spirit on an empty stomach matches the Python reference")
     func singleSpiritMatchesReference() throws {
         let drink = Drink(consumedAt: t0, volumeMl: 40, abvPercent: 40, stomach: .empty)
         let curve = engine.simulate(profile: reference, drinks: [drink])
@@ -87,7 +87,7 @@ struct BACEngineTests {
         #expect(abs(sober.timeIntervalSince(t0) / 60 - 114) < 2)
     }
 
-    @Test("Három ital sorozata — numerikus egyezés a Python referenciával")
+    @Test("A series of three drinks matches the Python reference")
     func drinkSeriesMatchesReference() throws {
         let drinks = [
             Drink(consumedAt: minute(0), volumeMl: 500, abvPercent: 5, stomach: .full),
@@ -105,7 +105,7 @@ struct BACEngineTests {
         #expect(abs(curve.value(at: minute(240)) - 0.385413) < 1e-4)
     }
 
-    @Test("A gyomortartalom monoton csökkenti és késlelteti a csúcsot")
+    @Test("Stomach contents monotonically lower and delay the peak")
     func stomachStateMonotonicity() {
         var peaks: [(Double, Double)] = []
         for stomach in [StomachState.empty, .light, .full] {
@@ -113,11 +113,11 @@ struct BACEngineTests {
             let peak = engine.simulate(profile: reference, drinks: [drink]).peak!
             peaks.append((peak.bac, peak.date.timeIntervalSince(t0) / 60))
         }
-        #expect(peaks[0].0 > peaks[1].0 && peaks[1].0 > peaks[2].0)   // egyre alacsonyabb
-        #expect(peaks[0].1 < peaks[1].1 && peaks[1].1 < peaks[2].1)   // egyre későbbi
+        #expect(peaks[0].0 > peaks[1].0 && peaks[1].0 > peaks[2].0)   // progressively lower
+        #expect(peaks[0].1 < peaks[1].1 && peaks[1].1 < peaks[2].1)   // progressively later
     }
 
-    @Test("A leszálló ág meredeksége a béta paramétert követi")
+    @Test("The descending limb follows the beta parameter")
     func eliminationSlope() {
         let drink = Drink(consumedAt: t0, volumeMl: 200, abvPercent: 40, stomach: .empty)
         let curve = engine.simulate(profile: reference, drinks: [drink])
@@ -125,7 +125,7 @@ struct BACEngineTests {
         #expect(abs(slope - reference.beta) < 0.01)
     }
 
-    @Test("Magasabb béta gyorsabb kiürülést ad")
+    @Test("Higher beta clears faster")
     func fasterMetabolism() {
         var fast = reference
         fast.beta = 0.22
@@ -136,7 +136,7 @@ struct BACEngineTests {
         #expect(quick < slow)
     }
 
-    @Test("Tömegmegmaradás: a kiürült mennyiség megegyezik a bevitellel")
+    @Test("Mass conservation: what is eliminated equals what went in")
     func massConservation() {
         let drink = Drink(consumedAt: t0, volumeMl: 40, abvPercent: 40, stomach: .empty)
         let curve = engine.simulate(profile: reference, drinks: [drink])
@@ -149,21 +149,21 @@ struct BACEngineTests {
         #expect(abs(input - eliminated) / input < 0.01)
     }
 
-    @Test("A görbe soha nem megy negatívba")
+    @Test("The curve never goes negative")
     func neverNegative() {
         let drink = Drink(consumedAt: t0, volumeMl: 1, abvPercent: 5)
         let curve = engine.simulate(profile: reference, drinks: [drink])
         #expect(curve.samples.allSatisfy { $0.bac >= 0 })
     }
 
-    @Test("Üres bevitel üres görbét ad")
+    @Test("Empty input gives an empty curve")
     func emptyInput() {
         let curve = engine.simulate(profile: reference, drinks: [])
         #expect(curve.samples.isEmpty)
         #expect(curve.peak == nil)
     }
 
-    @Test("Az italok sorrendje nem számít")
+    @Test("The order drinks are passed in does not matter")
     func orderIndependence() {
         let a = Drink(consumedAt: minute(0), volumeMl: 500, abvPercent: 5)
         let b = Drink(consumedAt: minute(60), volumeMl: 40, abvPercent: 40)
@@ -173,9 +173,9 @@ struct BACEngineTests {
     }
 }
 
-// MARK: - Előrejelzés
+// MARK: - Projection
 
-@Suite("Következő ital előrejelzése")
+@Suite("Next drink projection")
 struct ProjectionTests {
 
     private var consumed: [Drink] {
@@ -185,7 +185,7 @@ struct ProjectionTests {
         ]
     }
 
-    @Test("A vetített csúcs magasabb a jelenlegi szintnél")
+    @Test("The projected peak sits above the current level")
     func projectionRaisesPeak() {
         let candidate = Drink(consumedAt: minute(90), volumeMl: 500, abvPercent: 5)
         let p = engine.project(profile: reference, consumed: consumed, candidate: candidate, limit: 1.2)
@@ -194,7 +194,7 @@ struct ProjectionTests {
         #expect(p.timeToPeak > 0)
     }
 
-    @Test("A nagyobb ital nagyobb csúcsot és később józanodást ad")
+    @Test("A larger drink gives a higher peak and a later sober time")
     func largerDrinkLargerPeak() {
         let small = Drink(consumedAt: minute(90), volumeMl: 40, abvPercent: 40)
         let large = Drink(consumedAt: minute(90), volumeMl: 120, abvPercent: 40)
@@ -206,7 +206,7 @@ struct ProjectionTests {
         #expect(pl.soberAt! > ps.soberAt!)
     }
 
-    @Test("Alacsony határnál jelzi az átlépést és a mikort")
+    @Test("A low limit reports the crossing and when it happens")
     func limitDetection() {
         let candidate = Drink(consumedAt: minute(90), volumeMl: 200, abvPercent: 40, stomach: .empty)
         let p = engine.project(profile: reference, consumed: consumed, candidate: candidate, limit: 0.5)
@@ -216,7 +216,7 @@ struct ProjectionTests {
         #expect(p.timeAboveLimit > 0)
     }
 
-    @Test("Magas határnál nem jelez átlépést")
+    @Test("A high limit reports no crossing")
     func withinLimit() {
         let candidate = Drink(consumedAt: minute(90), volumeMl: 40, abvPercent: 40)
         let p = engine.project(profile: reference, consumed: consumed, candidate: candidate, limit: 3.0)
@@ -225,12 +225,12 @@ struct ProjectionTests {
         #expect(p.timeAboveLimit == 0)
     }
 
-    @Test("A maximális italtérfogat tényleg a határ alatt marad")
+    @Test("The largest permitted drink really stays under the limit")
     func largestDrinkWithinLimit() throws {
         let template = Drink(consumedAt: minute(90), volumeMl: 500, abvPercent: 5)
         let limit = 0.8
 
-        // a Python referencia szerint ~884 mL 5%-os sör
+        // The Python reference gives roughly 884 mL of 5 % beer.
         let maxVolume = try #require(
             engine.largestDrinkWithinLimit(
                 profile: reference, consumed: consumed, template: template, limit: limit
@@ -247,7 +247,7 @@ struct ProjectionTests {
         #expect(engine.project(profile: reference, consumed: consumed, candidate: overLimit, limit: limit).exceedsLimit)
     }
 
-    @Test("Ha a jelenlegi szint már a határ fölött van, nincs megengedett ital")
+    @Test("No drink fits when the current level is already over the limit")
     func alreadyOverLimit() {
         let heavy = consumed + [Drink(consumedAt: minute(60), volumeMl: 300, abvPercent: 40, stomach: .empty)]
         let template = Drink(consumedAt: minute(120), volumeMl: 500, abvPercent: 5)
@@ -256,7 +256,7 @@ struct ProjectionTests {
         ) == nil)
     }
 
-    @Test("A gyors ivás meredekebb emelkedést ad ugyanannyi alkoholból")
+    @Test("Drinking faster gives a steeper rise for the same amount")
     func riseRateReflectsPacing() throws {
         let fast = (0..<4).map { Drink(consumedAt: minute(Double($0) * 10), volumeMl: 40, abvPercent: 40, stomach: .empty) }
         let slow = (0..<4).map { Drink(consumedAt: minute(Double($0) * 60), volumeMl: 40, abvPercent: 40, stomach: .empty) }
@@ -264,7 +264,7 @@ struct ProjectionTests {
         let fastRate = try #require(engine.simulate(profile: reference, drinks: fast).steepestRise).rate
         let slowRate = try #require(engine.simulate(profile: reference, drinks: slow).steepestRise).rate
 
-        // Python referencia: gyors 1.951, lassú 1.349 g/L/h
+        // Python reference: 1.951 fast, 1.349 slow, in g/L/h.
         #expect(fastRate > slowRate)
         #expect(abs(fastRate - 1.951) < 0.02)
         #expect(abs(slowRate - 1.349) < 0.02)

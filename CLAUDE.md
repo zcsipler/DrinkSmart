@@ -226,7 +226,10 @@ cd Reference && python3 make_catalog.py
 
 ## 8. Konvenciók
 
-- **A kódkommentek magyarul**, a típus- és tagnevek angolul.
+- **A kódban minden angol**: kommentek, docstringek, teszt- és suite-nevek,
+  MARK-ok, a Python szkriptek kiírásai. Magyar szöveg csak két helyen van:
+  a `Localizable.xcstrings` fordítási értékeiben és ebben a dokumentumban.
+  *(Ez a beszélgetés viszont magyarul folyik.)*
 - A kommentek a **miértet** magyarázzák, nem a mit. Ami a kódból látszik, azt
   ne írjuk le újra.
 - A `BACKit` nem importál SwiftUI-t. Soha.

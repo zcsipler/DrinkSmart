@@ -1,44 +1,49 @@
 """
-BAC referenciamodell - Widmark eloszlas + elsorendu abszorpcio + telitheto eliminacio.
+BAC reference model - Widmark distribution + first-order absorption
+with saturable elimination.
 
-Ez a Swift implementacio numerikus referenciaja. Minden koncentracio g/L egysegben
-ertendo (= promille), mert a forenzikus irodalom is ebben dolgozik.
-Az atvaltas: 1.0 g/L = 0.1 g/dL = 0.10% BAC.
+This is the numerical reference for the Swift implementation. All
+concentrations are in g/L (identical to per mille), because that is the unit
+the forensic literature works in. Conversion: 1.0 g/L = 0.1 g/dL = 0.10 % BAC.
 """
 
 from dataclasses import dataclass, field
 from typing import List, Literal
 
 ETHANOL_DENSITY = 0.789          # g/mL
-BLOOD_WATER_FRACTION = 0.85      # L viz / L teljes ver (80.6% w/w * 1.055 g/mL suruseg)
+BLOOD_WATER_FRACTION = 0.85      # L water per L whole blood (80.6 % w/w * 1.055 g/mL)
 
 Sex = Literal["male", "female"]
 StomachState = Literal["empty", "light", "full"]
 
-# Elsorendu abszorpcios rata-konstansok (1/h) a gyomortartalom fuggvenyeben.
-# Ehgyomorra a felszivodasi felezesi ido ~7 perc, teli gyomorra ~35 perc.
+# First-order absorption rate constants (1/h) by stomach contents.
+# Absorption half-life is ~7 minutes on an empty stomach, ~35 minutes on a full one.
 KA_BY_STOMACH = {
     "empty": 6.0,
     "light": 2.5,
     "full": 1.2,
 }
 
-# Elsofokú (gyomri ADH) metabolizmus miatti biohasznosulas. Lassabb felszivodas
-# hosszabb gyomri tartozkodast, es igy nagyobb first-pass vesztesget jelent.
+# Bioavailability after gastric (ADH) first-pass metabolism. Slower absorption
+# means a longer gastric residence time, and therefore greater first-pass loss.
 BIOAVAILABILITY_BY_STOMACH = {
     "empty": 0.95,
     "light": 0.88,
     "full": 0.80,
 }
 
-# Michaelis-Menten Km. Ilyen kicsi ertek mellett az eliminacio 0.02 g/L felett
-# gyakorlatilag nulladrendu, nulla korul viszont simán kifut - nem megy negativba.
+# Michaelis constant. At this value elimination is effectively zero-order above
+# 0.02 g/L but tapers off smoothly near zero - it never goes negative.
 KM = 0.02                        # g/L
-DEFAULT_BETA = 0.15              # g/L/h, "mild to moderate drinker" atlag
+DEFAULT_BETA = 0.15              # g/L/h, mild-to-moderate drinker average
 
 
 def watson_tbw(sex: Sex, age: float, height_cm: float, weight_kg: float) -> float:
-    """Watson (1980) teljes testviz becsles, literben."""
+    """Watson (1980) total body water estimate, in litres.
+
+    Note that the female equation does not include age. That is a property of
+    the Watson equations, not an omission here.
+    """
     if sex == "male":
         return 2.447 - 0.09516 * age + 0.1074 * height_cm + 0.3362 * weight_kg
     return -2.097 + 0.1069 * height_cm + 0.2466 * weight_kg
@@ -50,8 +55,8 @@ class BodyProfile:
     age: float
     height_cm: float
     weight_kg: float
-    beta: float = DEFAULT_BETA           # eliminacios rata g/L/h
-    tbw_override: float | None = None    # ha a felhasznalo kalibralta magat
+    beta: float = DEFAULT_BETA           # elimination rate, g/L/h
+    tbw_override: float | None = None    # set when the user has calibrated
 
     @property
     def total_body_water(self) -> float:
@@ -61,18 +66,18 @@ class BodyProfile:
 
     @property
     def distribution_volume(self) -> float:
-        """Ver-ekvivalens eloszlasi terfogat literben: C = A / Vd."""
+        """Blood-equivalent volume of distribution in litres: C = A / Vd."""
         return self.total_body_water / BLOOD_WATER_FRACTION
 
     @property
     def widmark_r(self) -> float:
-        """Tajekoztato Widmark-faktor, a klasszikus 0.68 / 0.55 ertekekkel osszevetheto."""
+        """Informational Widmark factor, comparable to the classic 0.68 / 0.55."""
         return self.total_body_water / (BLOOD_WATER_FRACTION * self.weight_kg)
 
 
 @dataclass
 class Drink:
-    minute: float                        # fogyasztas idopontja percben, t=0-hoz kepest
+    minute: float                        # time of consumption in minutes from t=0
     volume_ml: float
     abv_percent: float
     stomach: StomachState = "light"
@@ -91,7 +96,7 @@ class Drink:
 
     @property
     def standard_units(self) -> float:
-        """Magyar/EU standard egyseg = 10 g tiszta alkohol."""
+        """One EU standard unit is 10 g of pure alcohol."""
         return self.grams_ethanol / 10.0
 
 
@@ -99,7 +104,7 @@ class Drink:
 class Sample:
     minute: float
     bac: float                           # g/L
-    rate: float                          # g/L/h, elojeles valtozasi sebesseg
+    rate: float                          # g/L/h, signed rate of change
 
 
 @dataclass
@@ -111,7 +116,7 @@ class Simulation:
         return max(self.samples, key=lambda s: s.bac)
 
     def bac_at(self, minute: float) -> float:
-        """Linearis interpolacio a rasztermintak kozott."""
+        """Linear interpolation between raster samples."""
         if not self.samples or minute <= self.samples[0].minute:
             return 0.0
         if minute >= self.samples[-1].minute:
@@ -124,7 +129,7 @@ class Simulation:
         return 0.0
 
     def sober_at(self, threshold: float = 0.01) -> float | None:
-        """Elso idopont a csucs utan, ahol a BAC a kuszob ala esik."""
+        """First time after the peak at which BAC falls below the threshold."""
         peak_minute = self.peak.minute
         for s in self.samples:
             if s.minute >= peak_minute and s.bac < threshold:
@@ -132,7 +137,7 @@ class Simulation:
         return None
 
     def crosses(self, limit: float) -> float | None:
-        """Elso idopont, amikor a BAC atlepi a megadott hatart."""
+        """First time at which BAC reaches the given limit."""
         for s in self.samples:
             if s.bac >= limit:
                 return s.minute
@@ -147,13 +152,13 @@ def simulate(
     sample_every: float = 1.0,
 ) -> Simulation:
     """
-    Egy-kompartmentes modell, itaonkent kulon gyomor-kompartmenttel.
+    One-compartment model with a separate gut compartment per drink.
 
         dG_i/dt = -ka_i * G_i
         dC/dt   = (sum_i ka_i * G_i) / Vd - beta * C / (Km + C)
 
-    RK4 integracio, mert a telitheto eliminacios tag miatt az Euler-lepes
-    kis BAC-nal erzekelhetoen alulbecsul.
+    Integrated with RK4, because the saturable elimination term makes a plain
+    Euler step noticeably underestimate at low concentrations.
     """
     vd = profile.distribution_volume
     beta_per_minute = profile.beta / 60.0
@@ -175,7 +180,7 @@ def simulate(
     next_sample = 0.0
 
     while t <= horizon_minutes + 1e-9:
-        # az aktualis idopontig elfogyasztott italok bekerulnek a gyomorba
+        # drinks consumed by now enter the stomach
         for i in list(pending):
             if ordered[i].minute <= t + 1e-9:
                 gut[i] += ordered[i].absorbed_grams
@@ -217,8 +222,10 @@ def project_next_drink(
     limit: float,
 ) -> dict:
     """
-    A lenyeg: mi tortenik, HA megiszom a kovetkezot.
-    Visszaadja a jelenlegi es a vetitett csucsot, es hogy atlepne-e a sajat hatart.
+    The point of the whole thing: what happens IF I have the next one.
+
+    Returns the current and projected peak, and whether it would cross the
+    user's own limit.
     """
     baseline = simulate(profile, consumed)
     projected = simulate(profile, consumed + [candidate])

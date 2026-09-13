@@ -1,11 +1,11 @@
 import SwiftUI
 import BACKit
 
-/// Ital felvitele — és ami ennél fontosabb: az élő előrejelzés arról,
-/// hová vinné ez a görbét.
+/// Logging a drink — and, more importantly, the live projection of where it
+/// would take the curve.
 ///
-/// A döntés a kiöntés előtt születik, ezért a vetített csúcs itt jelenik meg,
-/// nem utólag a főképernyőn.
+/// The decision is made before the drink is poured, so the projected peak
+/// belongs here rather than on the main screen afterwards.
 struct AddDrinkSheet: View {
     let store: SessionStore
     @Environment(\.dismiss) private var dismiss
@@ -17,19 +17,19 @@ struct AddDrinkSheet: View {
     @State private var consumedAt: Date = .now
     @State private var showsTimePicker = false
 
-    /// Stabil azonosító, hogy a csúszka mozgatása ne gyártson minden
-    /// képfrissítésnél új itallal egyenértékű objektumot.
+    /// A stable identifier, so that dragging a slider does not mint a new
+    /// drink-equivalent object on every redraw.
     @State private var draftID = UUID()
 
-    /// A szimuláció nem olcsó, ezért nem a `body`-ban fut, hanem a bemenet
-    /// változásakor egyszer.
+    /// The simulation is not cheap, so it runs once when the input changes
+    /// rather than inside `body`.
     @State private var cachedProjection: BandedProjection?
 
     private var projection: BandedProjection {
         cachedProjection ?? store.project(candidate)
     }
 
-    /// A vetítés bemenete. Csak akkor számolunk újra, ha ez változik.
+    /// Inputs to the projection. We only recompute when this changes.
     private struct Input: Equatable {
         var templateID: String
         var volumeMl: Double
@@ -88,7 +88,7 @@ struct AddDrinkSheet: View {
         cachedProjection = store.project(candidate)
     }
 
-    // MARK: Előrejelzés
+    // MARK: Projection
 
     private var projectionCard: some View {
         VStack(spacing: 16) {
@@ -170,11 +170,11 @@ struct AddDrinkSheet: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// Háromállapotú figyelmeztetés.
+    /// Three-state warning.
     ///
-    /// A bizonytalanság miatt van egy köztes eset, amit tisztességtelen lenne
-    /// bármelyik irányba kerekíteni: a lassú lebontás átvinne a határon, a
-    /// gyors nem. Ilyenkor „átlépheted" a helyes állítás, nem „átlépnéd".
+    /// The uncertainty leaves a middle case that would be dishonest to round
+    /// in either direction: slow elimination crosses the limit, fast does not.
+    /// There "might cross" is the accurate claim, not "would cross".
     private var limitWarning: some View {
         HStack(spacing: 8) {
             Image(systemName: projection.outcome == .above
@@ -210,7 +210,7 @@ struct AddDrinkSheet: View {
         projection.limitCrossedAt?.hourMinute ?? candidate.consumedAt.hourMinute
     }
 
-    // MARK: Italtípus
+    // MARK: Drink type
 
     private var typePicker: some View {
         section("Type") {
@@ -251,7 +251,7 @@ struct AddDrinkSheet: View {
         abv = item.defaultAbv
     }
 
-    // MARK: Térfogat
+    // MARK: Volume
 
     private var volumeSection: some View {
         section("Amount", trailing: "\(volumeMl.formatted(.number.precision(.fractionLength(0)))) ml") {
@@ -282,7 +282,7 @@ struct AddDrinkSheet: View {
         }
     }
 
-    // MARK: Alkoholfok
+    // MARK: Strength
 
     private var abvSection: some View {
         section("Strength", trailing: abv.formatted(.number.precision(.fractionLength(1))) + " %") {
@@ -302,7 +302,7 @@ struct AddDrinkSheet: View {
         }
     }
 
-    // MARK: Gyomorállapot
+    // MARK: Stomach state
 
     private var stomachSection: some View {
         section("Stomach") {
@@ -346,7 +346,7 @@ struct AddDrinkSheet: View {
         }
     }
 
-    // MARK: Időpont
+    // MARK: Time
 
     private var timeSection: some View {
         section("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
@@ -408,7 +408,7 @@ struct AddDrinkSheet: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: Megerősítés
+    // MARK: Confirmation
 
     private var confirmBar: some View {
         Button {
@@ -432,7 +432,7 @@ struct AddDrinkSheet: View {
         .background(.ultraThinMaterial)
     }
 
-    // MARK: Szekció-keret
+    // MARK: Section chrome
 
     private func section<Content: View>(
         _ title: LocalizedStringKey,

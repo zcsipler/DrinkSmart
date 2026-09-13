@@ -1,30 +1,31 @@
 import Foundation
 
-/// Élettani állandók. Minden koncentráció g/L egységben (= ezrelék),
-/// mert a forenzikus szakirodalom ebben dolgozik.
-/// Átváltás: 1.0 g/L = 0.1 g/dL = 0.10 % BAC.
+/// Physiological constants. All concentrations are in g/L, which is identical
+/// to per mille — the unit the forensic literature works in.
+/// Conversion: `1.0 g/L = 0.1 g/dL = 0.10 % BAC`.
 public enum Physiology {
-    /// Etanol sűrűsége g/mL-ben.
+    /// Density of ethanol in g/mL.
     public static let ethanolDensity = 0.789
 
-    /// Egy liter teljes vér víztartalma literben (80.6 % w/w × 1.055 g/mL sűrűség).
+    /// Litres of water in one litre of whole blood (80.6 % w/w × 1.055 g/mL density).
     public static let bloodWaterFraction = 0.85
 
-    /// Michaelis–Menten Km. Ekkora érték mellett az elimináció 0.02 g/L fölött
-    /// gyakorlatilag nulladrendű, nulla közelében viszont simán kifut.
+    /// Michaelis constant. At this value elimination is effectively zero-order
+    /// above 0.02 g/L, but tapers off smoothly near zero instead of jumping
+    /// below it the way a plain linear Widmark model does.
     public static let michaelisConstant = 0.02
 
-    /// Alapértelmezett eliminációs ráta, „mild to moderate drinker” átlag.
-    /// Az irodalmi tartomány nagyjából 0.10–0.25 g/L/h.
+    /// Default elimination rate, the mild-to-moderate drinker average.
+    /// The range reported in the literature is roughly 0.10–0.25 g/L/h.
     public static let defaultBeta = 0.15
 
-    /// A béta alapértelmezett bizonytalansága (± g/L/h).
+    /// Default uncertainty on beta (± g/L/h).
     public static let defaultBetaUncertainty = 0.03
 
-    /// Élettanilag lehetséges szélsőértékek. A sáv soha nem lóg ezeken túl.
+    /// Physiologically plausible extremes. The band never extends past these.
     public static let betaBounds = 0.08...0.32
 
-    /// Egy standard egység tiszta alkoholban, grammban (EU/magyar konvenció).
+    /// Grams of pure alcohol in one standard unit (EU convention).
     public static let gramsPerStandardUnit = 10.0
 }
 
@@ -32,27 +33,28 @@ public enum Sex: String, Codable, Sendable, CaseIterable {
     case male, female
 }
 
-/// A felhasználó testalkata és anyagcseréje.
+/// The user's body composition and metabolism.
 ///
-/// A `beta` szándékosan felhasználó által állítható: ez az egyetlen paraméter,
-/// aminek a kalibrálása érdemben javítja a személyes pontosságot.
+/// `beta` is deliberately adjustable: it is the single parameter whose
+/// calibration meaningfully improves accuracy for an individual.
 public struct BodyProfile: Codable, Hashable, Sendable {
     public var sex: Sex
     public var age: Double
     public var heightCm: Double
     public var weightKg: Double
 
-    /// Eliminációs ráta g/L/h. A sáv középértéke.
+    /// Elimination rate in g/L/h. The centre of the band.
     public var beta: Double
 
-    /// A `beta` bizonytalansága (± g/L/h).
+    /// Uncertainty on `beta` (± g/L/h).
     ///
-    /// Nem kozmetika: a béta a plauzibilis tartományán belül 40 % fölött
-    /// mozgatja a csúcsot és több órát a kiürülésen, ezért a modell
-    /// kimenete tartomány, nem egyetlen szám.
+    /// Not cosmetic: across its plausible range beta shifts the peak by more
+    /// than 40 % and the time to clear by several hours, which is why the
+    /// model's output is a range rather than a single number.
     public var betaUncertainty: Double
 
-    /// Ha a felhasználó a saját teljes testvizét kalibrálta, ez felülírja a Watson-becslést.
+    /// Overrides the Watson estimate when the user has calibrated their own
+    /// total body water.
     public var totalBodyWaterOverride: Double?
 
     public init(
@@ -73,30 +75,13 @@ public struct BodyProfile: Codable, Hashable, Sendable {
         self.totalBodyWaterOverride = totalBodyWaterOverride
     }
 
-    /// A lassú és a gyors lebontás széle, élettanilag lehetséges korlátok közé vágva.
-    public var betaRange: ClosedRange<Double> {
-        let low = max(beta - betaUncertainty, Physiology.betaBounds.lowerBound)
-        let high = min(beta + betaUncertainty, Physiology.betaBounds.upperBound)
-        return low...max(high, low)
-    }
-
-    /// Régi, `betaUncertainty` nélküli mentések visszaolvasásához.
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        sex = try c.decode(Sex.self, forKey: .sex)
-        age = try c.decode(Double.self, forKey: .age)
-        heightCm = try c.decode(Double.self, forKey: .heightCm)
-        weightKg = try c.decode(Double.self, forKey: .weightKg)
-        beta = try c.decodeIfPresent(Double.self, forKey: .beta) ?? Physiology.defaultBeta
-        betaUncertainty = try c.decodeIfPresent(Double.self, forKey: .betaUncertainty)
-            ?? Physiology.defaultBetaUncertainty
-        totalBodyWaterOverride = try c.decodeIfPresent(Double.self, forKey: .totalBodyWaterOverride)
-    }
-
-    /// Watson (1980) teljes testvíz becslés, literben.
+    /// Watson (1980) total body water estimate, in litres.
     ///
-    /// A forenzikus irodalom ma ezt részesíti előnyben az etanol
-    /// eloszlási térfogatának közvetlen becslésével szemben.
+    /// Current forensic practice prefers this over estimating ethanol's
+    /// volume of distribution directly.
+    ///
+    /// Note that the female equation does not include age. That is a property
+    /// of the Watson equations, not an omission here.
     public var totalBodyWater: Double {
         if let override = totalBodyWaterOverride { return override }
         switch sex {
@@ -107,14 +92,34 @@ public struct BodyProfile: Codable, Hashable, Sendable {
         }
     }
 
-    /// Vér-ekvivalens eloszlási térfogat literben: `C = A / Vd`.
+    /// Blood-equivalent volume of distribution in litres: `C = A / Vd`.
     public var distributionVolume: Double {
         totalBodyWater / Physiology.bloodWaterFraction
     }
 
-    /// Tájékoztató Widmark-faktor. Összevethető a klasszikus 0.68 / 0.55 értékekkel,
-    /// és jó sanity checkként szolgál a beviteli adatokra.
+    /// Informational Widmark factor. Comparable to the classic 0.68 / 0.55
+    /// values, which makes it a useful sanity check on the entered body data.
     public var widmarkFactor: Double {
         totalBodyWater / (Physiology.bloodWaterFraction * weightKg)
+    }
+
+    /// The slow and fast ends of elimination, clamped to physiological bounds.
+    public var betaRange: ClosedRange<Double> {
+        let low = max(beta - betaUncertainty, Physiology.betaBounds.lowerBound)
+        let high = min(beta + betaUncertainty, Physiology.betaBounds.upperBound)
+        return low...max(high, low)
+    }
+
+    /// Decodes snapshots written before `betaUncertainty` existed.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        sex = try c.decode(Sex.self, forKey: .sex)
+        age = try c.decode(Double.self, forKey: .age)
+        heightCm = try c.decode(Double.self, forKey: .heightCm)
+        weightKg = try c.decode(Double.self, forKey: .weightKg)
+        beta = try c.decodeIfPresent(Double.self, forKey: .beta) ?? Physiology.defaultBeta
+        betaUncertainty = try c.decodeIfPresent(Double.self, forKey: .betaUncertainty)
+            ?? Physiology.defaultBetaUncertainty
+        totalBodyWaterOverride = try c.decodeIfPresent(Double.self, forKey: .totalBodyWaterOverride)
     }
 }

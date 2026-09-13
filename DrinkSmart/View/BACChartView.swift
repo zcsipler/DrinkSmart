@@ -2,26 +2,26 @@ import SwiftUI
 import Charts
 import BACKit
 
-/// A véralkohol-görbe. Az app központi képernyője.
+/// The blood alcohol curve. The app's central screen.
 ///
-/// Sávot rajzol, nem vonalat. A lebontási sebesség a plauzibilis tartományán
-/// belül 40 % fölött mozgatja a csúcsot és több órát a kiürülésen — egyetlen
-/// vonal olyan pontosságot állítana, ami nincs meg. A sáv szélessége maga is
-/// információ: azt mutatja, mennyire tudjuk, amit állítunk.
+/// It draws a band, not a line. Across its plausible range the elimination
+/// rate shifts the peak by over 40 % and the time to clear by hours — a single
+/// line would claim a precision that is not there. The width of the band is
+/// itself information: it shows how well we know what we are asserting.
 ///
-/// Amit szándékosan NEM mutat: verdiktet. Se „vezethetsz", se „biztonságos".
+/// What it deliberately does NOT show: a verdict. No "you can drive", no "safe".
 struct BACChartView: View {
     let store: SessionStore
 
-    /// A scrub gesztus alatt kiválasztott időpont.
+    /// The time selected while scrubbing.
     @State private var scrubDate: Date?
 
     private var band: BACBand { store.band }
     private var unit: BACUnit { store.unit }
 
-    /// A motor percenkénti mintákat ad — egy 12 órás alkalom 720 pont, amit
-    /// felesleges kirajzolni. Ritkítunk kb. 220 pontra, de a csúcsot mindig
-    /// megtartjuk, különben a sáv teteje levágódna.
+    /// The engine samples every minute — a 12-hour session is 720 points,
+    /// more than is worth drawing. We thin to about 220, but always keep the
+    /// peak, otherwise the top of the band would be clipped.
     private var displaySamples: [BACBandSample] {
         let samples = band.samples
         guard samples.count > 220 else { return samples }
@@ -48,7 +48,7 @@ struct BACChartView: View {
         }
     }
 
-    // MARK: Fejléc
+    // MARK: Header
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
@@ -102,8 +102,8 @@ struct BACChartView: View {
         }
     }
 
-    /// A felszálló ág jelzése. Ez az egyetlen információ, amit egy szonda
-    /// elvileg sem tud megadni — érdemes kiemelni.
+    /// Marks the absorption limb. This is the one piece of information a
+    /// breathalyser cannot give even in principle, so it is worth surfacing.
     private var risingBadge: some View {
         HStack(spacing: 5) {
             Image(systemName: "arrow.up.right")
@@ -117,7 +117,7 @@ struct BACChartView: View {
         .background(Theme.caution.opacity(0.14), in: Capsule())
     }
 
-    // MARK: A diagram
+    // MARK: Chart
 
     private var chart: some View {
         Chart {
@@ -139,7 +139,7 @@ struct BACChartView: View {
         .frame(height: 260)
     }
 
-    /// A sáv: a gyors és a lassú lebontás közti terület.
+    /// The band: the area between fast and slow elimination.
     @ChartContentBuilder
     private var uncertaintyBand: some ChartContent {
         ForEach(displaySamples, id: \.date) { sample in
@@ -166,8 +166,8 @@ struct BACChartView: View {
         }
     }
 
-    /// A kitöltés függőleges gradiens: a szín a magassággal változik, így a
-    /// sáv alakja és a szint egyszerre olvasható.
+    /// The fill is a vertical gradient, so colour varies with height and the
+    /// shape of the band and the level can be read at the same time.
     private var bandGradient: LinearGradient {
         LinearGradient(
             stops: [
@@ -222,7 +222,7 @@ struct BACChartView: View {
                 .foregroundStyle(Color.white.opacity(scrubDate == nil ? 0.18 : 0.4))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: scrubDate == nil ? [3, 3] : []))
 
-            // A fókuszpont is tartomány: két végjelölő, nem egyetlen pötty.
+            // The focus point is a range too: two end markers, not one dot.
             PointMark(x: .value("Now", date), y: .value("Lower", range.lowerBound))
                 .symbolSize(38)
                 .foregroundStyle(Theme.tint(for: range.lowerBound).opacity(0.7))
@@ -233,7 +233,7 @@ struct BACChartView: View {
         }
     }
 
-    // MARK: Tengelyek
+    // MARK: Axes
 
     private var xAxis: some AxisContent {
         AxisMarks(preset: .aligned, values: .stride(by: .hour, count: strideHours)) { value in
@@ -248,8 +248,8 @@ struct BACChartView: View {
         }
     }
 
-    /// Hosszabb alkalomnál ritkítjuk a címkéket, hogy ne torlódjanak.
-    /// Angol locale-ban az AM/PM miatt szélesebbek, ezért eggyel korábban.
+    /// Thin out the labels on longer sessions so they do not collide.
+    /// In an English locale AM/PM makes them wider, hence the earlier steps.
     private var strideHours: Int {
         let hours = store.visibleRange.upperBound
             .timeIntervalSince(store.visibleRange.lowerBound) / 3600
@@ -273,7 +273,7 @@ struct BACChartView: View {
         }
     }
 
-    // MARK: Jelmagyarázat
+    // MARK: Legend
 
     private var legend: some View {
         HStack(spacing: 12) {

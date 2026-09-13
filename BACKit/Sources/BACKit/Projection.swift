@@ -1,43 +1,46 @@
 import Foundation
 
-/// Annak az eredménye, hogy „mi történik, HA megiszom a következőt”.
+/// The answer to "what happens IF I have the next one".
 ///
-/// Ez az app létezésének oka: a döntés a kiöntés ELŐTT születik, és az
-/// egységszámláló trackerek csak visszamenőleg tudnak válaszolni.
+/// This is why the app exists: the decision is made BEFORE the drink is poured,
+/// and unit-counting trackers can only answer in retrospect.
+///
+/// Single-curve variant. `BandedProjection` is the one the UI uses, since the
+/// uncertainty on the elimination rate is too large to report a single number.
 public struct DrinkProjection: Sendable {
-    /// A jelenlegi szint a tervezett ital időpontjában.
+    /// The current level at the time of the planned drink.
     public let currentBAC: Double
-    /// A vetített csúcs, ha az ital megtörténik.
+    /// The projected peak if the drink happens.
     public let projectedPeak: Double
-    /// Mikor jönne a csúcs.
+    /// When that peak would occur.
     public let projectedPeakDate: Date
-    /// Mennyi idő múlva jönne a csúcs.
+    /// How far ahead the peak is.
     public let timeToPeak: TimeInterval
-    /// Mennyivel emelné a csúcsot ez az egy ital.
+    /// How much this one drink raises the peak.
     public var increment: Double { projectedPeak - currentBAC }
 
-    /// Átlépné-e a felhasználó saját határát.
+    /// Whether it would cross the user's own limit.
     public let exceedsLimit: Bool
-    /// Mikor lépné át.
+    /// When it would cross.
     public let limitCrossedAt: Date?
-    /// Mennyi ideig maradna a határ fölött.
+    /// How long it would stay above.
     public let timeAboveLimit: TimeInterval
-    /// Mikorra esne vissza józan szintre.
+    /// When the level would fall back to sober.
     public let soberAt: Date?
 
-    /// A legmeredekebb emelkedés g/L/h-ban az ital után. A memóriakiesés
-    /// a felszívódás sebességével korrelál, nem csak a csúcsértékkel.
+    /// The steepest rise after the drink, in g/L/h. Memory impairment tracks
+    /// absorption speed, not only the peak value.
     public let peakRiseRate: Double
 }
 
 public extension BACEngine {
-    /// Összeveti a jelenlegi állapotot azzal, ami egy tervezett ital után következne.
+    /// Compares the current state with what would follow a planned drink.
     ///
     /// - Parameters:
-    ///   - profile: a felhasználó testalkata
-    ///   - consumed: az eddig elfogyasztott italok
-    ///   - candidate: a tervezett ital
-    ///   - limit: a felhasználó által beállított saját határ g/L-ben
+    ///   - profile: the user's body composition
+    ///   - consumed: drinks already consumed
+    ///   - candidate: the planned drink
+    ///   - limit: the user's own limit in g/L
     func project(
         profile: BodyProfile,
         consumed: [Drink],
@@ -67,10 +70,10 @@ public extension BACEngine {
         )
     }
 
-    /// Megkeresi a legnagyobb italt, ami még belefér a saját határba.
+    /// Finds the largest drink that still fits under the user's own limit.
     ///
-    /// Bináris keresés a térfogatra — a görbe monoton a dózisban, így ez stabil.
-    /// Nil, ha már a jelenlegi szint is a határ fölött van.
+    /// Binary search on volume — the curve is monotonic in dose, so this is
+    /// stable. Returns nil when the current level is already above the limit.
     func largestDrinkWithinLimit(
         profile: BodyProfile,
         consumed: [Drink],

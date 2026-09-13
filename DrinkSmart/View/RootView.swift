@@ -6,7 +6,8 @@ struct RootView: View {
     @State private var showsAddDrink = false
     @State private var showsProfile = false
 
-    /// Fél percenként lép — a sáv nem változik tőle, csak a leolvasás pontja.
+    /// Ticks every half minute — this does not change the band, only where
+    /// on it we read.
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -93,7 +94,7 @@ struct RootView: View {
         .padding(.bottom, 18)
     }
 
-    // MARK: Statisztikák
+    // MARK: Stats
 
     private var statRow: some View {
         VStack(spacing: 12) {
@@ -142,7 +143,7 @@ struct RootView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: Italok listája
+    // MARK: Drink list
 
     @ViewBuilder
     private var drinkList: some View {
@@ -231,7 +232,8 @@ struct RootView: View {
 
     // MARK: Disclaimer
     //
-    // Nem apró betű a lap alján: a becslés természete a termék része.
+    // Not fine print at the bottom: the nature of the estimate is part of
+    // the product.
 
     private var disclaimer: some View {
         VStack(spacing: 6) {
@@ -246,7 +248,7 @@ struct RootView: View {
         .padding(.horizontal, 10)
     }
 
-    // MARK: Hozzáadás
+    // MARK: Add button
 
     private var addButton: some View {
         Button { showsAddDrink = true } label: {

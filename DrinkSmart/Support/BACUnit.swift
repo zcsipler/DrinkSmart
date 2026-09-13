@@ -1,15 +1,15 @@
 import Foundation
 
-/// A megjelenítés mértékegysége. A motor mindig g/L-ben számol.
+/// Display unit. The engine always computes in g/L.
 enum BACUnit: String, CaseIterable, Codable, Identifiable {
-    /// Ezrelék — a magyar és a kontinentális európai konvenció. 1 g/L = 1 ‰.
+    /// Per mille — the Hungarian and continental European convention. 1 g/L = 1 ‰.
     case perMille
-    /// Százalék — az amerikai konvenció. 1 g/L = 0,1 %.
+    /// Percent — the US convention. 1 g/L = 0.1 %.
     case percent
 
     var id: String { rawValue }
 
-    /// Szimbólum. Szándékosan nem lokalizált: a ‰ és a % nemzetközi jel.
+    /// Symbol. Deliberately not localized: ‰ and % are international signs.
     var suffix: String {
         switch self {
         case .perMille: "‰"
@@ -17,8 +17,8 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
         }
     }
 
-    /// A szimbólum szándékosan nincs benne: egy literál `%` a katalógusban
-    /// formátumspecifikátornak látszana. A nézet külön fűzi hozzá.
+    /// The symbol is deliberately left out: a literal `%` in the string
+    /// catalog would look like a format specifier. The view appends it.
     var label: LocalizedStringResource {
         switch self {
         case .perMille: "Per mille"
@@ -40,8 +40,9 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
         }
     }
 
-    /// A `.number` stílus a rendszer nyelvét követi, tehát magyarul
-    /// tizedesvesszőt ad, angolul tizedespontot — kézi formázás nélkül.
+    /// The `.number` style follows the system language, so it produces a
+    /// decimal comma in Hungarian and a point in English without any manual
+    /// formatting on our side.
     func format(_ gramsPerLiter: Double) -> String {
         convert(gramsPerLiter).formatted(
             .number
@@ -54,10 +55,10 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
         "\(format(gramsPerLiter)) \(suffix)"
     }
 
-    /// Tartomány mértékegység nélkül: „0,52–0,64”.
+    /// A range without the unit: "0.52–0.64".
     ///
-    /// Ha a két vég a megjelenített pontosságon belül egybeesik, egyetlen
-    /// számot ad — nem írunk ki „0,52–0,52” alakot.
+    /// Collapses to a single number when both ends agree at the displayed
+    /// precision — we never print "0.52–0.52".
     func formatRange(_ range: ClosedRange<Double>) -> String {
         let low = format(range.lowerBound)
         let high = format(range.upperBound)
@@ -70,10 +71,10 @@ enum BACUnit: String, CaseIterable, Codable, Identifiable {
 }
 
 extension TimeInterval {
-    /// Rövid időtartam a rendszer nyelvén: „3 ó 20 p”, illetve „3h 20m”.
+    /// A short duration in the system language: "3h 20m", or "3 ó 20 p".
     ///
-    /// A `Duration.UnitsFormatStyle` maga lokalizál, ezért ezt a szöveget
-    /// nem kell fordítanunk — és a nulla órát is elhagyja.
+    /// `Duration.UnitsFormatStyle` localizes itself, so this text needs no
+    /// translation — and it drops a zero hour component on its own.
     var compactDuration: String {
         guard self > 0 else { return "—" }
         let minutes = Int((self / 60).rounded())
@@ -84,15 +85,15 @@ extension TimeInterval {
 }
 
 extension Date {
-    /// Óra és perc a rendszer beállítása szerint — magyarul 24 órás,
-    /// angol locale-ban 12 órás AM/PM alakban.
+    /// Hours and minutes per the system settings — 24-hour in Hungarian,
+    /// 12-hour with AM/PM in an English locale.
     var hourMinute: String {
         formatted(date: .omitted, time: .shortened)
     }
 }
 
 extension ClosedRange where Bound == Date {
-    /// Időtartomány: „19:00–22:00”, vagy egyetlen időpont, ha egybeesnek.
+    /// A time range: "19:00–22:00", or a single time when they coincide.
     var hourMinuteRange: String {
         let from = lowerBound.hourMinute
         let to = upperBound.hourMinute

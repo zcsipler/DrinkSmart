@@ -1,8 +1,8 @@
 import Foundation
 import BACKit
 
-/// Egy italtípus a gyors felvitelhez: alapértelmezett kiszerelés, alkoholfok
-/// és a tipikus térfogatok, amikből egy koppintással lehet választani.
+/// A drink type for quick entry: default serving, strength, and the typical
+/// volumes offered as one-tap options.
 struct DrinkTemplate: Identifiable, Hashable {
     let id: String
     let name: LocalizedStringResource
@@ -12,9 +12,9 @@ struct DrinkTemplate: Identifiable, Hashable {
     let volumeOptions: [Double]
     let abvRange: ClosedRange<Double>
 
-    /// A rögzített ital a sablon **azonosítóját** hordozza, nem a nevét —
-    /// különben a mentett adat nyelvhez kötődne, és nyelvváltás után
-    /// angol nevek maradnának a magyar felületen.
+    /// The recorded drink carries the template's **identifier**, not its name.
+    /// Otherwise persisted data would be tied to a language, and English names
+    /// would linger on a Hungarian interface after a language change.
     func makeDrink(at date: Date, volumeMl: Double, abv: Double, stomach: StomachState) -> Drink {
         Drink(consumedAt: date, volumeMl: volumeMl, abvPercent: abv, stomach: stomach, name: id)
     }
@@ -61,9 +61,9 @@ enum DrinkCatalog {
         all.first { $0.id == id } ?? all[0]
     }
 
-    /// A sablon egy már rögzített italhoz. Először azonosító szerint keres,
-    /// ha az nem talál, az alkoholfok alapján tippel — így importált vagy
-    /// régi adatokra sem marad ikon és név nélkül.
+    /// The template for an already recorded drink. Looks up by identifier
+    /// first, then guesses from the strength — so imported or legacy data
+    /// never ends up without an icon and a name.
     static func template(for drink: Drink) -> DrinkTemplate {
         if let id = drink.name, let match = all.first(where: { $0.id == id }) {
             return match
@@ -80,7 +80,7 @@ enum DrinkCatalog {
     static func name(for drink: Drink) -> LocalizedStringResource { template(for: drink).name }
 }
 
-// MARK: - Gyomorállapot megjelenítése
+// MARK: - Stomach state presentation
 
 extension StomachState {
     var label: LocalizedStringResource {
@@ -107,7 +107,7 @@ extension StomachState {
         }
     }
 
-    /// Rövid magyarázat, ami megindokolja, miért számít ez a választás.
+    /// A short explanation of why this choice matters.
     var explanation: LocalizedStringResource {
         switch self {
         case .empty: "Fast absorption, higher and earlier peak."

@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import BACKit
 
-/// A várt értékek a `Reference/bac_model.py` referencia-implementációból
-/// származnak, a béta 0,12 / 0,15 / 0,18 hármasával.
+/// Expected values come from `Reference/bac_model.py`, run at beta
+/// 0.12 / 0.15 / 0.18.
 private let reference = BodyProfile(
     sex: .male, age: 35, heightCm: 180, weightKg: 80,
     beta: 0.15, betaUncertainty: 0.03
@@ -21,16 +21,16 @@ private var series: [Drink] {
     ]
 }
 
-@Suite("Béta tartomány")
+@Suite("Beta range")
 struct BetaRangeTests {
 
-    @Test("A sáv széleit a bizonytalanság adja")
+    @Test("Uncertainty sets the edges of the band")
     func betaRange() {
         #expect(abs(reference.betaRange.lowerBound - 0.12) < 1e-9)
         #expect(abs(reference.betaRange.upperBound - 0.18) < 1e-9)
     }
 
-    @Test("A tartomány nem lóg ki az élettani határokon")
+    @Test("The range stays inside the physiological bounds")
     func clampedToBounds() {
         var extreme = reference
         extreme.beta = 0.10
@@ -39,7 +39,7 @@ struct BetaRangeTests {
         #expect(extreme.betaRange.upperBound <= Physiology.betaBounds.upperBound)
     }
 
-    @Test("Nulla bizonytalanságnál a sáv egyetlen pont")
+    @Test("Zero uncertainty collapses the band to a point")
     func zeroUncertainty() {
         var exact = reference
         exact.betaUncertainty = 0
@@ -50,7 +50,7 @@ struct BetaRangeTests {
         #expect(abs(peak.upperBound - peak.lowerBound) < 1e-6)
     }
 
-    @Test("Régi, betaUncertainty nélküli mentés is visszaolvasható")
+    @Test("Snapshots written before betaUncertainty still decode")
     func decodesLegacySnapshot() throws {
         let legacy = """
         {"sex":"male","age":35,"heightCm":180,"weightKg":80,"beta":0.15}
@@ -62,10 +62,10 @@ struct BetaRangeTests {
     }
 }
 
-@Suite("BAC sáv")
+@Suite("BAC band")
 struct BACBandTests {
 
-    @Test("A csúcs tartománya egyezik a referenciával")
+    @Test("The peak range matches the reference")
     func peakRangeMatchesReference() throws {
         let band = engine.simulateBand(profile: reference, drinks: series)
         let peak = try #require(band.peakRange)
@@ -73,13 +73,13 @@ struct BACBandTests {
         #expect(abs(peak.lowerBound - 0.510401) < 1e-4)
         #expect(abs(peak.upperBound - 0.624922) < 1e-4)
 
-        // A középső görbe csúcsa a sávon belül van.
+        // The centre curve's peak lies inside the band.
         let center = try #require(band.peak)
         #expect(abs(center.bac - 0.565699) < 1e-4)
         #expect(peak.contains(center.bac))
     }
 
-    @Test("A szint tartománya egyezik a referenciával")
+    @Test("The level range at a given time matches the reference")
     func rangeAtTimeMatchesReference() {
         let band = engine.simulateBand(profile: reference, drinks: series)
 
@@ -96,7 +96,7 @@ struct BACBandTests {
         }
     }
 
-    @Test("A kiürülés tartománya egyezik a referenciával")
+    @Test("The sober range matches the reference")
     func soberRangeMatchesReference() throws {
         let band = engine.simulateBand(profile: reference, drinks: series)
         let sober = try #require(band.soberRange())
@@ -105,21 +105,21 @@ struct BACBandTests {
         #expect(abs(sober.upperBound.timeIntervalSince(t0) / 60 - 522) < 2)
     }
 
-    @Test("A felső ág sehol nem megy az alsó alá")
+    @Test("The upper branch never drops below the lower one")
     func bandIsOrdered() {
         let band = engine.simulateBand(profile: reference, drinks: series)
         let violations = band.samples.filter { $0.high < $0.low - 1e-9 }
         #expect(violations.isEmpty)
     }
 
-    @Test("A középvonal végig a sávon belül fut")
+    @Test("The centre line stays inside the band throughout")
     func centerInsideBand() {
         let band = engine.simulateBand(profile: reference, drinks: series)
         let outside = band.samples.filter { $0.mid < $0.low - 1e-6 || $0.mid > $0.high + 1e-6 }
         #expect(outside.isEmpty)
     }
 
-    @Test("Üres bevitelre üres sáv")
+    @Test("Empty input gives an empty band")
     func emptyInput() {
         let band = engine.simulateBand(profile: reference, drinks: [])
         #expect(band.isEmpty)
@@ -127,7 +127,7 @@ struct BACBandTests {
         #expect(band.soberRange() == nil)
     }
 
-    @Test("Nagyobb bizonytalanság szélesebb sávot ad")
+    @Test("Greater uncertainty widens the band")
     func widerUncertaintyWidensBand() throws {
         var wide = reference
         wide.betaUncertainty = 0.05
@@ -141,11 +141,11 @@ struct BACBandTests {
     }
 }
 
-@Suite("Határátlépés három állapota")
+@Suite("Three-state limit crossing")
 struct LimitOutcomeTests {
 
-    /// A referencia szerint a csúcs sávja 0,510–0,625 g/L.
-    @Test("A küszöb helyzete szerint below / uncertain / above")
+    /// The reference peak band is 0.510–0.625 g/L.
+    @Test("below / uncertain / above depending on where the limit sits")
     func outcomeBoundaries() {
         let candidate = Drink(consumedAt: minute(90), volumeMl: 200, abvPercent: 12, stomach: .light)
         let consumed = Array(series.prefix(2))
@@ -154,12 +154,12 @@ struct LimitOutcomeTests {
             engine.projectBand(profile: reference, consumed: consumed, candidate: candidate, limit: limit).outcome
         }
 
-        #expect(outcome(limit: 0.40) == .above)      // még gyors lebontással is átlépi
-        #expect(outcome(limit: 0.60) == .uncertain)  // csak lassú lebontással
-        #expect(outcome(limit: 0.90) == .below)      // sehogy
+        #expect(outcome(limit: 0.40) == .above)      // crosses even with fast elimination
+        #expect(outcome(limit: 0.60) == .uncertain)  // only with slow elimination
+        #expect(outcome(limit: 0.90) == .below)      // not at all
     }
 
-    @Test("A kimenetel monoton a küszöbben")
+    @Test("The outcome is monotonic in the limit")
     func monotonicInLimit() {
         let candidate = Drink(consumedAt: minute(90), volumeMl: 200, abvPercent: 12, stomach: .light)
         let consumed = Array(series.prefix(2))
@@ -170,12 +170,12 @@ struct LimitOutcomeTests {
                 profile: reference, consumed: consumed, candidate: candidate, limit: step
             ).outcome
             if outcome == .below { seenBelow = true }
-            // ha egyszer már „below", magasabb küszöbnél sem lehet szigorúbb
+            // once "below", a higher limit can never be stricter
             if seenBelow { #expect(outcome == .below) }
         }
     }
 
-    @Test("A segédtulajdonságok konzisztensek")
+    @Test("The convenience flags are consistent")
     func helperFlags() {
         #expect(LimitOutcome.below.exceedsPossible == false)
         #expect(LimitOutcome.uncertain.exceedsPossible == true)
@@ -187,10 +187,10 @@ struct LimitOutcomeTests {
     }
 }
 
-@Suite("Sávos előrejelzés")
+@Suite("Banded projection")
 struct BandedProjectionTests {
 
-    @Test("A vetített csúcs tartománya a jelenlegi fölött van")
+    @Test("The projected peak range sits above the current one")
     func projectionRaisesPeak() {
         let consumed = Array(series.prefix(2))
         let candidate = Drink(consumedAt: minute(90), volumeMl: 500, abvPercent: 5)
@@ -201,7 +201,7 @@ struct BandedProjectionTests {
         #expect(p.soberRange != nil)
     }
 
-    @Test("A nagyobb ital magasabb sávot és később kiürülést ad")
+    @Test("A larger drink shifts the band up and clears later")
     func largerDrinkShiftsBand() throws {
         let consumed = Array(series.prefix(2))
         let small = Drink(consumedAt: minute(90), volumeMl: 40, abvPercent: 40)
@@ -218,7 +218,7 @@ struct BandedProjectionTests {
         #expect(largeSober.upperBound > smallSober.upperBound)
     }
 
-    @Test("Üres előzmény esetén a jelenlegi tartomány nulla")
+    @Test("With no history the current range is zero")
     func firstDrinkOfTheSession() {
         let candidate = Drink(consumedAt: t0, volumeMl: 500, abvPercent: 5)
         let p = engine.projectBand(profile: reference, consumed: [], candidate: candidate, limit: 0.8)

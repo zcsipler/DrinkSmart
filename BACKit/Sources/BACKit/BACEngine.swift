@@ -1,16 +1,16 @@
 import Foundation
 
-/// Egy mintavételi pont a BAC-görbén.
+/// One sample on the BAC curve.
 public struct BACSample: Hashable, Sendable {
-    /// Abszolút időpont — közvetlenül használható Swift Charts x tengelyeként.
+    /// Absolute timestamp — usable directly as a Swift Charts x value.
     public let date: Date
-    /// Véralkoholszint g/L-ben (= ezrelék).
+    /// Blood alcohol concentration in g/L (= per mille).
     public let bac: Double
-    /// Előjeles változási sebesség g/L/h-ban. Pozitív = felszálló ág.
+    /// Signed rate of change in g/L/h. Positive means the absorption limb.
     public let rate: Double
 }
 
-/// A szimuláció eredménye.
+/// The result of a simulation.
 public struct BACCurve: Sendable {
     public let samples: [BACSample]
     public let startedAt: Date
@@ -22,18 +22,18 @@ public struct BACCurve: Sendable {
 
     public var isEmpty: Bool { samples.allSatisfy { $0.bac <= 0 } }
 
-    /// A legmagasabb pont a görbén.
+    /// The highest point on the curve.
     public var peak: BACSample? {
         samples.max { $0.bac < $1.bac }
     }
 
-    /// A legmeredekebb emelkedés. A blackout-kockázat ezzel korrelál
-    /// jobban, mint a puszta összmennyiséggel.
+    /// The steepest rise. Memory impairment correlates with this better than
+    /// with the total amount consumed.
     public var steepestRise: BACSample? {
         samples.max { $0.rate < $1.rate }
     }
 
-    /// Lineárisan interpolált érték tetszőleges időpontban.
+    /// Linearly interpolated value at an arbitrary time.
     public func value(at date: Date) -> Double {
         guard let first = samples.first, let last = samples.last else { return 0 }
         if date <= first.date { return first.bac }
@@ -51,18 +51,18 @@ public struct BACCurve: Sendable {
         return a.bac + w * (b.bac - a.bac)
     }
 
-    /// Az első időpont a csúcs után, ahol a szint a küszöb alá esik.
+    /// The first time after the peak at which the level drops below `threshold`.
     public func soberDate(threshold: Double = 0.01) -> Date? {
         guard let peak else { return nil }
         return samples.first { $0.date >= peak.date && $0.bac < threshold }?.date
     }
 
-    /// Az első időpont, amikor a görbe eléri a megadott határt.
+    /// The first time the curve reaches the given limit.
     public func firstCrossing(of limit: Double) -> Date? {
         samples.first { $0.bac >= limit }?.date
     }
 
-    /// Mennyi ideig marad a szint a megadott határ fölött.
+    /// How long the level stays above the given limit.
     public func duration(above limit: Double) -> TimeInterval {
         let above = samples.filter { $0.bac >= limit }
         guard let first = above.first, let last = above.last else { return 0 }
@@ -70,24 +70,24 @@ public struct BACCurve: Sendable {
     }
 }
 
-/// Egy-kompartmentes farmakokinetikai modell, italonként külön gyomor-kompartmenttel.
+/// One-compartment pharmacokinetic model with a separate gut compartment per drink.
 ///
 /// ```
 /// dGᵢ/dt = -kaᵢ · Gᵢ
 /// dC/dt  = (Σᵢ kaᵢ · Gᵢ) / Vd − β · C / (Km + C)
 /// ```
 ///
-/// RK4 integrációval, mert a telíthető eliminációs tag miatt az Euler-lépés
-/// alacsony BAC-nál érzékelhetően alulbecsül.
+/// Integrated with RK4, because the saturable elimination term makes a plain
+/// Euler step noticeably underestimate at low concentrations.
 ///
-/// A típus szándékosan tiszta érték-szemantikájú és UI-független:
-/// SwiftData `@Model` osztályok ezt hívják, nem fordítva.
+/// The type is deliberately a pure value and free of UI concerns: SwiftData
+/// `@Model` classes call into this, never the other way round.
 public struct BACEngine: Sendable {
-    /// Integrációs lépésköz percben.
+    /// Integration step in minutes.
     public var stepMinutes: Double
-    /// Mintavételi sűrűség percben.
+    /// Sampling interval in minutes.
     public var sampleEveryMinutes: Double
-    /// Maximális szimulált időtáv percben.
+    /// Maximum simulated span in minutes.
     public var horizonMinutes: Double
 
     public init(
@@ -118,7 +118,7 @@ public struct BACEngine: Sendable {
         var pending = Set(ordered.indices)
         var concentration = 0.0
 
-        /// Visszaadja a gyomor-kompartmentek és a központi koncentráció deriváltjait.
+        /// Derivatives of the gut compartments and the central concentration.
         func derivatives(_ gutState: [Double], _ c: Double) -> ([Double], Double) {
             var dGut = [Double](repeating: 0, count: gutState.count)
             var influx = 0.0
@@ -137,7 +137,7 @@ public struct BACEngine: Sendable {
         let dt = stepMinutes
 
         while t <= horizonMinutes + 1e-9 {
-            // az aktuális időpontig elfogyasztott italok bekerülnek a gyomorba
+            // drinks consumed by now enter the stomach
             let arrived = pending.filter { offsets[$0] <= t + 1e-9 }
             for i in arrived {
                 gut[i] += doses[i]
@@ -168,7 +168,7 @@ public struct BACEngine: Sendable {
             concentration = max(concentration + dt / 6 * (k1c + 2 * k2c + 2 * k3c + k4c), 0)
             t += dt
 
-            // korai kilépés, ha már nincs se felszívódó, se keringő alkohol
+            // early exit once nothing is left to absorb or eliminate
             if concentration <= 1e-6, pending.isEmpty, gut.allSatisfy({ $0 <= 1e-9 }), t > 1 {
                 samples.append(BACSample(date: start.addingTimeInterval(t * 60), bac: 0, rate: 0))
                 break

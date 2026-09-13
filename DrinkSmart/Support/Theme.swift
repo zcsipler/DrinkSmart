@@ -1,9 +1,9 @@
 import SwiftUI
 import UIKit
 
-/// Az app vizuális nyelve. Sötét alap, a görbe színe pedig a szinttel változik:
-/// nyugodt türkiz alul, borostyán középen, meleg korall a tetején.
-/// A szín így önmagában is információt hordoz, nem csak dekoráció.
+/// The app's visual language. Dark ground, and a curve whose colour tracks the
+/// level: calm teal low down, amber in the middle, warm coral at the top.
+/// The colour therefore carries information rather than being decoration.
 enum Theme {
     static let background = Color(red: 0.043, green: 0.051, blue: 0.071)
     static let surface = Color(red: 0.086, green: 0.098, blue: 0.129)
@@ -13,13 +13,13 @@ enum Theme {
     static let primaryText = Color(red: 0.937, green: 0.945, blue: 0.961)
     static let secondaryText = Color(red: 0.561, green: 0.588, blue: 0.643)
 
-    static let calm = Color(red: 0.271, green: 0.749, blue: 0.706)      // türkiz
-    static let caution = Color(red: 0.949, green: 0.714, blue: 0.310)   // borostyán
-    static let elevated = Color(red: 0.937, green: 0.427, blue: 0.396)  // korall
+    static let calm = Color(red: 0.271, green: 0.749, blue: 0.706)      // teal
+    static let caution = Color(red: 0.949, green: 0.714, blue: 0.310)   // amber
+    static let elevated = Color(red: 0.937, green: 0.427, blue: 0.396)  // coral
 
-    /// A szintnek megfelelő szín. A töréspontok szándékosan lágyak — a
-    /// farmakokinetika folytonos, nem lépcsős, és a színezés se sugalljon
-    /// éles kategóriahatárokat.
+    /// The colour for a given level. The breakpoints are deliberately soft:
+    /// pharmacokinetics is continuous, not stepped, and the colouring should
+    /// not imply sharp category boundaries either.
     static func tint(for bac: Double) -> Color {
         switch bac {
         case ..<0.3: calm
@@ -40,8 +40,8 @@ enum Theme {
         )
     }
 
-    /// `getRed(_:green:blue:alpha:)` szürkeárnyalatos színtérre is helyesen
-    /// válaszol, ellentétben a `cgColor.components` indexeléssel.
+    /// `getRed(_:green:blue:alpha:)` answers correctly for greyscale colour
+    /// spaces too, unlike indexing into `cgColor.components`.
     private static func rgba(_ color: Color) -> (r: Double, g: Double, b: Double, a: Double) {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
@@ -50,7 +50,8 @@ enum Theme {
 }
 
 extension Font {
-    /// A hero kijelző számjegyei. Monospaced, hogy ne ugráljon a szám másodpercenként.
+    /// Digits for the hero readout. Monospaced so the number does not jitter
+    /// as it ticks.
     static func readout(_ size: CGFloat) -> Font {
         .system(size: size, weight: .light, design: .rounded).monospacedDigit()
     }

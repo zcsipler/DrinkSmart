@@ -1,31 +1,32 @@
 import Foundation
 
-/// Egy időpont a sávon: alsó becslés, középérték, felső becslés.
+/// One point on the band: lower estimate, centre, upper estimate.
 public struct BACBandSample: Hashable, Sendable {
     public let date: Date
-    /// Gyors lebontást feltételezve.
+    /// Assuming fast elimination.
     public let low: Double
     public let mid: Double
-    /// Lassú lebontást feltételezve.
+    /// Assuming slow elimination.
     public let high: Double
 
     public var range: ClosedRange<Double> { min(low, high)...max(low, high) }
 }
 
-/// Három szimuláció a béta plauzibilis széleivel és a középértékével.
+/// Three simulations: the plausible extremes of beta plus its centre.
 ///
-/// Azért ez a modell kimenete egyetlen görbe helyett, mert a béta a saját
-/// tartományán belül 40 % fölött mozgatja a csúcsot és több órát a kiürülésen.
-/// Egy vonal kirajzolása olyan pontosságot állítana, ami nincs.
+/// This, rather than a single curve, is the model's output because across its
+/// own range beta shifts the peak by more than 40 % and the time to clear by
+/// several hours. Drawing one line would claim a precision that is not there.
 ///
-/// Elnevezés a görbe helyzete szerint, nem a bétáé szerint: a **lassú**
-/// lebontás ad **magasabb** és tovább tartó görbét, tehát az a `upper`.
+/// Named by where the curve sits, not by the value of beta: **slow**
+/// elimination produces the **higher**, longer-lasting curve, so that one is
+/// `upper`. This is easy to get backwards.
 public struct BACBand: Sendable {
-    /// A béta középértékével.
+    /// Using the centre value of beta.
     public let center: BACCurve
-    /// Lassú lebontás — a sáv teteje.
+    /// Slow elimination — the top of the band.
     public let upper: BACCurve
-    /// Gyors lebontás — a sáv alja.
+    /// Fast elimination — the bottom of the band.
     public let lower: BACCurve
 
     public init(center: BACCurve, upper: BACCurve, lower: BACCurve) {
@@ -42,8 +43,8 @@ public struct BACBand: Sendable {
 
     public var isEmpty: Bool { center.samples.isEmpty }
 
-    /// Az összefésült minták. A leghosszabb görbe időpontjaira illesztve,
-    /// mert a három szimuláció különböző időben fut ki nullára.
+    /// The merged samples, aligned to the longest curve's timestamps — the
+    /// three simulations reach zero at different times.
     public var samples: [BACBandSample] {
         let spine = upper.samples.count >= center.samples.count ? upper.samples : center.samples
         return spine.map { sample in
@@ -56,7 +57,7 @@ public struct BACBand: Sendable {
         }
     }
 
-    /// A szint tartománya egy adott időpontban.
+    /// The range of possible levels at a given time.
     public func range(at date: Date) -> ClosedRange<Double> {
         let a = lower.value(at: date)
         let b = upper.value(at: date)
@@ -67,16 +68,17 @@ public struct BACBand: Sendable {
         center.value(at: date)
     }
 
-    /// A csúcs tartománya. A két szélső görbe csúcsa eltérő időpontra is eshet.
+    /// The range of possible peaks. The two outer curves can peak at different
+    /// times, so this is a range of values, not of one moment.
     public var peakRange: ClosedRange<Double>? {
         guard let low = lower.peak?.bac, let high = upper.peak?.bac else { return nil }
         return min(low, high)...max(low, high)
     }
 
-    /// A középső görbe csúcsa — ennek az időpontját érdemes kiírni.
+    /// The centre curve's peak — use its timestamp when one must be shown.
     public var peak: BACSample? { center.peak }
 
-    /// Mikorra ürül ki. Gyors lebontással hamarabb, lassúval később.
+    /// When the level clears: sooner with fast elimination, later with slow.
     public func soberRange(threshold: Double = 0.01) -> ClosedRange<Date>? {
         guard
             let early = lower.soberDate(threshold: threshold),
@@ -85,7 +87,7 @@ public struct BACBand: Sendable {
         return min(early, late)...max(early, late)
     }
 
-    /// A legkésőbbi időpont, ameddig a sáv bármelyik ága tart.
+    /// The latest time any branch of the band extends to.
     public var end: Date? {
         [center.samples.last?.date, upper.samples.last?.date, lower.samples.last?.date]
             .compactMap { $0 }
@@ -93,27 +95,27 @@ public struct BACBand: Sendable {
     }
 }
 
-// MARK: - Határátlépés
+// MARK: - Limit crossing
 
-/// Háromállapotú válasz arra, hogy egy tervezett ital átvinne-e a saját határon.
+/// A three-state answer to whether a planned drink crosses the user's limit.
 ///
-/// A bizonytalanság miatt a „nem" és az „igen" közt van egy harmadik eset,
-/// amit tisztességtelen lenne bármelyik irányba kerekíteni.
+/// Because of the uncertainty there is a third case between "no" and "yes"
+/// that it would be dishonest to round in either direction.
 public enum LimitOutcome: Sendable, Hashable {
-    /// A lassú lebontás esetén sem érné el a határt.
+    /// Would not reach the limit even with slow elimination.
     case below
-    /// A lassú lebontásnál átlépné, a gyorsnál nem.
+    /// Would cross with slow elimination but not with fast.
     case uncertain
-    /// Még gyors lebontással is átlépné.
+    /// Would cross even with fast elimination.
     case above
 
     public var exceedsPossible: Bool { self != .below }
     public var exceedsCertain: Bool { self == .above }
 }
 
-// MARK: - Sávos előrejelzés
+// MARK: - Banded projection
 
-/// A „mi lenne, ha megiszom a következőt" kérdés válasza, tartományokkal.
+/// The "what if I have the next one" answer, expressed as ranges.
 public struct BandedProjection: Sendable {
     public let currentRange: ClosedRange<Double>
     public let peakRange: ClosedRange<Double>
@@ -121,19 +123,20 @@ public struct BandedProjection: Sendable {
     public let timeToPeak: TimeInterval
     public let soberRange: ClosedRange<Date>?
     public let outcome: LimitOutcome
-    /// Mikor lépné át a határt a leggyorsabb esetben.
+    /// When the limit would be crossed in the earliest case.
     public let limitCrossedAt: Date?
-    /// Meddig maradna fölötte a lassú lebontás szerint — a pesszimista ág.
+    /// How long it would stay above according to the slow branch — the
+    /// pessimistic bound.
     public let maxTimeAboveLimit: TimeInterval
-    /// A legmeredekebb emelkedés a középső görbén, g/L/h.
+    /// The steepest rise on the centre curve, in g/L/h.
     public let peakRiseRate: Double
 }
 
-// MARK: - Motor
+// MARK: - Engine
 
 public extension BACEngine {
 
-    /// Lefuttatja a szimulációt a béta három értékével.
+    /// Runs the simulation at three values of beta.
     func simulateBand(profile: BodyProfile, drinks: [Drink], from origin: Date? = nil) -> BACBand {
         guard !drinks.isEmpty else { return .empty }
 
@@ -150,7 +153,7 @@ public extension BACEngine {
         )
     }
 
-    /// Sávos változata a `project(profile:consumed:candidate:limit:)` hívásnak.
+    /// Banded counterpart of `project(profile:consumed:candidate:limit:)`.
     func projectBand(
         profile: BodyProfile,
         consumed: [Drink],
