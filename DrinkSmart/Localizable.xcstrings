@@ -461,6 +461,23 @@
         }
       }
     },
+    "Drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ital"
+          }
+        }
+      }
+    },
     "Drinking frequency": {
       "extractionState": "manual",
       "localizations": {
@@ -733,6 +750,57 @@
         }
       }
     },
+    "Level": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szint"
+          }
+        }
+      }
+    },
+    "Lower": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alsó"
+          }
+        }
+      }
+    },
+    "Lower estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower estimate"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alsó becslés"
+          }
+        }
+      }
+    },
     "Male": {
       "extractionState": "manual",
       "localizations": {
@@ -933,6 +1001,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Százalék"
+          }
+        }
+      }
+    },
+    "Personal limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal limit"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saját határ"
           }
         }
       }
@@ -1277,6 +1362,23 @@
         }
       }
     },
+    "Time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idő"
+          }
+        }
+      }
+    },
     "Time to peak": {
       "extractionState": "manual",
       "localizations": {
@@ -1409,6 +1511,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Egység"
+          }
+        }
+      }
+    },
+    "Upper": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Felső"
+          }
+        }
+      }
+    },
+    "Upper estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper estimate"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Felső becslés"
           }
         }
       }

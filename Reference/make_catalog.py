@@ -48,6 +48,16 @@ TRANSLATIONS = {
     "Weekly routine": "Heti rendszeresség",
     "Daily or nearly daily": "Napi vagy majdnem napi",
 
+    # --- BACChartView: chart axis and series labels (VoiceOver reads these) ---
+    "Time": "Idő",
+    "Level": "Szint",
+    "Lower": "Alsó",
+    "Upper": "Felső",
+    "Lower estimate": "Alsó becslés",
+    "Upper estimate": "Felső becslés",
+    "Personal limit": "Saját határ",
+    "Drink": "Ital",
+
     # --- BACChartView ---
     "Expected peak around %@": "Várható csúcs %@ körül",
     "Peaked around %@": "Csúcs volt %@ körül",
@@ -197,6 +207,11 @@ def main() -> int:
     ):
         for m in re.finditer(r'case \.\w+:\s*"((?:[^"\\]|\\.)*)"', block.group(1)):
             literals.add(m.group(1))
+
+    # Swift Charts .value("...") labels: Xcode extracts these too, and
+    # VoiceOver reads them out, so they need translating.
+    for m in re.finditer(r'\.value\(\s*"((?:[^"\\]|\\.)*)"', sources):
+        literals.add(m.group(1))
 
     # DrinkTemplate names are LocalizedStringResource too. We only look
     # inside the template constructor: Drink(name:) stores the template

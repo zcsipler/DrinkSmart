@@ -5,6 +5,18 @@ megváltoztatunk a modellben vagy a terméklogikában, ezt is frissítsük.
 
 ---
 
+## 0. Munkamódszer — kötelező
+
+**Soha ne commitolj engedély nélkül.** Ha a változtatás kész, mutasd meg a
+`git diff --stat` összesítőt és a lényegi részleteket, aztán várj. A commitot
+Zoltán hagyja jóvá, és ő is fogalmazhat rajta. Ugyanez a `git push`-ra és
+minden más olyan műveletre, ami a repó állapotát kívülről is láthatóvá teszi.
+
+Staging (`git add`) is várjon a jóváhagyásra — az elrontott index ugyanúgy
+takarítást igényel.
+
+---
+
 ## 1. Mi ez
 
 iOS app (SwiftUI, iOS 17+) a saját alkoholfogyasztás tudatos követésére.
@@ -226,6 +238,7 @@ cd Reference && python3 make_catalog.py
 
 ## 8. Konvenciók
 
+- **Commit csak jóváhagyás után** — lásd a 0. fejezetet.
 - **A kódban minden angol**: kommentek, docstringek, teszt- és suite-nevek,
   MARK-ok, a Python szkriptek kiírásai. Magyar szöveg csak két helyen van:
   a `Localizable.xcstrings` fordítási értékeiben és ebben a dokumentumban.
