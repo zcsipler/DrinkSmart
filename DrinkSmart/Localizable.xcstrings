@@ -2,6 +2,23 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
+    "%@ drinks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ drinks"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ital"
+          }
+        }
+      }
+    },
     "%@ g alcohol": {
       "extractionState": "manual",
       "localizations": {
@@ -121,6 +138,23 @@
         }
       }
     },
+    "A session appears here once it has ended — when your level has cleared and a few hours have passed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A session appears here once it has ended — when your level has cleared and a few hours have passed."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egy alkalom akkor kerül ide, ha lezárult — amikor a szinted kiürült, és eltelt néhány óra."
+          }
+        }
+      }
+    },
     "Actual values vary considerably between individuals. Never use this to decide whether you can drive.": {
       "extractionState": "manual",
       "localizations": {
@@ -155,6 +189,23 @@
         }
       }
     },
+    "Add a drink when you have one, or swipe to look back at earlier days.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a drink when you have one, or swipe to look back at earlier days."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidd fel, amikor iszol valamit — vagy húzd oldalra, és nézd vissza a korábbi napokat."
+          }
+        }
+      }
+    },
     "Add drink": {
       "extractionState": "manual",
       "localizations": {
@@ -168,23 +219,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ital hozzáadása"
-          }
-        }
-      }
-    },
-    "Add your first one and you'll see how your level develops over time.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add your first one and you'll see how your level develops over time."
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vidd fel az elsőt, és látni fogod, hogyan alakul a szinted az idő múlásával."
           }
         }
       }
@@ -321,6 +355,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Számított értékek"
+          }
+        }
+      }
+    },
+    "Calculated with your profile at the time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculated with your profile at the time"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az akkori profiloddal számolva"
           }
         }
       }
@@ -767,6 +818,23 @@
         }
       }
     },
+    "History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Előzmény"
+          }
+        }
+      }
+    },
     "How often do you drink?": {
       "extractionState": "manual",
       "localizations": {
@@ -784,6 +852,23 @@
         }
       }
     },
+    "Lasted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lasted"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tartam"
+          }
+        }
+      }
+    },
     "Level": {
       "extractionState": "manual",
       "localizations": {
@@ -797,6 +882,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Szint"
+          }
+        }
+      }
+    },
+    "Live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élő"
           }
         }
       }
@@ -903,6 +1005,23 @@
         }
       }
     },
+    "Next day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next day"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Következő nap"
+          }
+        }
+      }
+    },
     "No active session": {
       "extractionState": "manual",
       "localizations": {
@@ -920,19 +1039,70 @@
         }
       }
     },
-    "No drinks logged yet": {
+    "No data for this day": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No drinks logged yet"
+            "value": "No data for this day"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Még nincs felvitt ital"
+            "value": "Erről a napról nincs adat"
+          }
+        }
+      }
+    },
+    "No past sessions yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No past sessions yet"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Még nincs lezárt alkalom"
+          }
+        }
+      }
+    },
+    "Nothing logged today": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing logged today"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ma még nincs felvitt ital"
+          }
+        }
+      }
+    },
+    "Nothing was logged between 5 in the morning and the next.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing was logged between 5 in the morning and the next."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hajnali 5 és a másnap hajnali 5 között nem került fel semmi."
           }
         }
       }
@@ -1052,6 +1222,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saját határ"
+          }
+        }
+      }
+    },
+    "Previous day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous day"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Előző nap"
           }
         }
       }
@@ -1260,6 +1447,23 @@
         }
       }
     },
+    "Started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kezdés"
+          }
+        }
+      }
+    },
     "Still rising": {
       "extractionState": "manual",
       "localizations": {
@@ -1345,6 +1549,23 @@
         }
       }
     },
+    "This is before the app started keeping records, so there is nothing to say about it either way.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is before the app started keeping records, so there is nothing to say about it either way."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a nap megelőzi, hogy az app elkezdett volna rögzíteni — így sem azt nem tudjuk, hogy ittál, sem azt, hogy nem."
+          }
+        }
+      }
+    },
     "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. This is the weakest point of the model — which is why the app shows a range instead of a single number.": {
       "extractionState": "manual",
       "localizations": {
@@ -1426,6 +1647,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Csúcsig"
+          }
+        }
+      }
+    },
+    "Today": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ma"
           }
         }
       }
@@ -1736,6 +1974,40 @@
         }
       }
     },
+    "Yesterday": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tegnap"
+          }
+        }
+      }
+    },
+    "You didn't drink on this day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You didn't drink on this day"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezen a napon nem ittál"
+          }
+        }
+      }
+    },
     "Your limit": {
       "extractionState": "manual",
       "localizations": {
@@ -1804,23 +2076,6 @@
         }
       }
     },
-    "estimated level": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "estimated level"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "becsült szint"
-          }
-        }
-      }
-    },
     "estimated range": {
       "extractionState": "manual",
       "localizations": {
@@ -1851,6 +2106,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "kg"
+          }
+        }
+      }
+    },
+    "peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "csúcs"
           }
         }
       }

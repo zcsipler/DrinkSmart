@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 import BACKit
 
-/// The blood alcohol curve. The app's central screen.
+/// The blood alcohol curve.
 ///
 /// It draws a band, not a line. Across its plausible range the elimination
 /// rate shifts the peak by over 40 % and the time to clear by hours — a single
@@ -10,14 +10,17 @@ import BACKit
 /// itself information: it shows how well we know what we are asserting.
 ///
 /// What it deliberately does NOT show: a verdict. No "you can drive", no "safe".
+///
+/// Takes a `BACChartModel` rather than the store, so the same view renders a
+/// past evening from the history with that session's own profile snapshot.
 struct BACChartView: View {
-    let store: SessionStore
+    let model: BACChartModel
 
     /// The time selected while scrubbing.
     @State private var scrubDate: Date?
 
-    private var band: BACBand { store.band }
-    private var unit: BACUnit { store.unit }
+    private var band: BACBand { model.band }
+    private var unit: BACUnit { model.unit }
 
     /// The engine samples every minute — a 12-hour session is 720 points,
     /// more than is worth drawing. We thin to about 220, but always keep the
@@ -54,7 +57,7 @@ struct BACChartView: View {
         HStack(alignment: .firstTextBaseline) {
             headline
             Spacer()
-            if store.isRising, scrubDate == nil, !store.drinks.isEmpty {
+            if model.isRising, scrubDate == nil {
                 risingBadge
             }
         }
@@ -69,17 +72,17 @@ struct BACChartView: View {
                 value: unit.formatRange(band.range(at: scrubDate)),
                 tint: Theme.tint(for: band.value(at: scrubDate))
             )
-        } else if let peak = store.upcomingPeak, let range = store.peakRange {
+        } else if let peak = model.upcomingPeak, let range = model.peakRange {
             labelledValue(
                 title: Text("Expected peak around \(peak.date.hourMinute)"),
                 value: unit.formatRange(range),
                 tint: Theme.tint(for: peak.bac)
             )
-        } else if let peak = store.peak, let range = store.peakRange, peak.bac > 0 {
+        } else if let peak = model.peak, let range = model.peakRange, peak.bac > 0 {
             labelledValue(
                 title: Text("Peaked around \(peak.date.hourMinute)"),
                 value: unit.formatRange(range),
-                tint: Theme.secondaryText
+                tint: model.isLive ? Theme.secondaryText : Theme.tint(for: peak.bac)
             )
         } else {
             labelledValue(
@@ -127,8 +130,8 @@ struct BACChartView: View {
             drinkMarkers
             focusMarks
         }
-        .chartXScale(domain: store.visibleRange)
-        .chartYScale(domain: 0...store.yMaximum)
+        .chartXScale(domain: model.visibleRange)
+        .chartYScale(domain: 0...model.yMaximum)
         .chartXSelection(value: $scrubDate)
         .chartXAxis { xAxis }
         .chartYAxis { yAxis }
@@ -160,7 +163,7 @@ struct BACChartView: View {
                 x: .value("Time", sample.date),
                 y: .value("Level", sample.mid)
             )
-            .foregroundStyle(Theme.tint(for: store.peakRange?.upperBound ?? 0))
+            .foregroundStyle(Theme.tint(for: model.peakRange?.upperBound ?? 0))
             .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
             .interpolationMethod(.monotone)
         }
@@ -171,8 +174,8 @@ struct BACChartView: View {
     private var bandGradient: LinearGradient {
         LinearGradient(
             stops: [
-                .init(color: Theme.tint(for: store.yMaximum).opacity(0.45), location: 0),
-                .init(color: Theme.tint(for: store.yMaximum * 0.5).opacity(0.30), location: 0.55),
+                .init(color: Theme.tint(for: model.yMaximum).opacity(0.45), location: 0),
+                .init(color: Theme.tint(for: model.yMaximum * 0.5).opacity(0.30), location: 0.55),
                 .init(color: Theme.calm.opacity(0.16), location: 1),
             ],
             startPoint: .top,
@@ -182,11 +185,11 @@ struct BACChartView: View {
 
     @ChartContentBuilder
     private var limitRule: some ChartContent {
-        RuleMark(y: .value("Personal limit", store.limit))
+        RuleMark(y: .value("Personal limit", model.limit))
             .foregroundStyle(Theme.elevated.opacity(0.55))
             .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
             .annotation(position: .top, alignment: .trailing, spacing: 3) {
-                Text("YOUR LIMIT \(unit.formatted(store.limit))")
+                Text("YOUR LIMIT \(unit.formatted(model.limit))")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.elevated.opacity(0.85))
             }
@@ -194,7 +197,7 @@ struct BACChartView: View {
 
     @ChartContentBuilder
     private var drinkMarkers: some ChartContent {
-        ForEach(store.drinks) { drink in
+        ForEach(model.drinks) { drink in
             RuleMark(x: .value("Drink", drink.consumedAt))
                 .foregroundStyle(Color.white.opacity(0.07))
                 .lineStyle(StrokeStyle(lineWidth: 1))
@@ -212,15 +215,19 @@ struct BACChartView: View {
         }
     }
 
+    /// The now-marker, and the scrub read-out.
+    ///
+    /// A finished session has no "now", so it only gets a marker while the
+    /// user is actually dragging across it.
     @ChartContentBuilder
     private var focusMarks: some ChartContent {
-        if !store.drinks.isEmpty {
-            let date = scrubDate ?? store.now
+        if !model.drinks.isEmpty, let date = scrubDate ?? model.focusDate {
             let range = band.range(at: date)
+            let isScrubbing = scrubDate != nil
 
             RuleMark(x: .value("Now", date))
-                .foregroundStyle(Color.white.opacity(scrubDate == nil ? 0.18 : 0.4))
-                .lineStyle(StrokeStyle(lineWidth: 1, dash: scrubDate == nil ? [3, 3] : []))
+                .foregroundStyle(Color.white.opacity(isScrubbing ? 0.4 : 0.18))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: isScrubbing ? [] : [3, 3]))
 
             // The focus point is a range too: two end markers, not one dot.
             PointMark(x: .value("Now", date), y: .value("Lower", range.lowerBound))
@@ -251,8 +258,8 @@ struct BACChartView: View {
     /// Thin out the labels on longer sessions so they do not collide.
     /// In an English locale AM/PM makes them wider, hence the earlier steps.
     private var strideHours: Int {
-        let hours = store.visibleRange.upperBound
-            .timeIntervalSince(store.visibleRange.lowerBound) / 3600
+        let hours = model.visibleRange.upperBound
+            .timeIntervalSince(model.visibleRange.lowerBound) / 3600
         return switch hours {
         case ..<7: 1
         case ..<14: 2
@@ -299,10 +306,19 @@ struct BACChartView: View {
     }
 }
 
-#Preview {
-    ZStack {
-        Theme.background.ignoresSafeArea()
-        BACChartView(store: .preview)
-            .padding()
+@MainActor
+private struct ChartPreview: View {
+    private let store = SessionStore.preview
+
+    var body: some View {
+        ZStack {
+            Theme.background.ignoresSafeArea()
+            BACChartView(model: store.chartModel)
+                .padding()
+        }
     }
+}
+
+#Preview {
+    ChartPreview()
 }

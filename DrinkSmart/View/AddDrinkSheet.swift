@@ -16,6 +16,11 @@ struct AddDrinkSheet: View {
     /// Non-nil when correcting a drink that is already in the session.
     let editing: Drink?
 
+    /// Which session the drink belongs to. Nil means the running one; the
+    /// history detail passes a past session so the projection is made against
+    /// that evening's own profile snapshot.
+    let session: DrinkingSession?
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var template: DrinkTemplate
@@ -30,9 +35,10 @@ struct AddDrinkSheet: View {
     /// existing drink's id, which is what lets `update(_:)` find it.
     @State private var draftID: UUID
 
-    init(store: SessionStore, editing: Drink? = nil) {
+    init(store: SessionStore, editing: Drink? = nil, session: DrinkingSession? = nil) {
         self.store = store
         self.editing = editing
+        self.session = session
 
         let template = editing.map(DrinkCatalog.template(for:)) ?? DrinkCatalog.all[0]
         _template = State(initialValue: template)
@@ -53,7 +59,7 @@ struct AddDrinkSheet: View {
     @State private var cachedProjection: BandedProjection?
 
     private var projection: BandedProjection {
-        cachedProjection ?? store.project(candidate, excluding: editing?.id)
+        cachedProjection ?? store.project(candidate, excluding: editing?.id, in: session)
     }
 
     /// Inputs to the projection. We only recompute when this changes.
@@ -112,7 +118,7 @@ struct AddDrinkSheet: View {
     }
 
     private func recalculate() {
-        cachedProjection = store.project(candidate, excluding: editing?.id)
+        cachedProjection = store.project(candidate, excluding: editing?.id, in: session)
     }
 
     // MARK: Projection
@@ -381,15 +387,20 @@ struct AddDrinkSheet: View {
         section("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
             VStack(spacing: 10) {
                 if showsTimePicker {
+                    // Date as well as time, so a drink can be filled in days
+                    // or months later. The store routes it to the session
+                    // covering that drinking day rather than to whichever one
+                    // is open now.
                     DatePicker(
                         selection: $consumedAt,
                         in: ...Date.now,
-                        displayedComponents: .hourAndMinute
+                        displayedComponents: [.date, .hourAndMinute]
                     ) {
                         Text("When")
                     }
-                    .datePickerStyle(.wheel)
+                    .datePickerStyle(.compact)
                     .labelsHidden()
+                    .tint(Theme.calm)
                 } else {
                     HStack(spacing: 8) {
                         quickTime("Now", minutesAgo: 0)
@@ -442,7 +453,7 @@ struct AddDrinkSheet: View {
     private var confirmBar: some View {
         Button {
             if isEditing {
-                store.update(candidate)
+                store.update(candidate, in: session)
             } else {
                 store.add(candidate)
             }
@@ -494,6 +505,7 @@ struct AddDrinkSheet: View {
     }
 }
 
+@MainActor
 private struct EditSheetPreview: View {
     private let store = SessionStore.preview
 

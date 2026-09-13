@@ -138,6 +138,7 @@ struct DrinkRow: View {
     }
 }
 
+@MainActor
 private struct DrinkRowPreview: View {
     @State private var openRowID: UUID?
     private let store = SessionStore.preview

@@ -68,19 +68,43 @@ TRANSLATIONS = {
     "drag to read values": "húzd a leolvasáshoz",
     "release to go back": "engedd el a visszatéréshez",
 
-    # --- RootView ---
+    # --- Live screen: day paging, the dry day and the unknown day ---
+    "Previous day": "Előző nap",
+    "Next day": "Következő nap",
+    "No data for this day": "Erről a napról nincs adat",
+    "This is before the app started keeping records, so there is nothing to say about it either way.":
+        "Ez a nap megelőzi, hogy az app elkezdett volna rögzíteni — így sem azt nem tudjuk, hogy ittál, sem azt, hogy nem.",
+
+    "Live": "Élő",
+    "Yesterday": "Tegnap",
+    "Nothing logged today": "Ma még nincs felvitt ital",
+    "Add a drink when you have one, or swipe to look back at earlier days.":
+        "Vidd fel, amikor iszol valamit — vagy húzd oldalra, és nézd vissza a korábbi napokat.",
+    "You didn't drink on this day": "Ezen a napon nem ittál",
+    "Nothing was logged between 5 in the morning and the next.":
+        "Hajnali 5 és a másnap hajnali 5 között nem került fel semmi.",
+
+    # --- Tabs and history ---
+    "Today": "Ma",
+    "History": "Előzmény",
+    "No past sessions yet": "Még nincs lezárt alkalom",
+    "A session appears here once it has ended — when your level has cleared and a few hours have passed.":
+        "Egy alkalom akkor kerül ide, ha lezárult — amikor a szinted kiürült, és eltelt néhány óra.",
+    "%@ drinks": "%@ ital",
+    "peak": "csúcs",
+    "Started": "Kezdés",
+    "Lasted": "Tartam",
+    "Calculated with your profile at the time": "Az akkori profiloddal számolva",
+
+    # --- TodayView ---
     "Profile": "Profil",
     "End session": "Alkalom lezárása",
-    "estimated level": "becsült szint",
     "estimated range": "becsült tartomány",
     "Elapsed": "Tartam",
     "Drinks": "Italok",
     "Units": "Egység",
     "Expected to clear": "Várhatóan ekkorra ürül ki",
     "Drinks this session": "Az alkalom italai",
-    "No drinks logged yet": "Még nincs felvitt ital",
-    "Add your first one and you'll see how your level develops over time.":
-        "Vidd fel az elsőt, és látni fogod, hogyan alakul a szinted az idő múlásával.",
     "This is an estimate, not a measurement.": "Ez egy becslés, nem mérés.",
     "Actual values vary considerably between individuals. Never use this to decide whether you can drive.":
         "A tényleges érték egyénenként jelentősen eltérhet. Soha ne használd annak eldöntésére, hogy vezethetsz-e.",

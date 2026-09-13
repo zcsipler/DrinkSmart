@@ -1,70 +1,202 @@
 import Foundation
 import Observation
+import SwiftData
 import BACKit
 
-/// The app's single source of state.
+/// State for the current drinking session.
 ///
-/// The band is recomputed only when an input actually changes (a drink, the
-/// profile). The clock tick just moves `now`, which refreshes the readout
-/// without starting a new simulation.
+/// Backed by SwiftData: the open `DrinkingSession` is the source of truth, and
+/// the band is derived from it. Settings live in `AppSettings`, because they
+/// describe the user now, whereas the session records who they were then.
+///
+/// The band is recomputed only when an input actually changes. The clock tick
+/// moves `now`, which refreshes the readout without starting a simulation.
+/// Main-actor isolated: it holds a `ModelContext`, which is not `Sendable`,
+/// and every caller is a view anyway.
 @Observable
+@MainActor
 final class SessionStore {
 
-    // MARK: State
+    private let context: ModelContext
+    private let engine = BACEngine()
+    let settings: AppSettings
 
-    var profile: BodyProfile {
-        didSet { rebuild(); persist() }
-    }
+    /// The session currently accepting drinks. Nil until the first one.
+    private(set) var session: DrinkingSession?
 
-    /// The user's own limit in g/L. Not a legal limit — a personal reference.
-    var limit: Double {
-        didSet { persist() }
-    }
-
-    var unit: BACUnit {
-        didSet { persist() }
-    }
-
-    /// Proxy for beta. Changing this rewrites the profile's beta values.
-    var frequency: DrinkingFrequency {
-        didSet {
-            guard frequency != oldValue else { return }
-            frequency.apply(to: &profile)   // the profile's didSet rebuilds and persists
-        }
-    }
-
-    private(set) var drinks: [Drink] = []
     private(set) var band: BACBand = .empty
 
     /// The current time. Refreshed every half minute.
     var now: Date = .now
 
-    private let engine = BACEngine()
+    init(context: ModelContext, settings: AppSettings) {
+        self.context = context
+        self.settings = settings
+        LegacySessionImport.run(in: context)
+        refreshFromStore()
+    }
 
-    // MARK: Lifecycle
+    // MARK: Settings passthrough
+    //
+    // The views talk to the store; whether a value is a setting or session data
+    // is not their concern.
 
-    init(
-        profile: BodyProfile = .init(sex: .male, age: 35, heightCm: 180, weightKg: 80),
-        limit: Double = 0.8,
-        unit: BACUnit = .perMille
-    ) {
-        self.profile = profile
-        self.limit = limit
-        self.unit = unit
-        self.frequency = .closest(toBeta: profile.beta)
-        load()
+    var profile: BodyProfile {
+        get { settings.profile }
+        set {
+            settings.profile = newValue
+            // An open session follows the current profile: a correction made
+            // mid-evening should fix the curve you are looking at. A closed
+            // one never moves.
+            session?.applySnapshot(of: newValue)
+            rebuild()
+        }
+    }
+
+    var limit: Double {
+        get { settings.limit }
+        set {
+            settings.limit = newValue
+            session?.limit = newValue
+        }
+    }
+
+    var unit: BACUnit {
+        get { settings.unit }
+        set { settings.unit = newValue }
+    }
+
+    var frequency: DrinkingFrequency {
+        get { settings.frequency }
+        set {
+            settings.frequency = newValue
+            session?.applySnapshot(of: settings.profile)
+            rebuild()
+        }
+    }
+
+    // MARK: Session lifecycle
+
+    /// Loads the open session and closes it if the rule says it has ended.
+    ///
+    /// Called on launch and when returning to the foreground, not only when a
+    /// drink is logged — otherwise a forgotten session would stay open for days.
+    func refreshFromStore() {
+        session = fetchOpenSession()
+        closeSessionIfEnded()
         rebuild()
+    }
+
+    private func fetchOpenSession() -> DrinkingSession? {
+        var descriptor = FetchDescriptor<DrinkingSession>(
+            predicate: #Predicate { $0.endedAt == nil },
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        return try? context.fetch(descriptor).first
+    }
+
+    /// Closes the open session when the policy says the occasion is over.
+    private func closeSessionIfEnded() {
+        guard let session, !session.sortedDrinks.isEmpty else { return }
+
+        let drinks = session.sortedDrinks
+        let computed = engine.simulateBand(profile: session.profile, drinks: drinks)
+        let lastDrinkAt = drinks.last?.consumedAt
+
+        guard !SessionPolicy.isStillOpen(band: computed, lastDrinkAt: lastDrinkAt, at: now) else {
+            return
+        }
+
+        session.endedAt = SessionPolicy.closingDate(
+            lastDrinkAt: lastDrinkAt,
+            soberAt: computed.soberRange()?.upperBound
+        )
+        session.store(summary(for: session, band: computed))
+        save()
+        self.session = nil
+    }
+
+    /// The session a drink at this time belongs to, if one exists.
+    ///
+    /// Membership follows the drinking day, the same rule the Live screen uses
+    /// to group days — so a drink logged late lands where the user would look
+    /// for it, rather than wherever the open session happens to be.
+    private func sessionCovering(_ date: Date) -> DrinkingSession? {
+        let day = DrinkingDay.containing(date)
+
+        if let session, day.contains(session.startedAt) { return session }
+
+        let descriptor = FetchDescriptor<DrinkingSession>(
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor))?.first { day.contains($0.startedAt) }
+    }
+
+    private func startSession(at date: Date) -> DrinkingSession {
+        let new = DrinkingSession(
+            startedAt: date,
+            profile: profileApplicable(at: date),
+            limit: settings.limit
+        )
+        context.insert(new)
+        return new
+    }
+
+    /// Which profile a backdated session should freeze.
+    ///
+    /// For a drink being logged now, today's profile is right. For one being
+    /// filled in from six months ago it is not: the whole reason sessions
+    /// carry a snapshot is that bodies change. The nearest session in time is
+    /// the closest thing we have to who you were then; the current profile is
+    /// only the fallback when there is nothing to go on.
+    private func profileApplicable(at date: Date) -> BodyProfile {
+        let day = DrinkingDay.containing(date)
+        guard !day.isCurrent(at: now) else { return settings.profile }
+
+        let descriptor = FetchDescriptor<DrinkingSession>(
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        let nearest = (try? context.fetch(descriptor))?.min {
+            abs($0.startedAt.timeIntervalSince(date)) < abs($1.startedAt.timeIntervalSince(date))
+        }
+        return nearest?.profile ?? settings.profile
+    }
+
+    /// Re-decides whether a session is still running, after it has changed.
+    ///
+    /// A backdated drink can revive a session that had ended, or leave an
+    /// older one closed but with a later clearing time. Both go through the
+    /// same policy as everything else.
+    private func reconcile(_ target: DrinkingSession) {
+        let drinks = target.sortedDrinks
+        guard !drinks.isEmpty else { return }
+
+        let computed = engine.simulateBand(profile: target.profile, drinks: drinks)
+        let lastDrinkAt = drinks.last?.consumedAt
+
+        if SessionPolicy.isStillOpen(band: computed, lastDrinkAt: lastDrinkAt, at: now) {
+            target.endedAt = nil
+            session = target
+        } else {
+            target.endedAt = SessionPolicy.closingDate(
+                lastDrinkAt: lastDrinkAt,
+                soberAt: computed.soberRange()?.upperBound
+            )
+            target.store(summary(for: target, band: computed))
+            if session === target { session = nil }
+        }
     }
 
     // MARK: Derived values
 
-    /// The range of possible current levels. This is what the main readout shows.
+    var drinks: [Drink] { session?.sortedDrinks ?? [] }
+
     var currentRange: ClosedRange<Double> {
         drinks.isEmpty ? 0...0 : band.range(at: now)
     }
 
-    /// The centre value — needed where a single number is unavoidable, such as
-    /// tinting and animation.
+    /// The centre value, for tinting and animation where one number is needed.
     var currentBAC: Double {
         drinks.isEmpty ? 0 : band.value(at: now)
     }
@@ -72,7 +204,6 @@ final class SessionStore {
     var peakRange: ClosedRange<Double>? { band.peakRange }
     var peak: BACSample? { band.peak }
 
-    /// The peak is only "expected" while it is still ahead of us.
     var upcomingPeak: BACSample? {
         guard let peak, peak.date > now.addingTimeInterval(60) else { return nil }
         return peak
@@ -82,9 +213,7 @@ final class SessionStore {
         drinks.isEmpty ? nil : band.soberRange()
     }
 
-    var sessionStart: Date? {
-        drinks.map(\.consumedAt).min()
-    }
+    var sessionStart: Date? { drinks.map(\.consumedAt).min() }
 
     var sessionDuration: TimeInterval {
         guard let start = sessionStart else { return 0 }
@@ -103,18 +232,14 @@ final class SessionStore {
         return .below
     }
 
-    /// Whether the curve is currently rising. The absorption limb is where a
-    /// breathalyser would read low.
-    var isRising: Bool {
-        !drinks.isEmpty && currentRate > 0.01
-    }
+    /// Whether the curve is rising. The absorption limb is where a breathalyser
+    /// would read low.
+    var isRising: Bool { !drinks.isEmpty && currentRate > 0.01 }
 
     var currentRate: Double {
         band.center.samples.last { $0.date <= now }?.rate ?? 0
     }
 
-    /// The visible time window. At least six hours, but wide enough to contain
-    /// the full clearance.
     var visibleRange: ClosedRange<Date> {
         let start = (sessionStart ?? now).addingTimeInterval(-15 * 60)
         let naturalEnd = soberRange?.upperBound ?? now.addingTimeInterval(4 * 3600)
@@ -128,109 +253,145 @@ final class SessionStore {
 
     // MARK: Actions
 
+    /// Logs a drink, including one backdated to a day long past.
+    ///
+    /// The drink goes to the session covering its own drinking day, not to
+    /// whichever session happens to be open. Without that, filling in a beer
+    /// from three weeks ago would drag tonight's session back three weeks and
+    /// draw one continuous curve across it.
     func add(_ drink: Drink) {
-        drinks.append(drink)
-        drinks.sort { $0.consumedAt < $1.consumedAt }
+        // A drink arriving after the occasion has ended starts the next one.
+        closeSessionIfEnded()
+
+        let target = sessionCovering(drink.consumedAt) ?? startSession(at: drink.consumedAt)
+        if drink.consumedAt < target.startedAt {
+            target.startedAt = drink.consumedAt
+        }
+
+        let record = DrinkRecord(drink)
+        record.session = target
+        context.insert(record)
+        target.invalidateSummary()
+
+        reconcile(target)
+        save()
         rebuild()
-        persist()
     }
 
-    /// Replaces an already logged drink. Re-sorts, because an edit can move
-    /// the drink to a different point in the session.
-    func update(_ drink: Drink) {
-        guard let index = drinks.firstIndex(where: { $0.id == drink.id }) else { return }
-        drinks[index] = drink
-        drinks.sort { $0.consumedAt < $1.consumedAt }
+    /// Corrects a drink. `target` defaults to the running session; the history
+    /// detail passes a past one, because a mistake noticed three weeks later is
+    /// still a mistake worth fixing.
+    func update(_ drink: Drink, in target: DrinkingSession? = nil) {
+        let owner = target ?? session
+        guard let owner, let record = (owner.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
+
+        record.apply(drink)
+        if let earliest = owner.sortedDrinks.first?.consumedAt {
+            owner.startedAt = earliest
+        }
+        owner.invalidateSummary()
+        // Changing a time moves the clearing point too, which can reopen a
+        // session that had ended or close one that had not.
+        reconcile(owner)
+        save()
         rebuild()
-        persist()
     }
 
-    func remove(_ drink: Drink) {
-        drinks.removeAll { $0.id == drink.id }
+    func remove(_ drink: Drink, from target: DrinkingSession? = nil) {
+        let owner = target ?? session
+        guard let owner, let record = (owner.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
+
+        context.delete(record)
+        owner.invalidateSummary()
+
+        // An empty session is not history worth keeping.
+        if owner.sortedDrinks.isEmpty {
+            context.delete(owner)
+            if owner === session { session = nil }
+        }
+
+        save()
         rebuild()
-        persist()
     }
 
+    /// Ends the occasion now, at the user's request.
     func clearSession() {
-        drinks.removeAll()
+        guard let session else { return }
+        let drinks = session.sortedDrinks
+
+        if drinks.isEmpty {
+            context.delete(session)
+        } else {
+            let computed = engine.simulateBand(profile: session.profile, drinks: drinks)
+            session.endedAt = SessionPolicy.closingDate(
+                lastDrinkAt: drinks.last?.consumedAt,
+                soberAt: computed.soberRange()?.upperBound
+            )
+            session.store(summary(for: session, band: computed))
+        }
+
+        self.session = nil
+        save()
         rebuild()
-        persist()
     }
 
     /// What would happen if the user had this drink.
     ///
-    /// When correcting an already logged drink, pass its id as `excluding`:
-    /// the comparison is then "the session without it" against "the session
-    /// with the corrected version", rather than counting the drink twice.
-    func project(_ candidate: Drink, excluding excludedID: UUID? = nil) -> BandedProjection {
-        let others = excludedID.map { id in drinks.filter { $0.id != id } } ?? drinks
-        return engine.projectBand(profile: profile, consumed: others, candidate: candidate, limit: limit)
+    /// When correcting a logged drink, pass its id as `excluding` so the
+    /// comparison is "the session without it" against "with the corrected
+    /// version", rather than counting it twice.
+    /// `in` selects which session the comparison is made against. A past
+    /// session is evaluated with **its own** profile snapshot and limit, not
+    /// today's — otherwise the projection would describe a night that never
+    /// happened.
+    func project(
+        _ candidate: Drink,
+        excluding excludedID: UUID? = nil,
+        in target: DrinkingSession? = nil
+    ) -> BandedProjection {
+        let owner = target ?? session
+        let all = owner?.sortedDrinks ?? drinks
+        let others = excludedID.map { id in all.filter { $0.id != id } } ?? all
+
+        return engine.projectBand(
+            profile: owner?.profile ?? settings.profile,
+            consumed: others,
+            candidate: candidate,
+            limit: owner?.limit ?? limit
+        )
     }
 
     func tick() {
         now = .now
+        closeSessionIfEnded()
     }
+
+    // MARK: Plumbing
 
     private func rebuild() {
-        band = drinks.isEmpty ? .empty : engine.simulateBand(profile: profile, drinks: drinks)
+        let drinks = session?.sortedDrinks ?? []
+        guard let session, !drinks.isEmpty else {
+            band = .empty
+            return
+        }
+        band = engine.simulateBand(profile: session.profile, drinks: drinks)
     }
 
-    // MARK: Persistence
-    //
-    // UserDefaults + Codable for now. The SwiftData layer arrives when we need
-    // statistics across past sessions.
-
-    private struct Snapshot: Codable {
-        var profile: BodyProfile
-        var limit: Double
-        var unit: BACUnit
-        var frequency: DrinkingFrequency
-        var drinks: [Drink]
-    }
-
-    private static let storageKey = "drinksmart.session.v2"
-
-    private func persist() {
-        let snapshot = Snapshot(
-            profile: profile, limit: limit, unit: unit, frequency: frequency, drinks: drinks
+    private func summary(for session: DrinkingSession, band: BACBand) -> SessionSummary {
+        SessionSummary(
+            peakRange: band.peakRange ?? 0...0,
+            soberAt: band.soberRange()?.upperBound,
+            totalUnits: session.totalUnits,
+            drinkCount: session.drinks?.count ?? 0
         )
-        guard let data = try? JSONEncoder().encode(snapshot) else { return }
-        UserDefaults.standard.set(data, forKey: Self.storageKey)
     }
 
-    private func load() {
-        guard
-            let data = UserDefaults.standard.data(forKey: Self.storageKey),
-            let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data)
-        else { return }
-
-        profile = snapshot.profile
-        limit = snapshot.limit
-        unit = snapshot.unit
-        frequency = snapshot.frequency
-        // Keep only the last 24 hours — anything older has already cleared.
-        let cutoff = Date.now.addingTimeInterval(-24 * 3600)
-        drinks = snapshot.drinks.filter { $0.consumedAt > cutoff }.sorted { $0.consumedAt < $1.consumedAt }
-    }
-}
-
-// MARK: - Preview data
-
-extension SessionStore {
-    static var preview: SessionStore {
-        let store = SessionStore()
-        // `name` holds the template identifier, not the displayed name.
-        store.drinks = [
-            Drink(consumedAt: .now.addingTimeInterval(-9000), volumeMl: 500, abvPercent: 5, stomach: .full, name: "beer"),
-            Drink(consumedAt: .now.addingTimeInterval(-5400), volumeMl: 500, abvPercent: 5, stomach: .light, name: "beer"),
-            Drink(consumedAt: .now.addingTimeInterval(-2700), volumeMl: 150, abvPercent: 12, stomach: .light, name: "wine"),
-            Drink(consumedAt: .now.addingTimeInterval(-900), volumeMl: 40, abvPercent: 40, stomach: .light, name: "spirit"),
-        ]
-        store.rebuildForPreview()
-        return store
-    }
-
-    private func rebuildForPreview() {
-        band = BACEngine().simulateBand(profile: profile, drinks: drinks)
+    private func save() {
+        do {
+            try context.save()
+        } catch {
+            // Losing a drink silently is worse than a log line nobody reads.
+            assertionFailure("Failed to save: \(error)")
+        }
     }
 }

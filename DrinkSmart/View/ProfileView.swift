@@ -3,14 +3,16 @@ import BACKit
 
 /// Body composition, metabolism and the personal limit.
 ///
+/// Its own tab rather than a sheet: this is where the iCloud switch, data
+/// export and deletion will land, and a sheet does not have room to grow.
+///
 /// The elimination rate deliberately does not appear as a raw number: no user
 /// can answer "what is your beta in per mille per hour", and a value set at
 /// random makes the estimate worse. We ask about drinking frequency instead —
 /// something everyone knows about themselves — and the raw parameters live
 /// under advanced settings.
-struct ProfileSheet: View {
+struct ProfileView: View {
     let store: SessionStore
-    @Environment(\.dismiss) private var dismiss
     @State private var showsAdvanced = false
 
     var body: some View {
@@ -27,14 +29,7 @@ struct ProfileSheet: View {
             .background(Theme.background)
             .navigationTitle(Text("Profile"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                        .foregroundStyle(Theme.calm)
-                }
-            }
         }
-        .preferredColorScheme(.dark)
     }
 
     // MARK: Body
@@ -277,5 +272,5 @@ struct ProfileSheet: View {
 }
 
 #Preview {
-    ProfileSheet(store: .preview)
+    ProfileView(store: .preview)
 }
