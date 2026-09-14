@@ -11,27 +11,37 @@ Nem vezetési döntéstámogató. A megjelenítés sehol nem ad verdiktet.
 DrinkSmart/
 ├── DrinkSmart.xcodeproj
 ├── BACKit/                    lokális Swift package — a farmakokinetikai motor
-│   ├── Sources/BACKit/
-│   └── Tests/BACKitTests/     20 teszt a Python referencia értékeivel
+│   ├── Sources/BACKit/        BodyProfile, Drink, BACEngine, BACBand, Projection
+│   └── Tests/BACKitTests/     38 teszt a Python referencia értékeivel
 ├── DrinkSmart/                az app target
-│   ├── DrinkSmartApp.swift
+│   ├── DrinkSmartApp.swift    ModelContainer CloudKittel, lokális visszaeséssel
+│   ├── Localizable.xcstrings  129 kulcs, angol forrás + magyar fordítás
 │   ├── Model/
-│   │   ├── DrinkCatalog.swift  italtípusok, gyomorállapot megjelenítése
-│   │   ├── DrinkingFrequency.swift  a béta proxyja
-│   │   └── SessionStore.swift  @Observable állapot, perzisztencia
-│   ├── Support/
-│   │   ├── Theme.swift         színek — a görbe színe a szinttel változik
-│   │   └── BACUnit.swift       ‰ / % megjelenítés, formázás
-│   └── View/
-│       ├── RootView.swift      hero kijelző, statisztikák, itallista
-│       ├── BACChartView.swift  a görbe
-│       ├── AddDrinkSheet.swift ital felvitele + élő előrejelzés
-│       └── ProfileSheet.swift  testalkat, anyagcsere, saját határ
-└── Reference/                  Python referencia-implementáció és validáció
+│   │   ├── BACChartModel.swift      a chart bemenete, élő vagy tárolt alkalomból
+│   │   ├── DrinkingDay.swift        ivási nap hajnali 5-ös határral
+│   │   ├── SessionStore.swift       @Observable, SwiftData-alapú
+│   │   └── Persistence/             @Model séma, lezárási szabály, migráció
+│   ├── Support/               Theme, BACUnit
+│   └── View/                  MainTabView, LiveView, HistoryView, chart, lapok
+└── Reference/                 Python referencia + a katalógusgenerátor
 ```
 
 A motor külön package, mert így `swift test`-tel futtatható az Xcode projekt
 megnyitása nélkül, és mert a modell nem függhet a UI-tól.
+
+## Tárolás
+
+Az alkalmak SwiftDatában élnek, iCloud-szinkronra előkészített sémával.
+
+Minden alkalom tárolja a **saját profil-pillanatképét**. Enélkül egy régi este
+visszamenőleg megváltozna, amikor a testsúlyod frissül: ugyanaz a három ital
+60 kg-nál 0,578 ‰ csúcsot ad, 70 kg-nál 0,507-et. Egy feljegyzés, ami magát
+átírja, nem feljegyzés. A **motort** viszont nem fagyasztjuk be — a bemenet van
+eltárolva, így egy későbbi modelljavítás a régi alkalmakat is újraszámolja.
+
+Az alkalom határát a `SessionPolicy` dönti el: nyitva marad, amíg van alkohol a
+rendszerben, vagy az utolsó ital 3 óránál frissebb. A napok határa hajnali 5,
+hogy egy éjfélen átnyúló este egy naphoz tartozzon.
 
 ## Miért sáv, és nem vonal
 
@@ -92,14 +102,32 @@ cd BACKit && swift test       # a motor tesztjei külön is futnak
 cd Reference && python3 validate.py
 ```
 
-A bundle azonosító `io.gbsolutions.DrinkSmart` — a saját csapatodra állítsd át
-a target Signing beállításainál.
+A bundle azonosító `dev.zcsipler.drinksmart`. A fejlesztői csapatot a target
+Signing beállításainál kell megadni.
+
+Az iCloud-szinkronhoz a target Signing & Capabilities fülén be kell kapcsolni
+az **iCloud → CloudKit** és a **Background Modes → Remote notifications**
+capabilityt. Enélkül az app fut, csak lokálisan tárol.
+
+## Képernyők
+
+**Live** — az élő alkalom görbéje. Oldalra húzva vagy a fejléc nyilaival
+visszalapozhatsz korábbi napokra. Négy állapota van: élő alkalom, rögzített nap,
+száraz nap, és olyan nap, amiről nincs adatunk — ez utóbbi kettő szándékosan
+külön, mert „nem ittál" és „nem tudjuk" nem ugyanaz.
+
+**Előzmény** — a lezárt alkalmak listája, rákoppintva az akkori görbe.
+
+**Profil** — testalkat, fogyasztási gyakoriság, saját határ, mértékegység.
+
+Ital bárhol felvihető és szerkeszthető, visszamenőlegesen is: a dátumválasztó
+napot és időt is kínál, és az ital a saját ivási napjának alkalmához kerül.
 
 ## Ami még nincs kész
 
+- Tartományválasztó és aggregált statisztika az Előzmény tabon
+- App-szintű teszt target a tárolási logikához
 - HealthKit: testadatok beolvasása és a BAC visszaírása
 - Helyi értesítések: közeledsz a határhoz / mikorra leszel tiszta
-- Korábbi alkalmak és statisztika (itt jön be a SwiftData)
 - watchOS-kiegészítő a gyors felvitelhez
 - Kalibráció: ha valaha szondával visszamérsz, abból illeszthető a `beta`
-# DrinkSmart

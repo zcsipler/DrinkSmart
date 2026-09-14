@@ -25,7 +25,7 @@ A központi kérdés, amire válaszol:
 > **Hová vinné a szintemet a következő ital, és mikor?**
 
 A tulajdonos és fejlesztő Zoltán. GitHub: `zcsipler/DrinkSmart`.
-Bundle ID: `io.gbsolutions.DrinkSmart`.
+Bundle ID: `dev.zcsipler.drinksmart`.
 
 ## 2. Miért létezik — a termék tézise
 
@@ -59,29 +59,51 @@ DrinkSmart/
 │   ├── Sources/BACKit/
 │   │   ├── BodyProfile.swift   Watson TBW, eloszlási térfogat, béta + bizonytalanság
 │   │   ├── Drink.swift         ital, gyomorállapot, ka, biohasznosulás
-│   │   ├── BACEngine.swift     RK4 szimuláció, BACCurve lekérdezések
+│   │   ├── BACEngine.swift     RK4 szimuláció, BACCurve lekérdezések, version
 │   │   ├── Projection.swift    egyvonalas „mi lenne, ha" (régebbi API, megmaradt)
 │   │   └── BACBand.swift       sávos szimuláció, LimitOutcome, BandedProjection
-│   └── Tests/BACKitTests/      44 teszt, Python referenciaértékekkel
+│   └── Tests/BACKitTests/      38 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
+│   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
+│   ├── Localizable.xcstrings   129 kulcs, en + hu
 │   ├── Model/
+│   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
+│   │   ├── DrinkingDay.swift        ivási nap hajnali 5-ös határral
 │   │   ├── DrinkingFrequency.swift  a béta proxyja
-│   │   └── SessionStore.swift       @Observable állapot, UserDefaults perzisztencia
+│   │   ├── SessionStore.swift       @Observable, SwiftData-alapú, a nyitott alkalom
+│   │   └── Persistence/
+│   │       ├── DrinkingSession.swift     @Model, profil-pillanatkép + cache
+│   │       ├── DrinkRecord.swift         @Model, a tárolt ital
+│   │       ├── SessionPolicy.swift       mikor ér véget egy alkalom
+│   │       ├── AppSettings.swift         ki vagy MOST (UserDefaults)
+│   │       ├── LegacySessionImport.swift egyszeri import a régi blobból
+│   │       └── SessionStore+Preview.swift in-memory store a previewekhez
 │   ├── Support/
 │   │   ├── Theme.swift         színek, a görbe színe a szinttel változik
 │   │   └── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
 │   └── View/
-│       ├── RootView.swift      hero kijelző, statisztikák, itallista, disclaimer
-│       ├── BACChartView.swift  a sáv
-│       ├── AddDrinkSheet.swift ital felvitele + élő előrejelzés
-│       └── ProfileSheet.swift  testalkat, gyakoriság, saját határ, haladó
-└── Reference/                  Python referencia-implementáció és validáció
+│       ├── MainTabView.swift        History / Live / Profil, Live középen
+│       ├── LiveView.swift           élő alkalom + naplapozás + négy nap-állapot
+│       ├── HistoryView.swift        lezárt alkalmak listája
+│       ├── SessionDetailView.swift  navigációs keret egy múltbeli alkalomhoz
+│       ├── SessionContentView.swift a tartalom — LiveView és Detail is ezt használja
+│       ├── BACChartView.swift       a sáv, BACChartModel bemenettel
+│       ├── DrinkListSection.swift   az itallista, koppintás + húzás
+│       ├── DrinkRow.swift           egy sor, kézzel írt swipe-pal
+│       ├── AddDrinkSheet.swift      felvitel és szerkesztés + élő előrejelzés
+│       └── ProfileView.swift        testalkat, gyakoriság, saját határ, haladó
+└── Reference/                  Python referencia + a katalógusgenerátor
 ```
 
 **Rétegszabály:** a `BACKit` UI-független és `Sendable`. A SwiftUI nézetek és a
 SwiftData a motort hívják, soha nem fordítva. Ha valami élettani logika a
 `DrinkSmart/` alá kerülne, az hiba.
+
+**A nézetek nem beszélnek SwiftDatával közvetlenül**, egy kivétellel: a
+`@Query` a `HistoryView`-ban és a `LiveView`-ban, mert az listázás. Minden írás
+a `SessionStore`-on megy át — hét művelet: `refreshFromStore`, `add`, `update`,
+`remove`, `clearSession`, `project`, `tick`.
 
 ## 4. A modell
 
@@ -110,7 +132,7 @@ C   = A_felszívódott / Vd
 ```
 
 **A női egyenletben nincs életkor** — ez a Watson-formula sajátossága, nem hiba.
-Ha nőt állítunk be, a kor csúszkája nem mozdít semmit. A `ProfileSheet` testalkat
+Ha nőt állítunk be, a kor csúszkája nem mozdít semmit. A `ProfileView` testalkat
 szekciójának lábjegyzete ezt ki is mondja, ha a nem „nő" — különben bugnak
 látszana.
 
@@ -179,6 +201,37 @@ A `rate` / `steepestRise` és a „Még emelkedik" jelzés azért van, mert a
 memóriakiesés a felszívódás meredekségével korrelál. Ez egyben az egyetlen
 információ, amit egy szonda elvileg sem tud megadni.
 
+### 5.5 Alkalmanként befagyasztott profil
+
+Minden `DrinkingSession` tárolja a **saját** profil-pillanatképét, lapítva hat
+mezőbe. Ha csak az italokat tárolnánk és mindig az aktuális profillal
+számolnánk, egy régi este visszamenőleg megváltozna: ugyanaz a három ital
+60 kg-nál 0,578 ‰ csúcsot ad, 70 kg-nál 0,507-et — 14 % eltérés. Egy feljegyzés,
+ami magát átírja, nem feljegyzés.
+
+A lezárt alkalom befagy. A nyitott követi az aktuális profilt, amíg le nem
+zárul — mert egy este közepén észrevett elgépelést a *most látott* görbén
+akarsz javítani. Visszamenőlegesen létrehozott alkalom a **legközelebbi**
+alkalom profilját örökli, nem a mait (`profileApplicable`).
+
+A **motort** viszont szándékosan nem fagyasztjuk be: a bemenet van eltárolva,
+így egy későbbi modelljavítás a régi alkalmakat is helyesen újraszámolja.
+
+### 5.6 Ivási nap, nem naptári nap
+
+A `DrinkingDay` hajnali 5-kor vált. Egy 22:00–03:00 este így egy naphoz
+tartozik; éjféli határral kettévágódna, a csúcs az egyik napon, a lecsengés a
+másikon. Ez dönti el a Live lapozását és azt is, melyik alkalomba kerül egy
+visszamenőlegesen felvitt ital.
+
+### 5.7 Négy nap-állapot, és a „nem tudjuk" külön
+
+A Live képernyő négy esetet ismer: `live`, `recorded`, `dry`, `untracked`.
+Az utolsó kettő **nem ugyanaz**. Egy üres nap, amit rögzítettünk, bizonyíték
+arra, hogy nem ittál. Egy nap az `AppSettings.trackingStartedAt` előtt csak
+annyit jelent, hogy nem tudjuk. Azt írni rá, hogy „nem ittál", találgatás
+lenne, ezért külön ikonja és szövege van.
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -208,7 +261,7 @@ cd Reference && python3 validate.py && python3 check_tests.py
 amennyit az iOS nyelvi beállítása kér: magyar rendszeren magyar, minden más
 esetben angol.
 
-- `DrinkSmart/Localizable.xcstrings` — 100 kulcs, `en` és `hu`.
+- `DrinkSmart/Localizable.xcstrings` — 129 kulcs, `en` és `hu`.
 - A kulcs maga az **angol forrásszöveg**. Interpolációnál `%@`.
 - A nézetekben `LocalizedStringKey` (sima `Text("...")`), a modellrétegben
   `LocalizedStringResource` (enum `label` / `detail` / `explanation`).
@@ -249,6 +302,11 @@ cd Reference && python3 make_catalog.py
 - A `SessionStore` csak akkor számol újra, ha a bemenet változik — az óra
   ketyegése (`tick()`) csak a `now`-t mozgatja.
 - A chart ~220 pontra ritkít, de a csúcsot mindig megtartja.
+- A séma **CloudKit-kompatibilis**: minden tárolt mezőnek van alapértéke vagy
+  opcionális, nincs `@Attribute(.unique)`, a kapcsolat inverzzel megy. Ezt új
+  mező felvitelekor is tartani kell, különben migráció.
+- A cache-elt összesítő a `BACEngine.version`-t hordozza. Bumpold, ha a modell
+  **számai** változnak — refaktorra ne, mert feleslegesen újraszámol mindent.
 
 ## 9. App Store kontextus
 
@@ -267,15 +325,25 @@ TestFlight (100 eszköz, Beta App Review nélkül).
 
 ## 10. Állapot
 
-**Kész:** a motor sávval együtt, a chart, ital felvitele élő előrejelzéssel,
-profil, perzisztencia, 44 teszt, angol/magyar lokalizáció.
+**Kész:** a motor sávval együtt; SwiftData-perzisztencia alkalmanként
+befagyasztott profillal; migráció a régi UserDefaults-blobból; három tab;
+Live képernyő naplapozással és négy nap-állapottal; előzmény-lista és
+alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
+is; 38 teszt; angol/magyar lokalizáció 129 kulccsal.
+
+Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
 **Hátralévő:**
+- Tartományválasztó és aggregált statisztika az Előzmény tabon
+- iCloud capability bekapcsolása Xcode-ban (a konténer addig lokálisra esik
+  vissza, debug buildben assertionnel)
+- App-szintű teszt target — a `SessionPolicy`, a `DrinkingDay` és a migráció
+  tiszta logika, és ez az a kód, ami adatot tud veszíteni
 - HealthKit: testadatok beolvasása, BAC és kalória visszaírása
 - Helyi értesítések: közeledsz a határhoz / mikorra leszel tiszta
-- Korábbi alkalmak és statisztika — itt jön be a SwiftData
 - watchOS-kiegészítő a gyors felvitelhez
 - Kalibráció szondás visszamérésből
+- Ital áthelyezése másik napra szerkesztéssel (most az eredeti alkalomban marad)
 - A hero kijelző tartományos elrendezésének élő ellenőrzése (48pt + skálázás)
 - Az angol locale 12 órás AM/PM időformátuma szélesebb címkéket ad a charton;
   a `strideHours` már ritkít, de élőben ellenőrizni kell
@@ -285,4 +353,9 @@ profil, perzisztencia, 44 teszt, angol/magyar lokalizáció.
 Zoltán iOS fejlesztő, a technikai mélységet bírja és igényli. A termékdöntéseket
 érvekkel vitatja — ha valami rossz UX vagy rossz modellezés, mondjuk ki, és
 támasszuk alá számokkal. A „lebontási sebesség csúszka" kritikája tőle jött, és
-igaza volt; ebből lett az 5.1–5.3 pont.
+igaza volt; ebből lett az 5.1–5.3 pont. Ugyanígy a „nem ittál" kontra „nincs
+adat" megkülönböztetés (5.7).
+
+Döntés előtt **egyesével** kérdezz, részletesen, valós alternatívákkal — nem
+négy kérdést egyszerre. Ha egy kérésnek van rejtett következménye (ütköző
+gesztus, elveszett adat, hamis állítás), azt mondd ki, mielőtt megcsinálod.
