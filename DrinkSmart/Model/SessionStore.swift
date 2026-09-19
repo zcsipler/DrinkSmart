@@ -259,6 +259,9 @@ final class SessionStore {
     /// whichever session happens to be open. Without that, filling in a beer
     /// from three weeks ago would drag tonight's session back three weeks and
     /// draw one continuous curve across it.
+    ///
+    /// Logging it is also evidence about the one before it — see
+    /// `Array.pourCut(by:)`.
     func add(_ drink: Drink) {
         // A drink arriving after the occasion has ended starts the next one.
         closeSessionIfEnded()
@@ -268,6 +271,8 @@ final class SessionStore {
             target.startedAt = drink.consumedAt
         }
 
+        applyPourCut(of: drink, in: target)
+
         let record = DrinkRecord(drink)
         record.session = target
         context.insert(record)
@@ -276,6 +281,20 @@ final class SessionStore {
         reconcile(target)
         save()
         rebuild()
+    }
+
+    /// Shortens the drink this one interrupted, if it interrupted one.
+    ///
+    /// Only on `add`. Editing or deleting the interrupting drink afterwards
+    /// does **not** give the earlier one its original duration back — that was
+    /// a default, and the app has no record of a default it has replaced. The
+    /// duration is editable on both rows, which is the way out.
+    private func applyPourCut(of drink: Drink, in target: DrinkingSession) {
+        guard let cut = target.sortedDrinks.pourCut(by: drink),
+              let record = (target.drinks ?? []).first(where: { $0.id == cut.drinkID })
+        else { return }
+
+        record.drinkingMinutes = cut.drinkingMinutes
     }
 
     /// Corrects a drink. `target` defaults to the running session; the history
@@ -351,7 +370,10 @@ final class SessionStore {
     ) -> BandedProjection {
         let owner = target ?? session
         let all = owner?.sortedDrinks ?? drinks
-        let others = excludedID.map { id in all.filter { $0.id != id } } ?? all
+        // The same cut `add` will make, so the curve previewed above the Add
+        // button is the curve you get after pressing it.
+        let others = (excludedID.map { id in all.filter { $0.id != id } } ?? all)
+            .shorteningPour(for: candidate)
 
         return engine.projectBand(
             profile: owner?.profile ?? settings.profile,

@@ -65,8 +65,9 @@ DrinkSmart/
 │   │   ├── Drink.swift         ital, gyomorállapot, ka, biohasznosulás
 │   │   ├── BACEngine.swift     RK4 szimuláció, BACCurve lekérdezések, version
 │   │   ├── Projection.swift    egyvonalas „mi lenne, ha" (régebbi API, megmaradt)
-│   │   └── BACBand.swift       sávos szimuláció, LimitOutcome, BandedProjection
-│   └── Tests/BACKitTests/      47 teszt, Python referenciaértékekkel
+│   │   ├── BACBand.swift       sávos szimuláció, LimitOutcome, BandedProjection
+│   │   └── PourShortening.swift  a megkezdett ital lezárása a következővel
+│   └── Tests/BACKitTests/      56 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
 │   ├── Localizable.xcstrings   146 kulcs, en + hu
@@ -419,6 +420,40 @@ konstansba kéri le. Nem stílus kérdése: a `chartXSelection` minden húzási
 mintánál újraértékeli a `body`-t, és külön computed propertykből a pakolás
 markonként többször futna le, frame-enként.
 
+### 5.13 A következő ital lezárja az előzőt — de csak azonos típusnál
+
+A `drinkingMinutes` alapértéke típusonként fix (5.9): a sör 30 perc. Ha 20 perc
+múlva új **sört** veszünk fel, akkor az előzőt nem 30 perc alatt ittuk meg,
+hanem 20 alatt — a felvitel maga az információ, hiszen nem tartunk két sört a
+kézben. Az `Array.pourCut(by:)` ilyenkor lerövidíti a megkezdett italt arra a
+pillanatra.
+
+**Típusra érzékeny, és ez a lényege.** Egy feles a sör közben semmit nem mond a
+sörről; ha arra is rövidítenénk, kitalálnánk egy meredekebb emelkedést, mint
+ami történt. A típus a `Drink.name`, vagyis a sablon azonosítója.
+
+**Nincs alsó korlát.** Ha négy perccel később jön a következő sör, az előző négy
+perces lesz. Ez utólagos, tömeges felvitelnél hamis meredekséget ad (négy sör
+egymás után begépelve, mind „Most"-tal) — tudatos döntés, hogy a szabály
+kivétel nélkül érvényes, és a felvitt időpontok helyessége a felhasználón áll.
+
+**Amit tudni kell róla:**
+
+- **Idempotens.** A levágott ital már nem tart a kérdéses pillanatig, így egy
+  második futás nem talál semmit. E nélkül az `AddDrinkSheet` élő előrejelzése
+  minden lépésköznél tovább csonkította volna az időtartamot.
+- **A `project` ugyanazt a vágást alkalmazza**, mint az `add`. Nem kozmetika:
+  e nélkül az Add gomb fölött vetített görbe nem az lenne, amit a gomb
+  megnyomása után kapsz.
+- **Csak `add`-nál.** Az előző időtartama **nem áll vissza**, ha a megszakító
+  italt utólag töröljük vagy átidőzítjük — a 30 perc alapérték volt, és az app
+  nem tart nyilván lecserélt alapértékeket. Mindkét soron szerkeszthető az
+  időtartam, ez a kiút.
+- Csendben történik; az itallistában látszik az új időtartam.
+
+A szabály a `BACKit`-ben van, nem az app rétegben: `[Drink] -> [Drink]`, tiszta
+függvény UI nélkül — és így tesztelhető (`PourShorteningTests`, 9 teszt).
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -447,7 +482,7 @@ csúcssáv `0,510401 … 0,624922`, középcsúcs `0,565699` @ 138 perc,
 kiürülés `355 … 522` perc.
 
 ```bash
-./Reference/run_tests.sh                 # 47 teszt, BACKit
+./Reference/run_tests.sh                 # 56 teszt, BACKit
 cd Reference && python3 validate.py && python3 check_tests.py
 ```
 
@@ -549,7 +584,7 @@ befagyasztott profillal; migráció a régi UserDefaults-blobból; három tab;
 Live képernyő a mai napra, három nap-állapottal; előzmény-lista és
 alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
 is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyarázata
-és tippek a saját érték kiderítéséhez; 47 teszt; angol/magyar lokalizáció
+és tippek a saját érték kiderítéséhez; 56 teszt; angol/magyar lokalizáció
 144 kulccsal.
 
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
@@ -646,7 +681,7 @@ tudatosságnövelő eszköz, nem egy „megvezethetsz-e" kalkulátor.
 ### 11.8 Tesztlefedettség a fő számolásra
 
 Zoltán kérése, és a lista legfontosabb pontja: a **Widmark/farmakokinetikai
-számolás ne tudjon észrevétlenül elromlani**. Ami ma van, az jó alap — 47 teszt,
+számolás ne tudjon észrevétlenül elromlani**. Ami ma van, az jó alap — 56 teszt,
 konkrét számokkal a Python referenciából —, de nem teljes:
 
 - **Jellemzőalapú (property-based) tesztek** a konkrét értékek mellé:
@@ -712,7 +747,7 @@ javítja az előző kört, ismerjük el nyíltan és írjuk át (ebből lett az 
 
 **Mit tudok ellenőrizni.** A `BACKit` tesztjeit **le tudom futtatni**:
 `./Reference/run_tests.sh` letölt egy Swift toolchaint a sandboxba, és lemegy
-mind a 47 teszt (6.). Ezt minden olyan kör végén futtassuk le, ami a motorhoz
+mind az 56 teszt (6.). Ezt minden olyan kör végén futtassuk le, ami a motorhoz
 ér. Rajta kívül: zárójel- és API-egyezés-ellenőrzés, a Python referencia, a
 katalógus-ellenőrző.
 
