@@ -3,6 +3,10 @@
 Ez a fájl azért van, hogy egy új beszélgetés azonnal képben legyen. Ha valamit
 megváltoztatunk a modellben vagy a terméklogikában, ezt is frissítsük.
 
+Ha egy új beszélgetés kezdődik, a rövid útvonal: **0.** hogyan dolgozunk,
+**2.** miért létezik ez az app, **5.** minden lényeges döntés és az indoklása,
+**10.** hol állunk most, **11.** mi jön még.
+
 ---
 
 ## 0. Munkamódszer — kötelező
@@ -287,6 +291,33 @@ javasolt szórást a csúszka mellett szövegként ajánlja fel. A
 `betaUncertainty` nélkül írt pillanatkép azt a számot jelentette, és egy tárolt
 alkalom nem írhatja át magát (5.5).
 
+### 5.9 Ivási tempó — az emelkedés hitelessége, nem a csúcs pontossága
+
+A `Drink.drinkingMinutes` alatt az alkohol **egyenletes sebességgel** kerül a
+gyomorba, nem egyetlen pillanatban. Nulla időtartam bitre azonos a régi
+viselkedéssel (0,181691712), így semmi korábban felvitt adat nem mozdul.
+
+**Fontos, hogy miért van:** nem a csúcs miatt. Egy négy sörös este csúcsa
+így is, úgy is ~2 %-on belül ugyanaz. Az **emelkedés meredeksége** viszont
+0,81 → 0,36 g/L/h között mozog az „egy hajtásra" és a lassú kortyolás között
+(−55 %). A blackout ezzel korrelál (5.4), tehát egy olyan görbealakot
+állítottunk volna, amit nem modelleztünk.
+
+*(Ezt a számot egyszer elrontottam: egy gyors szkriptben a bolus-esetben mind a
+négy sört t=0-ra tettem, és −32 %-os csúcskülönbséget állítottam. Nem volt igaz.
+Ha egy szám túl jól jön ki, számoljuk újra.)*
+
+Italtípusonkénti alapértékek — `DrinkCatalog`: tömény 0 perc (egyben lehajtják),
+sör 30, bor 25, pezsgő 20, koktél 20, egyedi 15.
+
+### 5.10 Az előrejelzés a megerősítő sávban van, nem a lap tetején
+
+Az `AddDrinkSheet` vetített csúcsa az Add gomb fölött ül. Nem ez alapján
+választasz italt — már tudod, hogy sört akarsz —, így a lap tetején csak
+lenyomta a típusválasztót a fold alá. A gomb mellett viszont ott van, ahol a
+döntés születik, és a határátlépés-figyelmeztetés (5.2) belőle növi ki magát,
+amikor van mit mondani.
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -380,30 +411,123 @@ TestFlight (100 eszköz, Beta App Review nélkül).
 
 ## 10. Állapot
 
-**Kész:** a motor sávval együtt; SwiftData-perzisztencia alkalmanként
+**Kész:** a motor sávval és ivási tempóval; SwiftData-perzisztencia alkalmanként
 befagyasztott profillal; migráció a régi UserDefaults-blobból; három tab;
 Live képernyő naplapozással és négy nap-állapottal; előzmény-lista és
 alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
-is; 38 teszt; angol/magyar lokalizáció 129 kulccsal.
+is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyarázata
+és tippek a saját érték kiderítéséhez; 47 teszt; angol/magyar lokalizáció
+152 kulccsal.
 
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
-**Hátralévő:**
-- Tartományválasztó és aggregált statisztika az Előzmény tabon
-- iCloud capability bekapcsolása Xcode-ban (a konténer addig lokálisra esik
-  vissza, debug buildben assertionnel)
+Utolsó commit: `d0ef5aa` — „Add drinking pace, and show one number unless you
+ask for the range".
+
+## 11. Roadmap
+
+Zoltán tervei, prioritási sorrend nélkül. Egyik sincs elkezdve. Mielőtt
+bármelyikbe belevágnánk, kérdezzük meg, tényleg most jön-e — a sorrend
+változhat.
+
+### 11.1 Szondás visszatesztelés és kalibráció
+
+A cél nem az, hogy a szondát helyettesítsük, hanem hogy **felhasználjuk**. A
+`ProfileView` már leírja a módszert szövegben (5.3): két fújás a lecsengő ágon,
+legalább egy óra különbséggel, a különbség osztva az eltelt órákkal adja a bétát.
+
+Amit építeni kell: egy kis kalkulátor — két mért érték + két időpont —, ami
+kiszámolja a bétát, és felajánlja, hogy beállítja. Érdemes eltárolni a méréseket
+is, hogy több pontból lehessen átlagolni, és hogy a becslés/mérés eltérése
+látható legyen.
+
+Ez egyben **App Store-érv** is: az app nem kiváltja a hardvert, hanem pontosabb
+lesz tőle. A guideline 1.4.3 pont a szondával párosított appokat engedi (9.).
+
+### 11.2 Feature flagek és in-app payment
+
+Az **alapfunkció a Live** — ez maradjon ingyenes és mindig elérhető. Minden más
+funkció kerüljön flag alá, hogy egy későbbi in-app vásárlás mögé lehessen tenni
+őket anélkül, hogy a kódot újra kellene szabni.
+
+Tervezési megjegyzés: a flageket ne a nézetekbe szórjuk szét. Egy központi
+`FeatureFlags` (vagy `Entitlements`) típus kell, ami a StoreKit-állapotot és a
+debug-override-ot egy helyen fogja össze, és a nézetek csak kérdezik.
+
+### 11.3 Sokkal komplexebb Előzmény
+
+Havi / heti / éves bontás, line chartokkal a fogyasztásról. Nem csak
+alkalomlista: trendek. Mennyit ittam ebben a hónapban az előzőhöz képest, hány
+józan nap volt, hogy alakult a csúcsok alakulása.
+
+Az adat már megvan hozzá: a `DrinkingSession` tárol összesítőt
+(`SessionSummary`), és a `DrinkingDay` (5.6) adja a napi bontást. Aggregálásnál
+figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van kötve.
+
+### 11.4 Adatmentés és készülékváltás
+
+**A követelmény:** ha Zoltán készüléket vált ugyanazzal az Apple ID-val, az
+adatok ne vesszenek el. Ez nem opcionális kényelem.
+
+A séma már **CloudKit-kompatibilis** (8.), a konténer kódban ott van, csak a
+capability nincs bekapcsolva Xcode-ban — addig lokálisra esik vissza.
+
+Nyitott döntés: elég-e az iCloud / Apple ID kötés, vagy kell saját
+login/regisztráció is. Az iCloud egyszerűbb és privátabb (nincs szerverünk, ami
+alkoholfogyasztási adatot tárol — ez adatvédelmileg komoly érv), viszont
+Androidra vagy webre nem vihető át, és nem támogat megosztást. **Ezt még meg
+kell beszélni.**
+
+### 11.5 Több profil
+
+Egy estén belül át lehessen váltani másik emberre — pl. a barátnő profiljára —,
+és oda is felvinni az italokat.
+
+Ez a legmélyebb séma-változás a listán. A `DrinkingSession` ma a profilt
+*pillanatképként* tárolja (5.5), de nincs fogalma arról, hogy *kié*. Kell egy
+`Person` entitás, és minden alkalomnak hozzá kell tartoznia. A migrációt úgy
+kell megírni, hogy a meglévő alkalmak egy alapértelmezett személyhez kerüljenek.
+A `SessionStore` ma egyetlen nyitott alkalmat ismer — több emberrel egyszerre
+több nyitott alkalom van.
+
+### 11.6 Józan napok streak
+
+Duolingo-szerű: jól látható helyen, a headerben a józan napok száma, és
+gratuláció bizonyos mérföldköveknél.
+
+Vigyázni kell vele: a streak **motiváló**, de egy megszakadt sorozat tud
+büntetésként hatni, ami pont ellentétes azzal, amit ez az app akar. Legyen benne
+visszafogott — ne piros, ne „elvesztetted", inkább „eddig eljutottál". A számítás
+alapja a `DrinkingDay` (5.6) és az `AppSettings.trackingStartedAt`: nem
+rögzített nap nem józan nap, csak ismeretlen (5.7).
+
+### 11.7 Tudományos magyarázó képernyő
+
+A kíváncsiaknak: mi alapján és hogyan számol az app — Widmark, Watson,
+Michaelis–Menten, a felszívódási állandók. A tartalom nagyrészt már megvan
+ebben a dokumentumban (4. fejezet) és a kód kommentjeiben.
+
+Ez is **App Store-érv**: az átláthatóság azt támasztja alá, hogy ez egy
+tudatosságnövelő eszköz, nem egy „megvezethetsz-e" kalkulátor.
+
+## 12. Technikai hátralék
+
+Nem termékfunkciók, hanem amit rendbe kell tenni:
+
+- iCloud capability bekapcsolása Xcode-ban (lásd 11.4)
 - App-szintű teszt target — a `SessionPolicy`, a `DrinkingDay` és a migráció
   tiszta logika, és ez az a kód, ami adatot tud veszíteni
+- Tartományválasztó az Előzmény tabon (a 11.3 előfeltétele)
 - HealthKit: testadatok beolvasása, BAC és kalória visszaírása
 - Helyi értesítések: közeledsz a határhoz / mikorra leszel tiszta
 - watchOS-kiegészítő a gyors felvitelhez
-- Kalibráció szondás visszamérésből
 - Ital áthelyezése másik napra szerkesztéssel (most az eredeti alkalomban marad)
-- A hero kijelző tartományos elrendezésének élő ellenőrzése (48pt + skálázás)
+- A hero kijelző **tartományos** elrendezésének élő ellenőrzése: 48pt-on egy
+  tartomány kétszer olyan széles, a `minimumScaleFactor` 0,5-re megy le
 - Az angol locale 12 órás AM/PM időformátuma szélesebb címkéket ad a charton;
   a `strideHours` már ritkít, de élőben ellenőrizni kell
 
-## 11. Megjegyzés a hangnemhez
+## 13. Megjegyzés a hangnemhez
 
 Zoltán iOS fejlesztő, a technikai mélységet bírja és igényli. A termékdöntéseket
 érvekkel vitatja — ha valami rossz UX vagy rossz modellezés, mondjuk ki, és
@@ -414,3 +538,14 @@ adat" megkülönböztetés (5.7).
 Döntés előtt **egyesével** kérdezz, részletesen, valós alternatívákkal — nem
 négy kérdést egyszerre. Ha egy kérésnek van rejtett következménye (ütköző
 gesztus, elveszett adat, hamis állítás), azt mondd ki, mielőtt megcsinálod.
+
+**A vitát vigyük végig, de ne makacskodjunk.** A tartomány-kontra-egy-szám kérdés
+két körben fordult: először kivettem a tartományt mindenhonnan, aztán kiderült,
+hogy a kérés nem ez volt — csak az alapérték ne tartomány legyen. Ha a válasz
+javítja az előző kört, ismerjük el nyíltan és írjuk át (ebből lett az 5.8).
+
+**Amit nem tudok ellenőrizni:** nincs Swift toolchain a környezetemben, tehát
+**nem fordítom le a kódot**. Amit tudok: zárójel- és API-egyezés-ellenőrzés, a
+Python referencia, a katalógus-ellenőrző. A fordítás és a futtatás Zoltáné —
+szimulátoron és készüléken. Ezért érdemes minden körben kis, önmagában
+értelmes változást adni.
