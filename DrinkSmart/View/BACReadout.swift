@@ -31,22 +31,39 @@ struct BACReadout: View {
     let range: ClosedRange<Double>
     let unit: BACUnit
 
+    /// The limit the colour is read against. Required rather than defaulted,
+    /// so a caller cannot quietly get someone else's scale.
+    let limit: Double
+
     /// Point size of the figure. The unit suffix scales from it.
     var size: CGFloat = 48
 
     /// Colour of the figure. Defaults to the level's own tint.
     var tint: Color?
 
-    init(_ range: ClosedRange<Double>, unit: BACUnit, size: CGFloat = 48, tint: Color? = nil) {
+    init(
+        _ range: ClosedRange<Double>,
+        unit: BACUnit,
+        limit: Double,
+        size: CGFloat = 48,
+        tint: Color? = nil
+    ) {
         self.range = range
         self.unit = unit
+        self.limit = limit
         self.size = size
         self.tint = tint
     }
 
     /// A figure that is a point by construction rather than by setting.
-    init(value: Double, unit: BACUnit, size: CGFloat = 48, tint: Color? = nil) {
-        self.init(value...value, unit: unit, size: size, tint: tint)
+    init(
+        value: Double,
+        unit: BACUnit,
+        limit: Double,
+        size: CGFloat = 48,
+        tint: Color? = nil
+    ) {
+        self.init(value...value, unit: unit, limit: limit, size: size, tint: tint)
     }
 
     /// What the colour reacts to. The middle of the band, so the tint does not
@@ -63,7 +80,7 @@ struct BACReadout: View {
         HStack(alignment: .firstTextBaseline, spacing: size * 0.11) {
             Text(verbatim: unit.formatRange(range))
                 .font(.readout(size))
-                .foregroundStyle(tint ?? Theme.tint(for: midpoint))
+                .foregroundStyle(tint ?? Theme.tint(for: midpoint, limit: limit))
                 .lineLimit(1)
                 .minimumScaleFactor(minimumScale)
                 .contentTransition(.numericText())
@@ -88,11 +105,11 @@ extension ClosedRange where Bound == Double {
     ZStack {
         Theme.background.ignoresSafeArea()
         VStack(alignment: .leading, spacing: 30) {
-            BACReadout(value: 0.58, unit: .perMille, size: 48)
-            BACReadout(0.52...0.64, unit: .perMille, size: 48)
-            BACReadout(value: 1.24, unit: .perMille, size: 26)
-            BACReadout(0.52...0.64, unit: .percent, size: 22)
-            BACReadout(value: 0.32, unit: .perMille, size: 22, tint: Theme.secondaryText)
+            BACReadout(value: 0.58, unit: .perMille, limit: 0.5, size: 48)
+            BACReadout(0.52...0.64, unit: .perMille, limit: 0.5, size: 48)
+            BACReadout(value: 1.24, unit: .perMille, limit: 0.5, size: 26)
+            BACReadout(0.52...0.64, unit: .percent, limit: 0.5, size: 22)
+            BACReadout(value: 0.32, unit: .perMille, limit: 0.5, size: 22, tint: Theme.secondaryText)
         }
         .padding()
     }

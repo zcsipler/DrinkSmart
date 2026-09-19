@@ -223,7 +223,7 @@ struct BACChartView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             caption(title)
-            BACReadout(range, unit: unit, size: 26, tint: tint)
+            BACReadout(range, unit: unit, limit: model.limit, size: 26, tint: tint)
         }
     }
 
@@ -311,7 +311,7 @@ struct BACChartView: View {
                 x: .value("Time", sample.date),
                 y: .value("Level", sample.mid)
             )
-            .foregroundStyle(Theme.tint(for: model.peakRange?.upperBound ?? 0))
+            .foregroundStyle(Theme.tint(for: model.peakRange?.upperBound ?? 0, limit: model.limit))
             .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
             .interpolationMethod(.monotone)
         }
@@ -319,11 +319,17 @@ struct BACChartView: View {
 
     /// The fill is a vertical gradient, so colour varies with height and the
     /// shape of the band and the level can be read at the same time.
+    ///
+    /// Anchored to the level the band actually reaches, not to `yMaximum`.
+    /// Now that the ramp is a fraction of the limit, `yMaximum` — which is at
+    /// least 1.4 times the limit by construction — would put the top of every
+    /// gradient in deep crimson, on a quiet evening as much as a heavy one.
     private var bandGradient: LinearGradient {
-        LinearGradient(
+        let peak = model.peakRange?.upperBound ?? 0
+        return LinearGradient(
             stops: [
-                .init(color: Theme.tint(for: model.yMaximum).opacity(0.45), location: 0),
-                .init(color: Theme.tint(for: model.yMaximum * 0.5).opacity(0.30), location: 0.55),
+                .init(color: Theme.tint(for: peak, limit: model.limit).opacity(0.45), location: 0),
+                .init(color: Theme.tint(for: peak * 0.5, limit: model.limit).opacity(0.30), location: 0.55),
                 .init(color: Theme.calm.opacity(0.16), location: 1),
             ],
             startPoint: .top,
@@ -334,12 +340,12 @@ struct BACChartView: View {
     @ChartContentBuilder
     private var limitRule: some ChartContent {
         RuleMark(y: .value("Personal limit", model.limit))
-            .foregroundStyle(Theme.elevated.opacity(0.55))
+            .foregroundStyle(Theme.alarm.opacity(0.5))
             .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
             .annotation(position: .top, alignment: .trailing, spacing: 3) {
                 Text("YOUR LIMIT \(unit.formatted(model.limit))")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Theme.elevated.opacity(0.85))
+                    .foregroundStyle(Theme.alarm.opacity(0.9))
             }
     }
 
@@ -473,11 +479,11 @@ struct BACChartView: View {
             // The focus point is a range too: two end markers, not one dot.
             PointMark(x: .value("Now", date), y: .value("Lower", range.lowerBound))
                 .symbolSize(38)
-                .foregroundStyle(Theme.tint(for: range.lowerBound).opacity(0.7))
+                .foregroundStyle(Theme.tint(for: range.lowerBound, limit: model.limit).opacity(0.7))
 
             PointMark(x: .value("Now", date), y: .value("Upper", range.upperBound))
                 .symbolSize(38)
-                .foregroundStyle(Theme.tint(for: range.upperBound).opacity(0.7))
+                .foregroundStyle(Theme.tint(for: range.upperBound, limit: model.limit).opacity(0.7))
         }
     }
 

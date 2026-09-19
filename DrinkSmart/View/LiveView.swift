@@ -146,7 +146,7 @@ struct LiveView: View {
             }
             .frame(height: 20)
 
-            BACReadout(store.currentRange, unit: store.unit, size: 48)
+            BACReadout(store.currentRange, unit: store.unit, limit: store.limit, size: 48)
 
             (store.currentRange.isPoint ? Text("estimated level") : Text("estimated range"))
                 .font(.system(size: 11, weight: .medium, design: .rounded))

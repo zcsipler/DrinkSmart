@@ -85,7 +85,7 @@ DrinkSmart/
 │   │       ├── LegacySessionImport.swift egyszeri import a régi blobból
 │   │       └── SessionStore+Preview.swift in-memory store a previewekhez
 │   ├── Support/
-│   │   ├── Theme.swift         színek, a görbe színe a szinttel változik
+│   │   ├── Theme.swift         színek, a görbe színe a határhoz viszonyítva változik
 │   │   └── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
 │   └── View/
 │       ├── MainTabView.swift        History / Live / Profil, Live középen
@@ -453,6 +453,44 @@ kivétel nélkül érvényes, és a felvitt időpontok helyessége a felhasznál
 
 A szabály a `BACKit`-ben van, nem az app rétegben: `[Drink] -> [Drink]`, tiszta
 függvény UI nélkül — és így tesztelhető (`PourShorteningTests`, 9 teszt).
+
+### 5.14 A színskála a saját határhoz van kötve, nem abszolút szintekhez
+
+A `Theme.tint(for:limit:)` a `bac / limit` arányt színezi, nem a ‰-értéket.
+Öt megállóval, folytonosan: **0** türkiz → **0,55** borostyán → **0,85** korall
+→ **1,00 teljes vörös** → **1,50 és fölötte** sötét bíbor.
+
+**Miért nem abszolút.** A régi skála 0,5 ‰-nél váltott borostyánra és 1,3 ‰
+fölött korallban állt meg — mindenkinek ugyanott. Ez a színt az ivásról
+általában tett állítássá tette, nem erről az emberről szólóvá: aki 0,3 ‰-re
+állította a határát, végig türkizben látta az estéjét, aki 1,2 ‰-re, az már jóval
+a saját vonala alatt korallban volt.
+
+**A teljes vörös pontosan a határon van.** Ez nem verdikt (2.): a határ a
+felhasználó saját száma, amit ő írt be, és az app csak következetes vele — az
+5.2-es háromállapotú figyelmeztetés ugyanerre a vonalra hivatkozik. Fölötte
+tovább mélyül, hogy a „jóval túl" is látsszon, de a telített vörös pillanata a
+határ.
+
+**Amit ez maga után vont:**
+
+- A `tint` minden hívója átad egy határt, és a `BACReadout`-on **kötelező**
+  paraméter — nem alapértelmezett, mert egy elfelejtett érték csendben valaki
+  más skáláját adná. Az Előzmény az adott alkalom saját határát adja át, nem a
+  mait, ugyanazon az alapon, mint a profil-pillanatképnél (5.5).
+- A chart sávgradiense a **csúcshoz** igazodik, nem a `yMaximum`-hoz. A
+  `yMaximum` konstrukció szerint legalább a határ 1,4-szerese, tehát minden
+  gradiens teteje sötét bíbor lett volna, egy csendes estén is.
+- A `ProfileView` határcsúszkájának értéke fixen `Theme.alarm`. A saját
+  szintjével színezni körkörös volna — a skála a határ törtrésze, tehát egy
+  határ mindig pontosan 1,0. Így viszont szó szerint azt mondja: **ez az a
+  szám, aminél a kijelző vörösre vált.**
+- A charton a határvonal is `Theme.alarm`, nem korall. Ugyanaz a küszöb,
+  ugyanaz a szín.
+
+**Aminek tudatában kell lenni:** alacsonyra állított határnál (0,2–0,3 ‰) egy
+sör is vörösre viszi a görbét. Ez a skála működése, nem hibája — de ha a határ
+alsó vége miatt zavaró lesz, a megállók az egyetlen hangolandó dolog.
 
 ## 6. Validáció
 

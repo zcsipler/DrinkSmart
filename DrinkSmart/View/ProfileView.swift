@@ -256,7 +256,11 @@ private struct LimitSlider: View {
                 Spacer()
                 Text(verbatim: store.unit.formatted(value))
                     .font(.system(.body, design: .rounded).monospacedDigit())
-                    .foregroundStyle(Theme.tint(for: value))
+                    // Always the alarm colour, and it means something literal:
+                    // this is the number the readout turns red on. Tinting it
+                    // by its own level would be circular — the ramp is a
+                    // fraction of the limit, so a limit is always exactly 1.
+                    .foregroundStyle(Theme.alarm)
             }
             Slider(
                 value: Binding(get: { value }, set: { draft = $0 }),
@@ -268,7 +272,7 @@ private struct LimitSlider: View {
                     self.draft = nil
                 }
             )
-            .tint(Theme.tint(for: value))
+            .tint(Theme.calm)
             .accessibilityLabel(Text("Your limit"))
         }
     }

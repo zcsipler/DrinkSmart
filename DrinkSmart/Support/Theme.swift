@@ -16,18 +16,49 @@ enum Theme {
     static let calm = Color(red: 0.271, green: 0.749, blue: 0.706)      // teal
     static let caution = Color(red: 0.949, green: 0.714, blue: 0.310)   // amber
     static let elevated = Color(red: 0.937, green: 0.427, blue: 0.396)  // coral
+    static let alarm = Color(red: 0.925, green: 0.176, blue: 0.196)     // red
+    static let critical = Color(red: 0.745, green: 0.043, blue: 0.157)  // deep crimson
 
-    /// The colour for a given level. The breakpoints are deliberately soft:
-    /// pharmacokinetics is continuous, not stepped, and the colouring should
-    /// not imply sharp category boundaries either.
-    static func tint(for bac: Double) -> Color {
-        switch bac {
-        case ..<0.3: calm
-        case ..<0.5: blend(calm, caution, t: (bac - 0.3) / 0.2)
-        case ..<0.8: caution
-        case ..<1.3: blend(caution, elevated, t: (bac - 0.8) / 0.5)
-        default: elevated
+    /// The colour for a level, read **against the limit that person set**.
+    ///
+    /// Not an absolute scale. The old one turned amber at 0.5 ‰ and topped out
+    /// at coral above 1.3 ‰, the same for everyone — which made the colour a
+    /// claim about drinking in general rather than about this person. Someone
+    /// who set 0.3 ‰ saw their whole evening in teal; someone who set 1.2 ‰ was
+    /// already in coral well below their own line.
+    ///
+    /// The ramp is anchored to the limit instead, so full red lands exactly
+    /// where you said your line was, and keeps deepening past it. The limit is
+    /// the user's own number, so this is not the app handing down a verdict —
+    /// it is the app being consistent with the one the user already wrote down.
+    ///
+    /// Continuous between the stops. Pharmacokinetics is not stepped, and the
+    /// colour should not imply category boundaries the model does not have.
+    static func tint(for bac: Double, limit: Double) -> Color {
+        // A limit of zero would make everything infinitely over it.
+        interpolate(levelRamp, at: bac / max(limit, 0.05))
+    }
+
+    /// Stops as a fraction of the limit.
+    private static var levelRamp: [(at: Double, color: Color)] {
+        [
+            (0.00, calm),
+            (0.55, caution),
+            (0.85, elevated),
+            (1.00, alarm),
+            (1.50, critical),
+        ]
+    }
+
+    private static func interpolate(_ stops: [(at: Double, color: Color)], at x: Double) -> Color {
+        guard let first = stops.first, let last = stops.last else { return calm }
+        if x <= first.at { return first.color }
+        if x >= last.at { return last.color }
+
+        for (lower, upper) in zip(stops, stops.dropFirst()) where x < upper.at {
+            return blend(lower.color, upper.color, t: (x - lower.at) / (upper.at - lower.at))
         }
+        return last.color
     }
 
     private static func blend(_ a: Color, _ b: Color, t: Double) -> Color {

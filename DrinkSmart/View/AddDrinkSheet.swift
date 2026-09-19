@@ -72,6 +72,10 @@ struct AddDrinkSheet: View {
         store.project(candidate, excluding: editing?.id, in: session)
     }
 
+    /// The limit the projection is judged against — a past session's own, not
+    /// today's, for the same reason its profile snapshot is used.
+    private var limit: Double { session?.limit ?? store.limit }
+
     private var candidate: Drink {
         Drink(
             id: draftID,
@@ -130,7 +134,7 @@ struct AddDrinkSheet: View {
                     .textCase(.uppercase)
                     .foregroundStyle(Theme.secondaryText)
 
-                BACReadout(projection.peakRange, unit: store.unit, size: 22)
+                BACReadout(projection.peakRange, unit: store.unit, limit: limit, size: 22)
             }
 
             Spacer(minLength: 0)
@@ -159,7 +163,7 @@ struct AddDrinkSheet: View {
         switch projection.outcome {
         case .below: Theme.calm
         case .uncertain: Theme.caution
-        case .above: Theme.elevated
+        case .above: Theme.alarm
         }
     }
 
@@ -503,7 +507,7 @@ struct AddDrinkSheet: View {
                 .foregroundStyle(Theme.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
-                .background(Theme.tint(for: projection.peakRange.upperBound), in: Capsule())
+                .background(Theme.tint(for: projection.peakRange.upperBound, limit: limit), in: Capsule())
             }
             .buttonStyle(.plain)
         }
