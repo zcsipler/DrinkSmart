@@ -97,7 +97,7 @@ DrinkSmart/
 │       ├── DrinkRow.swift           egy sor, kézzel írt swipe-pal
 │       ├── AddDrinkSheet.swift      felvitel és szerkesztés + élő előrejelzés
 │       └── ProfileView.swift        testalkat, gyakoriság, saját határ, haladó
-└── Reference/                  Python referencia + a katalógusgenerátor
+└── Reference/                  Python referencia, katalógusgenerátor, run_tests.sh
 ```
 
 **Rétegszabály:** a `BACKit` UI-független és `Sendable`. A SwiftUI nézetek és a
@@ -337,9 +337,22 @@ csúcssáv `0,510401 … 0,624922`, középcsúcs `0,565699` @ 138 perc,
 kiürülés `355 … 522` perc.
 
 ```bash
-cd BACKit && swift test
+./Reference/run_tests.sh                 # 47 teszt, BACKit
 cd Reference && python3 validate.py && python3 check_tests.py
 ```
+
+A `run_tests.sh` Macen egyszerűen `swift test`. A lényege a másik eset: az
+asszisztens Linux-sandboxában **nincs toolchain**, ezért a szkript letölt egy
+Swift release-t `/tmp`-be, és ugyanazt a suite-ot futtatja. Ettől a „elrontottam
+valamit?" kérdés helyben megválaszolható, nem kell visszakérdezni.
+
+Ez **csak a `BACKit`-re igaz**: a csomag a Foundationön kívül semmit nem
+importál, így bárhol fordul. Az app target SwiftUI-t és SwiftDatát használ, azt
+kizárólag Xcode tudja lefordítani — a nézetek és a perzisztencia ellenőrzése
+továbbra is Zoltáné.
+
+A letöltés ~800 MB, munkamenetenként egyszer, nagyjából három perc. Megéri:
+utána minden kör végén lefuttatható.
 
 ## 7. Lokalizáció
 
@@ -378,6 +391,8 @@ cd Reference && python3 make_catalog.py
 ## 8. Konvenciók
 
 - **Commit csak jóváhagyás után** — lásd a 0. fejezetet.
+- **A motorhoz érő változtatás után fusson le a tesztsuite**
+  (`./Reference/run_tests.sh`), mielőtt a diffet megmutatjuk.
 - **A kódban minden angol**: kommentek, docstringek, teszt- és suite-nevek,
   MARK-ok, a Python szkriptek kiírásai. Magyar szöveg csak két helyen van:
   a `Localizable.xcstrings` fordítási értékeiben és ebben a dokumentumban.
@@ -510,6 +525,28 @@ ebben a dokumentumban (4. fejezet) és a kód kommentjeiben.
 Ez is **App Store-érv**: az átláthatóság azt támasztja alá, hogy ez egy
 tudatosságnövelő eszköz, nem egy „megvezethetsz-e" kalkulátor.
 
+### 11.8 Tesztlefedettség a fő számolásra
+
+Zoltán kérése, és a lista legfontosabb pontja: a **Widmark/farmakokinetikai
+számolás ne tudjon észrevétlenül elromlani**. Ami ma van, az jó alap — 47 teszt,
+konkrét számokkal a Python referenciából —, de nem teljes:
+
+- **Jellemzőalapú (property-based) tesztek** a konkrét értékek mellé:
+  a görbe sosem negatív, a tömeg megmarad, több ital monoton magasabb csúcsot ad,
+  a sáv alsó vége sosem megy a felső fölé. Ezeket véletlen bemenetek százain
+  kell futtatni, nem három fixture-ön.
+- **Regressziós lakat a modellre.** Egy tesztfájl, ami a jelenlegi motor
+  kimenetét rögzíti több profilra és italsorozatra. Ha bármelyik szám mozdul,
+  a teszt elhasal — és akkor vagy szándékos volt (`BACEngine.version` bumpolása),
+  vagy elrontottunk valamit. Ez az a védelem, ami ma hiányzik.
+- **App-szintű teszt target** a `SessionPolicy`, a `DrinkingDay` és a migráció
+  köré. Ez a kód tud **adatot veszíteni**, és ma egyáltalán nincs tesztelve.
+- **Határesetek:** nulla hosszú ital, negatív időtartam, éjfélen átnyúló alkalom,
+  a bétahatárokra szorított sáv, üres profil.
+
+A `Reference/run_tests.sh` óta ez nem csak elvárás: minden kör végén lefuttatható
+(6.).
+
 ## 12. Technikai hátralék
 
 Nem termékfunkciók, hanem amit rendbe kell tenni:
@@ -544,8 +581,13 @@ két körben fordult: először kivettem a tartományt mindenhonnan, aztán kide
 hogy a kérés nem ez volt — csak az alapérték ne tartomány legyen. Ha a válasz
 javítja az előző kört, ismerjük el nyíltan és írjuk át (ebből lett az 5.8).
 
-**Amit nem tudok ellenőrizni:** nincs Swift toolchain a környezetemben, tehát
-**nem fordítom le a kódot**. Amit tudok: zárójel- és API-egyezés-ellenőrzés, a
-Python referencia, a katalógus-ellenőrző. A fordítás és a futtatás Zoltáné —
-szimulátoron és készüléken. Ezért érdemes minden körben kis, önmagában
-értelmes változást adni.
+**Mit tudok ellenőrizni.** A `BACKit` tesztjeit **le tudom futtatni**:
+`./Reference/run_tests.sh` letölt egy Swift toolchaint a sandboxba, és lemegy
+mind a 47 teszt (6.). Ezt minden olyan kör végén futtassuk le, ami a motorhoz
+ér. Rajta kívül: zárójel- és API-egyezés-ellenőrzés, a Python referencia, a
+katalógus-ellenőrző.
+
+**Amit nem tudok:** az **app targetet** nem fordítom — SwiftUI és SwiftData kell
+hozzá, az Xcode dolga. A nézetek, a perzisztencia és minden, ami készüléken
+látszik, Zoltáné. Ezért érdemes minden körben kis, önmagában értelmes
+változást adni.
