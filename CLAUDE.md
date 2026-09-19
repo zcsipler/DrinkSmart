@@ -358,6 +358,15 @@ teszt rossz.**
 | gyomortartalom | monoton alacsonyabb és későbbi csúcs |
 | Widmark-faktor | 0,667 / 0,589 — a klasszikus tartományban |
 
+**Futásidő** (sandbox, ARM Linux — készüléken vélhetően 2–4× gyorsabb, de a
+nagyságrend áll). Ezek a számok döntik el, mit szabad gesztus közben hívni:
+
+| Hívás | 1 ital | 5 ital | 8 ital |
+|---|---|---|---|
+| `simulateBand` | 2,5 ms | 3,8 ms | 6,1 ms |
+| `projectBand` (6 szimuláció) | — | 7,3 ms (4 ital + jelölt) | — |
+| `BACBand.samples` | — | 0,05 ms | — |
+
 Referencia-fixture a sávhoz (80 kg férfi, 3 ital, béta 0,12/0,15/0,18):
 csúcssáv `0,510401 … 0,624922`, középcsúcs `0,565699` @ 138 perc,
 kiürülés `355 … 522` perc.
@@ -428,6 +437,14 @@ cd Reference && python3 make_catalog.py
 - A `BACKit` nem importál SwiftUI-t. Soha.
 - A `SessionStore` csak akkor számol újra, ha a bemenet változik — az óra
   ketyegése (`tick()`) csak a `now`-t mozgatja.
+- **A csúszkák elengedéskor írnak a store-ba, nem húzás közben.** Mindegyik
+  saját kis nézet, ami a húzott értéket lokális `@State`-ben tartja, és az
+  `onEditingChanged`-ben commitol. Két oka van, és mindkettő mérhető: egy
+  `simulateBand` 2,5–6 ms (ez három RK4-futás, a részletek a 6. pontban), ami
+  a 120 Hz-es 8,33 ms-os frame nagy része; és egy `store`-ból olvasott érték
+  invalidálja azt, aki olvasta — a `ProfileView`-ba ágyazva ez az egész `Form`
+  volt. Ami az értékkel együtt kell hogy mozogjon (a kiürülési idő szövege, a
+  sáv), az ezért a draftot birtokló nézetbe költözik, nem marad kívül.
 - A chart ~220 pontra ritkít, de a csúcsot mindig megtartja.
 - A séma **CloudKit-kompatibilis**: minden tárolt mezőnek van alapértéke vagy
   opcionális, nincs `@Attribute(.unique)`, a kapcsolat inverzzel megy. Ezt új
@@ -585,6 +602,13 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
   már nincs hol látszódnia
 - A Live és az Előzmény összekötése: kell-e egyáltalán, és ha igen, gesztus
   helyett mivel (5.11)
+- Az `AddDrinkSheet` élő előrejelzése minden lépésköznél `projectBand`-et hív
+  (7,3 ms, 6 szimuláció). Itt a késleltetés nem járható út, mert pont az élő
+  előreszimuláció a termék tézise (2., 5.10) — ezt a motor gyorsításával kell
+  megoldani. A belső ciklus RK4-lépésenként ~7 tömböt allokál (`dGut`, három
+  `zip().map`), plusz lépésenként egy `pending.filter` és egy
+  `indices.contains`; előre foglalt scratch bufferekkel nagyrészt kiirtható.
+  A kimenetnek bitre azonosnak kell maradnia — `BACEngine.version` nem bumpolandó
 - HealthKit: testadatok beolvasása, BAC és kalória visszaírása
 - Helyi értesítések: közeledsz a határhoz / mikorra leszel tiszta
 - watchOS-kiegészítő a gyors felvitelhez

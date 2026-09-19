@@ -118,21 +118,7 @@ struct ProfileView: View {
 
     private var limitSection: some View {
         Section {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Your limit")
-                    Spacer()
-                    Text(verbatim: store.unit.formatted(store.limit))
-                        .font(.system(.body, design: .rounded).monospacedDigit())
-                        .foregroundStyle(Theme.tint(for: store.limit))
-                }
-                Slider(
-                    value: Binding(get: { store.limit }, set: { store.limit = $0 }),
-                    in: 0.2...2.0, step: 0.05
-                )
-                .tint(Theme.tint(for: store.limit))
-                .accessibilityLabel(Text("Your limit"))
-            }
+            LimitSlider(store: store)
         } header: {
             Text("Your limit")
         } footer: {
@@ -199,8 +185,8 @@ struct ProfileView: View {
     private var advancedSection: some View {
         Section {
             DisclosureGroup(isExpanded: $showsAdvanced) {
-                uncertaintyControl
-                eliminationRateGroup
+                UncertaintyControl(store: store)
+                EliminationRateGroup(store: store)
             } label: {
                 Text("Advanced")
             }
@@ -210,28 +196,116 @@ struct ProfileView: View {
         .listRowBackground(Theme.surface)
     }
 
-    /// How wide the band is — and therefore whether figures read as points or
-    /// as ranges.
-    ///
-    /// Zero by default (see `Physiology.defaultBetaUncertainty`), but the
-    /// control is a real one: above zero the app stops asserting a point and
-    /// reports the spread instead, which is the more literal reading of what
-    /// the model knows.
-    private var uncertaintyControl: some View {
+    // MARK: Helpers
+
+    private func stepperRow(
+        title: LocalizedStringKey,
+        value: Binding<Double>,
+        range: ClosedRange<Double>,
+        step: Double,
+        unit: LocalizedStringKey
+    ) -> some View {
+        Stepper(value: value, in: range, step: step) {
+            HStack {
+                Text(title)
+                Spacer()
+                HStack(spacing: 3) {
+                    Text(verbatim: value.wrappedValue.formatted(.number.precision(.fractionLength(0))))
+                    Text(unit)
+                }
+                .font(.system(.body, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.calm)
+            }
+        }
+    }
+}
+
+// MARK: - Sliders
+//
+// Each slider is its own view, and each keeps the value it is being dragged to
+// in local state until the finger lifts.
+//
+// Two reasons, and both are measured or evident rather than assumed. Writing to
+// the store on every step boundary makes `AppSettings` re-encode itself into
+// UserDefaults, and for the profile it also re-runs `simulateBand` — three RK4
+// integrations, 2.5–6 ms depending on how many drinks are in the session, which
+// is a large part of a 120 Hz frame. On top of that, a value read from the
+// store invalidates whoever read it: with these controls inlined in
+// `ProfileView` that was the whole `Form`, six sections including the
+// elimination explainer's eight interpolated, localized strings.
+//
+// Holding the draft locally means a drag re-renders one row and touches
+// nothing else. The store is written once, on release. Anything that has to
+// move *with* the value therefore lives inside the row that owns the draft —
+// which is why the explainer moved here with its slider rather than staying
+// behind in `ProfileView`.
+
+/// The personal limit.
+private struct LimitSlider: View {
+    let store: SessionStore
+
+    /// Non-nil only while a drag is in progress.
+    @State private var draft: Double?
+
+    private var value: Double { draft ?? store.limit }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Your limit")
+                Spacer()
+                Text(verbatim: store.unit.formatted(value))
+                    .font(.system(.body, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Theme.tint(for: value))
+            }
+            Slider(
+                value: Binding(get: { value }, set: { draft = $0 }),
+                in: 0.2...2.0,
+                step: 0.05,
+                onEditingChanged: { editing in
+                    guard !editing, let draft else { return }
+                    store.limit = draft
+                    self.draft = nil
+                }
+            )
+            .tint(Theme.tint(for: value))
+            .accessibilityLabel(Text("Your limit"))
+        }
+    }
+}
+
+/// How wide the band is — and therefore whether figures read as points or
+/// as ranges.
+///
+/// Zero by default (see `Physiology.defaultBetaUncertainty`), but the
+/// control is a real one: above zero the app stops asserting a point and
+/// reports the spread instead, which is the more literal reading of what
+/// the model knows.
+private struct UncertaintyControl: View {
+    let store: SessionStore
+
+    @State private var draft: Double?
+
+    private var value: Double { draft ?? store.profile.betaUncertainty }
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Uncertainty")
                 Spacer()
-                Text(verbatim: "± " + store.unit.formatted(store.profile.betaUncertainty))
+                Text(verbatim: "± " + store.unit.formatted(value))
                     .font(.system(.body, design: .rounded).monospacedDigit())
                     .foregroundStyle(Theme.calm)
             }
             Slider(
-                value: Binding(
-                    get: { store.profile.betaUncertainty },
-                    set: { store.profile.betaUncertainty = $0 }
-                ),
-                in: 0...0.06, step: 0.005
+                value: Binding(get: { value }, set: { draft = $0 }),
+                in: 0...0.06,
+                step: 0.005,
+                onEditingChanged: { editing in
+                    guard !editing, let draft else { return }
+                    store.profile.betaUncertainty = draft
+                    self.draft = nil
+                }
             )
             .tint(Theme.calm)
             .accessibilityLabel(Text("Uncertainty"))
@@ -249,30 +323,52 @@ struct ProfileView: View {
         }
         .padding(.vertical, 4)
     }
+}
 
-    /// The elimination rate, one level deeper still.
-    ///
-    /// Nobody knows their own beta, and nothing in daily life would ever
-    /// prompt someone to say "my clearance is 0.18 per hour". The drinking
-    /// frequency question above already sets it. It stays reachable for
-    /// calibration against a breathalyser, but at the very bottom of the
-    /// deepest section and folded away, so it is not offered as a choice.
-    private var eliminationRateGroup: some View {
+/// The elimination rate, one level deeper still.
+///
+/// Nobody knows their own beta, and nothing in daily life would ever
+/// prompt someone to say "my clearance is 0.18 per hour". The drinking
+/// frequency question above already sets it. It stays reachable for
+/// calibration against a breathalyser, but at the very bottom of the
+/// deepest section and folded away, so it is not offered as a choice.
+private struct EliminationRateGroup: View {
+    let store: SessionStore
+
+    @State private var draft: Double?
+
+    private var value: Double { draft ?? store.profile.beta }
+
+    /// The band that follows from the draft, so the range below the slider
+    /// tracks the drag instead of jumping on release.
+    private var betaRange: ClosedRange<Double> {
+        var preview = store.profile
+        preview.beta = value
+        return preview.betaRange
+    }
+
+    var body: some View {
         DisclosureGroup {
-            eliminationExplainer
+            explainer
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Rate")
                         .foregroundStyle(Theme.secondaryText)
                     Spacer()
-                    Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
+                    Text(verbatim: store.unit.formatted(value) + "/h")
                         .font(.system(.body, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.calm)
                 }
                 Slider(
-                    value: Binding(get: { store.profile.beta }, set: { store.profile.beta = $0 }),
-                    in: 0.10...0.25, step: 0.005
+                    value: Binding(get: { value }, set: { draft = $0 }),
+                    in: 0.10...0.25,
+                    step: 0.005,
+                    onEditingChanged: { editing in
+                        guard !editing, let draft else { return }
+                        store.profile.beta = draft
+                        self.draft = nil
+                    }
                 )
                 .tint(Theme.calm)
                 .accessibilityLabel(Text("Elimination rate"))
@@ -283,7 +379,7 @@ struct ProfileView: View {
                 Text("Range")
                     .foregroundStyle(Theme.secondaryText)
                 Spacer()
-                Text(verbatim: store.unit.formatRange(store.profile.betaRange) + " /h")
+                Text(verbatim: store.unit.formatRange(betaRange) + " /h")
                     .font(.system(.body, design: .rounded).monospacedDigit())
                     .foregroundStyle(Theme.primaryText)
             }
@@ -291,7 +387,7 @@ struct ProfileView: View {
             HStack {
                 Text("Elimination rate")
                 Spacer()
-                Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
+                Text(verbatim: store.unit.formatted(value) + "/h")
                     .font(.system(.footnote, design: .rounded).monospacedDigit())
                     .foregroundStyle(Theme.secondaryText)
             }
@@ -304,7 +400,8 @@ struct ProfileView: View {
     /// Without this the slider is a number nobody can reason about. The live
     /// clearing example is the part that makes it concrete — an abstract
     /// "0.15 per hour" means nothing until you see it as hours of your evening.
-    private var eliminationExplainer: some View {
+    /// It reads the draft, so it still moves under the finger.
+    private var explainer: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve.")
 
@@ -356,31 +453,8 @@ struct ProfileView: View {
     /// How long 1 g/L would take to clear at the current rate. Deliberately
     /// ignores absorption: this is about the descending limb only.
     private var clearingTimeFromOne: String {
-        let hours = 1.0 / max(store.profile.beta, 0.01)
+        let hours = 1.0 / max(value, 0.01)
         return (hours * 3600).compactDuration
-    }
-
-    // MARK: Helpers
-
-    private func stepperRow(
-        title: LocalizedStringKey,
-        value: Binding<Double>,
-        range: ClosedRange<Double>,
-        step: Double,
-        unit: LocalizedStringKey
-    ) -> some View {
-        Stepper(value: value, in: range, step: step) {
-            HStack {
-                Text(title)
-                Spacer()
-                HStack(spacing: 3) {
-                    Text(verbatim: value.wrappedValue.formatted(.number.precision(.fractionLength(0))))
-                    Text(unit)
-                }
-                .font(.system(.body, design: .rounded).monospacedDigit())
-                .foregroundStyle(Theme.calm)
-            }
-        }
     }
 }
 
