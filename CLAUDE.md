@@ -62,10 +62,10 @@ DrinkSmart/
 │   │   ├── BACEngine.swift     RK4 szimuláció, BACCurve lekérdezések, version
 │   │   ├── Projection.swift    egyvonalas „mi lenne, ha" (régebbi API, megmaradt)
 │   │   └── BACBand.swift       sávos szimuláció, LimitOutcome, BandedProjection
-│   └── Tests/BACKitTests/      38 teszt, Python referenciaértékekkel
+│   └── Tests/BACKitTests/      47 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   129 kulcs, en + hu
+│   ├── Localizable.xcstrings   152 kulcs, en + hu
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
@@ -150,6 +150,7 @@ tartományban van.
 | biohasznosulás | 0,95 / 0,88 / 0,80 | gyomri ADH first-pass |
 | Michaelis Km | 0,02 g/L | |
 | béta alapérték | 0,15 g/L/h | irodalmi tartomány 0,10–0,25 |
+| béta bizonytalanság alapból | 0 | egy szám, nem tartomány — lásd 5.8 |
 | béta élettani korlátok | 0,08–0,32 | a sáv sosem lóg ki ezeken |
 | standard egység | 10 g tiszta alkohol | EU/magyar konvenció |
 
@@ -174,9 +175,13 @@ A béta a plauzibilis tartományán belül ennyit mozdít ugyanazon az alkalmon
 | 0,21 | 0,481 ‰ | 5,8 óra |
 
 **44 % a csúcsban, négy óra a kiürülésben** — nagyobb hatás, mint ±10 kg
-testsúly. Egyetlen vonal kirajzolása olyan pontosságot állítana, ami nincs meg.
-Ezért a `BACBand` három szimulációt futtat, és **minden szám tartomány**:
-„0,52–0,64 ‰", „19:00–22:00".
+testsúly. A grafikonon egyetlen vonal kirajzolása olyan pontosságot állítana,
+ami nincs meg. Ezért a `BACBand` három szimulációt futtat, és a chart **sávot**
+rajzol. A sáv szélessége maga is információ.
+
+A motor mindig a sávot számolja — ez tartja életben az `uncertain` határállapotot
+(5.2) és a kiürülés időtartományát („19:00–22:00"). Hogy ebből mit *látunk*
+számként, azt az 5.8 dönti el.
 
 Névadás a görbe helyzete szerint, nem a bétáé szerint: a **lassú** lebontás ad
 **magasabb** görbét, tehát az az `upper`. Ezt könnyű elrontani.
@@ -193,7 +198,25 @@ A „hány ‰/óra a bétád" megválaszolhatatlan kérdés, és a találomra �
 rontja a becslést. Helyette a `DrinkingFrequency` négy fokozata (ritkán /
 havonta párszor / hetente többször / szinte naponta) adja a középértéket
 **és** a bizonytalanságot is. Élettani alap: a krónikus bevitel indukálja a
-CYP2E1/MEOS útvonalat. A nyers csúszkák a haladó beállítások közt maradtak.
+CYP2E1/MEOS útvonalat.
+
+A nyers béta-csúszka elérhető marad, de a haladó beállítások **legalján**, külön
+lenyitva. Egy vezérlő, ami feljebb ül, kérdésnek látszik, amire a felhasználótól
+választ várunk — erre viszont nem tud válaszolni. Egyetlen valós indoka van a
+kézi állításnak: ha van mért érték (szonda), amihez igazítani lehet.
+
+A lenyitott blokk ezért nem csak egy csúszka. Megmutatja a beállítást órában is
+(„1,0 ‰ ennyi idő alatt ürül ki") — az absztrakt 0,15/óra addig semmit nem
+jelent —, és három tippet ad a saját érték megtippeléséhez:
+
+1. **Szondával:** két fújás a lecsengő ágon, legalább egy óra különbséggel, az
+   utolsó ital után legalább két órával. A két érték különbsége osztva az eltelt
+   órákkal — ez maga a béta, definíció szerint.
+2. **Szonda nélkül:** az app megmondja, mikorra várja a kiürülést. Ha
+   következetesen hamarabb vagy rendben, a béta magasabb a beállítottnál. Ez a
+   valódi önkalibrációs hurok, hardver nélkül.
+3. **Mi mozgatja:** enzimindukció, nem átlagosan magasabb, éhgyomor és
+   májbetegség lefelé.
 
 ### 5.4 Emelkedési sebesség kiemelve
 
@@ -232,6 +255,38 @@ arra, hogy nem ittál. Egy nap az `AppSettings.trackingStartedAt` előtt csak
 annyit jelent, hogy nem tudjuk. Azt írni rá, hogy „nem ittál", találgatás
 lenne, ezért külön ikonja és szövege van.
 
+### 5.8 Egy szám alapból, tartomány ha a user kéri
+
+A motor mindig sávot számol (5.1). Hogy ez számként egy érték vagy tartomány,
+azt **kizárólag a `betaUncertainty`** dönti el, és az **alapértéke nulla**. A
+`BACReadout` mindig a sávot kapja, és magától egy számot ír ki, ha a sáv
+szélessége nulla (`formatRange` összecsukja az egyező végeket). Nincs külön
+„egyszámos mód" a kódban.
+
+**Miért nulla az alapérték.** A szám személyes referenciaskála: idővel
+megtanulod, nálad mit jelent a 0,6. Tartományhoz nincs fix pont, amihez az emlék
+hozzátapadhatna. Ráadásul a béta bizonytalansága nem véletlen zaj, hanem
+**személyenként szisztematikus**: ha a valódi bétád 0,18, és az app 0,15-tel
+számol, minden számot ugyanabba az irányba, nagyjából ugyanannyival téveszt el.
+A következetes torzítás egy referenciaskálához ártalmatlan — észrevétlenül
+hozzákalibrálod magad.
+
+**Miért marad meg a csúszka.** A tartomány a szó szerintibb válasz: a sebesség
+tényleg bizonytalan. Aki ezt akarja látni, állítsa fel — ettől az app is
+komolyabbnak hat. Ez beállítás, nem alapértelmezés.
+
+A szórás a nullás alapbeálláson is látszik ott, ahol **változtat a döntésen**:
+
+- **kiürülés ideje** — négy óra különbség nem kozmetika,
+- **a sáv a charton**,
+- **a háromállapotú figyelmeztetés** (5.2) — az „átlépheted" a sávból él.
+
+A `DrinkingFrequency` ezért **csak a bétát állítja**, a bizonytalanságot nem — a
+javasolt szórást a csúszka mellett szövegként ajánlja fel. A
+`Physiology.legacyBetaUncertainty` (0,03) külön konstans: egy régi, még
+`betaUncertainty` nélkül írt pillanatkép azt a számot jelentette, és egy tárolt
+alkalom nem írhatja át magát (5.5).
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -261,7 +316,7 @@ cd Reference && python3 validate.py && python3 check_tests.py
 amennyit az iOS nyelvi beállítása kér: magyar rendszeren magyar, minden más
 esetben angol.
 
-- `DrinkSmart/Localizable.xcstrings` — 129 kulcs, `en` és `hu`.
+- `DrinkSmart/Localizable.xcstrings` — 152 kulcs, `en` és `hu`.
 - A kulcs maga az **angol forrásszöveg**. Interpolációnál `%@`.
 - A nézetekben `LocalizedStringKey` (sima `Text("...")`), a modellrétegben
   `LocalizedStringResource` (enum `label` / `detail` / `explanation`).

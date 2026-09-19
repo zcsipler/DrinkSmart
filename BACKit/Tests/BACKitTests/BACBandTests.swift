@@ -50,6 +50,16 @@ struct BetaRangeTests {
         #expect(abs(peak.upperBound - peak.lowerBound) < 1e-6)
     }
 
+    @Test("A fresh profile has no uncertainty, so every figure is a point")
+    func defaultIsCertain() {
+        let fresh = BodyProfile(sex: .male, age: 35, heightCm: 180, weightKg: 80)
+        #expect(fresh.betaUncertainty == 0)
+        #expect(fresh.betaRange.lowerBound == fresh.betaRange.upperBound)
+
+        let band = engine.simulateBand(profile: fresh, drinks: series)
+        #expect(band.peakRange!.lowerBound == band.peakRange!.upperBound)
+    }
+
     @Test("Snapshots written before betaUncertainty still decode")
     func decodesLegacySnapshot() throws {
         let legacy = """
@@ -58,7 +68,8 @@ struct BetaRangeTests {
 
         let profile = try JSONDecoder().decode(BodyProfile.self, from: legacy)
         #expect(profile.beta == 0.15)
-        #expect(profile.betaUncertainty == Physiology.defaultBetaUncertainty)
+        // Not the default: a snapshot keeps the spread it was written with.
+        #expect(profile.betaUncertainty == Physiology.legacyBetaUncertainty)
     }
 }
 

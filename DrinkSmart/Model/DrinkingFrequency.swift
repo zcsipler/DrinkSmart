@@ -46,8 +46,13 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// ± uncertainty. Between-individual spread is substantial even among
-    /// infrequent drinkers, and grows with frequency.
+    /// The ± spread this frequency implies, offered as a suggestion next to
+    /// the uncertainty slider.
+    ///
+    /// Deliberately **not** applied automatically. Between-individual spread
+    /// is real and grows with frequency, but turning the displayed figures
+    /// into ranges is the user's choice, not something a picker three sections
+    /// higher should decide for them.
     var uncertainty: Double {
         switch self {
         case .rarely: 0.025
@@ -63,8 +68,9 @@ enum DrinkingFrequency: String, Codable, CaseIterable, Identifiable {
         allCases.min { abs($0.beta - beta) < abs($1.beta - beta) } ?? .occasional
     }
 
+    /// Sets the rate only. The uncertainty stays wherever the user put it —
+    /// see the note on `uncertainty`.
     func apply(to profile: inout BodyProfile) {
         profile.beta = beta
-        profile.betaUncertainty = uncertainty
     }
 }

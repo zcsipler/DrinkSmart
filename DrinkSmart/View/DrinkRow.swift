@@ -61,8 +61,16 @@ struct DrinkRow: View {
                     Text(verbatim: "\(drink.abvPercent.formatted(.number.precision(.fractionLength(1))))%")
                     Text(verbatim: "·")
                     Text(drink.stomach.shortLabel)
+                    // Only when it was sipped: "in one go" is the quiet
+                    // default and does not need saying on every row.
+                    if drink.drinkingMinutes > 0 {
+                        Text(verbatim: "·")
+                        Text(verbatim: (drink.drinkingMinutes * 60).compactDuration)
+                    }
                 }
                 .font(.system(size: 11, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
                 .foregroundStyle(Theme.secondaryText)
             }
 

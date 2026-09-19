@@ -45,7 +45,7 @@ final class DrinkingSession {
     var heightCm: Double = 180
     var weightKg: Double = 80
     var beta: Double = Physiology.defaultBeta
-    var betaUncertainty: Double = Physiology.defaultBetaUncertainty
+    var betaUncertainty: Double = Physiology.legacyBetaUncertainty
 
     /// The personal limit as it stood for this session.
     var limit: Double = 0.8

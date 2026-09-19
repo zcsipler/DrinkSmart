@@ -27,6 +27,7 @@ struct AddDrinkSheet: View {
     @State private var volumeMl: Double
     @State private var abv: Double
     @State private var stomach: StomachState
+    @State private var drinkingMinutes: Double
     @State private var consumedAt: Date
     @State private var showsTimePicker = false
 
@@ -45,6 +46,9 @@ struct AddDrinkSheet: View {
         _volumeMl = State(initialValue: editing?.volumeMl ?? template.defaultVolumeMl)
         _abv = State(initialValue: editing?.abvPercent ?? template.defaultAbv)
         _stomach = State(initialValue: editing?.stomach ?? .light)
+        _drinkingMinutes = State(
+            initialValue: editing?.drinkingMinutes ?? template.defaultDrinkingMinutes
+        )
         _consumedAt = State(initialValue: editing?.consumedAt ?? .now)
         _draftID = State(initialValue: editing?.id ?? UUID())
         // "15 min ago" is meaningless when correcting a drink from hours back,
@@ -68,11 +72,15 @@ struct AddDrinkSheet: View {
         var volumeMl: Double
         var abv: Double
         var stomach: StomachState
+        var drinkingMinutes: Double
         var consumedAt: Date
     }
 
     private var input: Input {
-        Input(templateID: template.id, volumeMl: volumeMl, abv: abv, stomach: stomach, consumedAt: consumedAt)
+        Input(
+            templateID: template.id, volumeMl: volumeMl, abv: abv,
+            stomach: stomach, drinkingMinutes: drinkingMinutes, consumedAt: consumedAt
+        )
     }
 
     private var candidate: Drink {
@@ -82,6 +90,7 @@ struct AddDrinkSheet: View {
             volumeMl: volumeMl,
             abvPercent: abv,
             stomach: stomach,
+            drinkingMinutes: drinkingMinutes,
             name: template.id
         )
     }
@@ -90,15 +99,15 @@ struct AddDrinkSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 22) {
-                    projectionCard
                     typePicker
                     volumeSection
                     abvSection
                     stomachSection
+                    paceSection
                     timeSection
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 90)
+                .padding(.bottom, 16)
             }
             .background(Theme.background)
             .scrollIndicators(.hidden)
@@ -122,50 +131,45 @@ struct AddDrinkSheet: View {
     }
 
     // MARK: Projection
+    //
+    // Lives above the Add button rather than at the top of the sheet. The
+    // projected peak is not what you pick a drink by — you already know you
+    // want a beer — so putting it first only pushed the type picker below the
+    // fold. At the button it sits where the decision actually happens, and the
+    // one part that earns its place before committing, the limit warning,
+    // grows out of it when there is something to say.
 
-    private var projectionCard: some View {
-        VStack(spacing: 16) {
-            HStack(alignment: .top, spacing: 0) {
-                // "Now" is wrong for a drink logged hours ago: when editing,
-                // the left column is the session without this drink at all.
-                projectionColumn(
-                    title: isEditing ? "Without this" : "Now",
-                    value: store.unit.formatRange(projection.currentRange),
-                    tint: Theme.tint(for: projection.currentRange.upperBound)
-                )
-
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 12, weight: .semibold))
+    private var projectionSummary: some View {
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(isEditing ? "With this" : "Projected peak")
+                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                    .textCase(.uppercase)
                     .foregroundStyle(Theme.secondaryText)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 18)
 
-                projectionColumn(
-                    title: isEditing ? "With this" : "Projected peak",
-                    value: store.unit.formatRange(projection.peakRange),
-                    tint: Theme.tint(for: projection.peakRange.upperBound)
-                )
+                BACReadout(projection.peakRange, unit: store.unit, size: 22)
             }
 
-            Divider().overlay(Theme.hairline)
+            Spacer(minLength: 0)
 
-            HStack(spacing: 0) {
-                detail("Peak at", projection.peakDate.hourMinute)
-                detail("Time to peak", projection.timeToPeak.compactDuration)
-                detail("Clears", projection.soberRange?.hourMinuteRange ?? "—")
+            VStack(alignment: .trailing, spacing: 3) {
+                miniStat("Peak at", projection.peakDate.hourMinute)
+                miniStat("Clears", projection.soberRange?.hourMinuteRange ?? "—")
             }
-
-            if projection.outcome.exceedsPossible {
-                limitWarning
-            }
-        }
-        .padding(18)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(projection.outcome == .below ? Theme.hairline : outcomeTint.opacity(0.5), lineWidth: 1)
         }
         .animation(.easeOut(duration: 0.18), value: projection.peakRange.upperBound)
+    }
+
+    private func miniStat(_ title: LocalizedStringKey, _ value: String) -> some View {
+        HStack(spacing: 5) {
+            Text(title)
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .foregroundStyle(Theme.secondaryText)
+            Text(verbatim: value)
+                .font(.system(size: 12, weight: .medium, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.primaryText)
+        }
     }
 
     private var outcomeTint: Color {
@@ -174,35 +178,6 @@ struct AddDrinkSheet: View {
         case .uncertain: Theme.caution
         case .above: Theme.elevated
         }
-    }
-
-    private func projectionColumn(title: LocalizedStringKey, value: String, tint: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.sectionLabel)
-                .textCase(.uppercase)
-                .foregroundStyle(Theme.secondaryText)
-            Text(verbatim: value)
-                .font(.readout(28))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .foregroundStyle(tint)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private func detail(_ title: LocalizedStringKey, _ value: String) -> some View {
-        VStack(spacing: 3) {
-            Text(title)
-                .font(.system(size: 9, weight: .semibold, design: .rounded))
-                .textCase(.uppercase)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(Theme.secondaryText)
-            Text(verbatim: value)
-                .font(.system(size: 14, weight: .medium, design: .rounded).monospacedDigit())
-                .foregroundStyle(Theme.primaryText)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     /// Three-state warning.
@@ -237,8 +212,8 @@ struct AddDrinkSheet: View {
             Spacer()
         }
         .foregroundStyle(outcomeTint)
-        .padding(12)
-        .background(outcomeTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+        .padding(10)
+        .background(outcomeTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 11))
     }
 
     private var crossingTime: String {
@@ -284,6 +259,7 @@ struct AddDrinkSheet: View {
         template = item
         volumeMl = item.defaultVolumeMl
         abv = item.defaultAbv
+        drinkingMinutes = item.defaultDrinkingMinutes
     }
 
     // MARK: Volume
@@ -381,6 +357,72 @@ struct AddDrinkSheet: View {
         }
     }
 
+    // MARK: Pace
+    //
+    // Across an evening this barely moves the peak, but it roughly halves the
+    // rate of rise — and that is the number memory impairment tracks. A shot
+    // thrown back and a pint nursed for half an hour are not the same event,
+    // even when the alcohol is identical.
+
+    private var paceSection: some View {
+        section("How fast", trailing: paceLabel) {
+            VStack(spacing: 10) {
+                HStack(spacing: 8) {
+                    pacePreset("In one go", minutes: 0)
+                    pacePreset("15 min", minutes: 15)
+                    pacePreset("30 min", minutes: 30)
+                    pacePreset("1 hr", minutes: 60)
+                }
+
+                Slider(value: $drinkingMinutes, in: 0...180, step: 5)
+                    .tint(Theme.calm)
+                    .accessibilityLabel(Text("How fast"))
+
+                Text(paceExplanation)
+                    .font(.system(size: 11, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var paceLabel: String {
+        drinkingMinutes <= 0
+            ? String(localized: "In one go")
+            : (drinkingMinutes * 60).compactDuration
+    }
+
+    private var paceExplanation: LocalizedStringResource {
+        switch drinkingMinutes {
+        case 0: "Counts as a single swallow — the steepest possible rise."
+        case ..<20: "A quick drink. The level climbs fast."
+        case ..<45: "A normal pace."
+        default: "Nursed slowly. Much gentler climb for the same alcohol."
+        }
+    }
+
+    private func pacePreset(_ label: LocalizedStringKey, minutes: Double) -> some View {
+        let isSelected = abs(drinkingMinutes - minutes) < 0.5
+
+        return Button {
+            withAnimation(.easeOut(duration: 0.15)) { drinkingMinutes = minutes }
+        } label: {
+            Text(label)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .background(
+                    isSelected ? Theme.calm.opacity(0.18) : Theme.surface,
+                    in: RoundedRectangle(cornerRadius: 10)
+                )
+                .foregroundStyle(isSelected ? Theme.calm : Theme.secondaryText)
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: Time
 
     private var timeSection: some View {
@@ -451,33 +493,44 @@ struct AddDrinkSheet: View {
     // MARK: Confirmation
 
     private var confirmBar: some View {
-        Button {
-            if isEditing {
-                store.update(candidate, in: session)
-            } else {
-                store.add(candidate)
+        VStack(spacing: 12) {
+            if projection.outcome.exceedsPossible {
+                limitWarning
             }
-            dismiss()
-        } label: {
-            HStack {
-                Image(systemName: isEditing ? "checkmark.circle.fill" : "plus.circle.fill")
+
+            projectionSummary
+
+            Button {
                 if isEditing {
-                    Text("Save changes")
+                    store.update(candidate, in: session)
                 } else {
-                    Text("Add")
+                    store.add(candidate)
                 }
+                dismiss()
+            } label: {
+                HStack {
+                    Image(systemName: isEditing ? "checkmark.circle.fill" : "plus.circle.fill")
+                    if isEditing {
+                        Text("Save changes")
+                    } else {
+                        Text("Add")
+                    }
+                }
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(Theme.background)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(Theme.tint(for: projection.peakRange.upperBound), in: Capsule())
             }
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
-            .foregroundStyle(Theme.background)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 15)
-            .background(Theme.tint(for: projection.peakRange.upperBound), in: Capsule())
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
         .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding(.top, 12)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.hairline).frame(height: 1)
+        }
     }
 
     // MARK: Section chrome

@@ -12,11 +12,32 @@ struct DrinkTemplate: Identifiable, Hashable {
     let volumeOptions: [Double]
     let abvRange: ClosedRange<Double>
 
+    /// How long this kind of drink typically takes to finish, in minutes.
+    ///
+    /// The defaults matter because most people will not touch the control, and
+    /// zero would quietly assert that every drink is thrown back in one go.
+    /// That barely shifts the peak, but it roughly doubles the rate of rise —
+    /// which is the number the blackout question depends on.
+    let defaultDrinkingMinutes: Double
+
     /// The recorded drink carries the template's **identifier**, not its name.
     /// Otherwise persisted data would be tied to a language, and English names
     /// would linger on a Hungarian interface after a language change.
-    func makeDrink(at date: Date, volumeMl: Double, abv: Double, stomach: StomachState) -> Drink {
-        Drink(consumedAt: date, volumeMl: volumeMl, abvPercent: abv, stomach: stomach, name: id)
+    func makeDrink(
+        at date: Date,
+        volumeMl: Double,
+        abv: Double,
+        stomach: StomachState,
+        drinkingMinutes: Double? = nil
+    ) -> Drink {
+        Drink(
+            consumedAt: date,
+            volumeMl: volumeMl,
+            abvPercent: abv,
+            stomach: stomach,
+            drinkingMinutes: drinkingMinutes ?? defaultDrinkingMinutes,
+            name: id
+        )
     }
 
     static func == (lhs: DrinkTemplate, rhs: DrinkTemplate) -> Bool { lhs.id == rhs.id }
@@ -28,32 +49,38 @@ enum DrinkCatalog {
         DrinkTemplate(
             id: "beer", name: "Beer", icon: "mug.fill",
             defaultVolumeMl: 500, defaultAbv: 5,
-            volumeOptions: [250, 330, 400, 500], abvRange: 0.5...12
+            volumeOptions: [250, 330, 400, 500], abvRange: 0.5...12,
+            defaultDrinkingMinutes: 30
         ),
         DrinkTemplate(
             id: "wine", name: "Wine", icon: "wineglass.fill",
             defaultVolumeMl: 150, defaultAbv: 12,
-            volumeOptions: [100, 125, 150, 200], abvRange: 5...18
+            volumeOptions: [100, 125, 150, 200], abvRange: 5...18,
+            defaultDrinkingMinutes: 25
         ),
         DrinkTemplate(
             id: "sparkling", name: "Sparkling", icon: "waterbottle.fill",
             defaultVolumeMl: 125, defaultAbv: 12,
-            volumeOptions: [100, 125, 150, 200], abvRange: 5...15
+            volumeOptions: [100, 125, 150, 200], abvRange: 5...15,
+            defaultDrinkingMinutes: 20
         ),
         DrinkTemplate(
             id: "spirit", name: "Spirit", icon: "drop.fill",
             defaultVolumeMl: 40, defaultAbv: 40,
-            volumeOptions: [20, 40, 50, 80], abvRange: 15...96
+            volumeOptions: [20, 40, 50, 80], abvRange: 15...96,
+            defaultDrinkingMinutes: 0
         ),
         DrinkTemplate(
             id: "cocktail", name: "Cocktail", icon: "cup.and.saucer.fill",
             defaultVolumeMl: 200, defaultAbv: 15,
-            volumeOptions: [150, 200, 250, 330], abvRange: 3...40
+            volumeOptions: [150, 200, 250, 330], abvRange: 3...40,
+            defaultDrinkingMinutes: 20
         ),
         DrinkTemplate(
             id: "custom", name: "Custom", icon: "slider.horizontal.3",
             defaultVolumeMl: 100, defaultAbv: 10,
-            volumeOptions: [50, 100, 200, 330], abvRange: 0.5...96
+            volumeOptions: [50, 100, 200, 330], abvRange: 0.5...96,
+            defaultDrinkingMinutes: 15
         ),
     ]
 

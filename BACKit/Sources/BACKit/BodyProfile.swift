@@ -20,7 +20,18 @@ public enum Physiology {
     public static let defaultBeta = 0.15
 
     /// Default uncertainty on beta (± g/L/h).
-    public static let defaultBetaUncertainty = 0.03
+    ///
+    /// Zero by design. The band is honest, but it is an opt-in: a figure that
+    /// arrives as a range has no fixed point to learn against, and learning
+    /// what your own number feels like is the whole purpose of the app. Turn
+    /// the uncertainty up in the advanced settings and every figure widens
+    /// into a range again.
+    public static let defaultBetaUncertainty = 0.0
+
+    /// What a profile snapshot written before `betaUncertainty` existed meant
+    /// implicitly. A stored session must keep the numbers it was recorded
+    /// with, so the legacy fallback does not follow the default above.
+    public static let legacyBetaUncertainty = 0.03
 
     /// Physiologically plausible extremes. The band never extends past these.
     public static let betaBounds = 0.08...0.32
@@ -49,8 +60,9 @@ public struct BodyProfile: Codable, Hashable, Sendable {
     /// Uncertainty on `beta` (± g/L/h).
     ///
     /// Not cosmetic: across its plausible range beta shifts the peak by more
-    /// than 40 % and the time to clear by several hours, which is why the
-    /// model's output is a range rather than a single number.
+    /// than 40 % and the time to clear by several hours. Zero collapses the
+    /// band to a line and every displayed figure to a single number, which is
+    /// the default; above zero the same figures are shown as ranges.
     public var betaUncertainty: Double
 
     /// Overrides the Watson estimate when the user has calibrated their own
@@ -119,7 +131,7 @@ public struct BodyProfile: Codable, Hashable, Sendable {
         weightKg = try c.decode(Double.self, forKey: .weightKg)
         beta = try c.decodeIfPresent(Double.self, forKey: .beta) ?? Physiology.defaultBeta
         betaUncertainty = try c.decodeIfPresent(Double.self, forKey: .betaUncertainty)
-            ?? Physiology.defaultBetaUncertainty
+            ?? Physiology.legacyBetaUncertainty
         totalBodyWaterOverride = try c.decodeIfPresent(Double.self, forKey: .totalBodyWaterOverride)
     }
 }

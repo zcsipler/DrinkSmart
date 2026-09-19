@@ -18,6 +18,11 @@ final class DrinkRecord {
     var volumeMl: Double = 0
     var abvPercent: Double = 0
 
+    /// How long the drink took to finish, in minutes. Zero means one go, which
+    /// is also what every row written before this existed decodes to — so old
+    /// history keeps the curve it always had.
+    var drinkingMinutes: Double = 0
+
     /// `StomachState.rawValue`. Stored as a string rather than an enum,
     /// because a value CloudKit has never seen must still decode to something.
     var stomachRaw: String = StomachState.light.rawValue
@@ -34,6 +39,7 @@ final class DrinkRecord {
         volumeMl = drink.volumeMl
         abvPercent = drink.abvPercent
         stomachRaw = drink.stomach.rawValue
+        drinkingMinutes = drink.drinkingMinutes
         templateID = drink.name ?? "beer"
     }
 
@@ -45,6 +51,7 @@ final class DrinkRecord {
             volumeMl: volumeMl,
             abvPercent: abvPercent,
             stomach: StomachState(rawValue: stomachRaw) ?? .light,
+            drinkingMinutes: drinkingMinutes,
             name: templateID
         )
     }
@@ -55,6 +62,7 @@ final class DrinkRecord {
         volumeMl = drink.volumeMl
         abvPercent = drink.abvPercent
         stomachRaw = drink.stomach.rawValue
+        drinkingMinutes = drink.drinkingMinutes
         templateID = drink.name ?? templateID
     }
 }

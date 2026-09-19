@@ -121,20 +121,29 @@ public struct BACEngine: Sendable {
         let km = Physiology.michaelisConstant
 
         let offsets = ordered.map { $0.consumedAt.timeIntervalSince(start) / 60 }
+        let durations = ordered.map(\.drinkingMinutes)
         let ka = ordered.map(\.stomach.absorptionRatePerMinute)
         let doses = ordered.map(\.absorbedGrams)
 
         var gut = [Double](repeating: 0, count: ordered.count)
-        var pending = Set(ordered.indices)
+        // Only instantaneous drinks wait to be deposited; the rest flow in.
+        var pending = Set(ordered.indices.filter { durations[$0] <= 0 })
         var concentration = 0.0
 
+        /// Zero-order flow into the stomach while a drink is being consumed.
+        func intakeRate(_ i: Int, _ t: Double) -> Double {
+            guard durations[i] > 0 else { return 0 }   // a bolus, deposited on arrival
+            guard t >= offsets[i], t < offsets[i] + durations[i] else { return 0 }
+            return doses[i] / durations[i]
+        }
+
         /// Derivatives of the gut compartments and the central concentration.
-        func derivatives(_ gutState: [Double], _ c: Double) -> ([Double], Double) {
+        func derivatives(_ gutState: [Double], _ c: Double, _ t: Double) -> ([Double], Double) {
             var dGut = [Double](repeating: 0, count: gutState.count)
             var influx = 0.0
             for i in gutState.indices {
                 let flow = ka[i] * gutState[i]
-                dGut[i] = -flow
+                dGut[i] = intakeRate(i, t) - flow
                 influx += flow
             }
             let elimination = c > 0 ? betaPerMinute * c / (km + c) : 0
@@ -147,7 +156,7 @@ public struct BACEngine: Sendable {
         let dt = stepMinutes
 
         while t <= horizonMinutes + 1e-9 {
-            // drinks consumed by now enter the stomach
+            // drinks downed in one go enter the stomach whole
             let arrived = pending.filter { offsets[$0] <= t + 1e-9 }
             for i in arrived {
                 gut[i] += doses[i]
@@ -155,7 +164,7 @@ public struct BACEngine: Sendable {
             }
 
             if t >= nextSample - 1e-9 {
-                let (_, rate) = derivatives(gut, concentration)
+                let (_, rate) = derivatives(gut, concentration, t)
                 samples.append(BACSample(
                     date: start.addingTimeInterval(t * 60),
                     bac: max(concentration, 0),
@@ -164,13 +173,13 @@ public struct BACEngine: Sendable {
                 nextSample += sampleEveryMinutes
             }
 
-            let (k1g, k1c) = derivatives(gut, concentration)
+            let (k1g, k1c) = derivatives(gut, concentration, t)
             let g2 = zip(gut, k1g).map { $0 + 0.5 * dt * $1 }
-            let (k2g, k2c) = derivatives(g2, concentration + 0.5 * dt * k1c)
+            let (k2g, k2c) = derivatives(g2, concentration + 0.5 * dt * k1c, t + 0.5 * dt)
             let g3 = zip(gut, k2g).map { $0 + 0.5 * dt * $1 }
-            let (k3g, k3c) = derivatives(g3, concentration + 0.5 * dt * k2c)
+            let (k3g, k3c) = derivatives(g3, concentration + 0.5 * dt * k2c, t + 0.5 * dt)
             let g4 = zip(gut, k3g).map { $0 + dt * $1 }
-            let (k4g, k4c) = derivatives(g4, concentration + dt * k3c)
+            let (k4g, k4c) = derivatives(g4, concentration + dt * k3c, t + dt)
 
             for i in gut.indices {
                 gut[i] = max(gut[i] + dt / 6 * (k1g[i] + 2 * k2g[i] + 2 * k3g[i] + k4g[i]), 0)
@@ -178,8 +187,10 @@ public struct BACEngine: Sendable {
             concentration = max(concentration + dt / 6 * (k1c + 2 * k2c + 2 * k3c + k4c), 0)
             t += dt
 
-            // early exit once nothing is left to absorb or eliminate
-            if concentration <= 1e-6, pending.isEmpty, gut.allSatisfy({ $0 <= 1e-9 }), t > 1 {
+            // early exit once nothing is left to pour, absorb or eliminate
+            let stillPouring = ordered.indices.contains { t < offsets[$0] + durations[$0] }
+            if concentration <= 1e-6, pending.isEmpty, !stillPouring,
+               gut.allSatisfy({ $0 <= 1e-9 }), t > 1 {
                 samples.append(BACSample(date: start.addingTimeInterval(t * 60), bac: 0, rate: 0))
                 break
             }

@@ -77,10 +77,21 @@ class BodyProfile:
 
 @dataclass
 class Drink:
-    minute: float                        # time of consumption in minutes from t=0
+    minute: float                        # time consumption STARTS, in minutes from t=0
     volume_ml: float
     abv_percent: float
     stomach: StomachState = "light"
+
+    # How long the drink takes to finish, in minutes. Zero means downed in one
+    # go.
+    #
+    # Across a whole evening this barely moves the peak - 2 % for four beers,
+    # because first-order absorption already spreads each dose over 20-30
+    # minutes. What it does move is the *rate of rise*: those same four beers
+    # go from 0.81 to 0.36 g/L/h at the steepest point when each is sipped over
+    # half an hour. Memory impairment tracks the rate, not the peak, so this is
+    # the number the feature exists for.
+    drinking_minutes: float = 0.0
 
     @property
     def grams_ethanol(self) -> float:
@@ -166,10 +177,21 @@ def simulate(
 
     gut = [0.0] * len(ordered)
     ka = [d.ka_per_minute for d in ordered]
-    pending = list(range(len(ordered)))
+    absorbed = [d.absorbed_grams for d in ordered]
+    # Only instantaneous drinks wait to be deposited; the rest flow in.
+    pending = [i for i, d in enumerate(ordered) if d.drinking_minutes <= 0]
 
-    def derivatives(gut_state: List[float], c: float) -> tuple[List[float], float]:
-        d_gut = [-ka[i] * gut_state[i] for i in range(len(gut_state))]
+    def intake_rate(i: int, t: float) -> float:
+        """Zero-order flow into the stomach while the drink is being consumed."""
+        d = ordered[i]
+        if d.drinking_minutes <= 0:
+            return 0.0                       # a bolus, deposited on arrival
+        if d.minute <= t < d.minute + d.drinking_minutes:
+            return absorbed[i] / d.drinking_minutes
+        return 0.0
+
+    def derivatives(gut_state: List[float], c: float, t: float) -> tuple[List[float], float]:
+        d_gut = [intake_rate(i, t) - ka[i] * gut_state[i] for i in range(len(gut_state))]
         influx = sum(ka[i] * gut_state[i] for i in range(len(gut_state))) / vd
         elimination = beta_per_minute * c / (KM + c) if c > 0 else 0.0
         return d_gut, influx - elimination
@@ -180,25 +202,25 @@ def simulate(
     next_sample = 0.0
 
     while t <= horizon_minutes + 1e-9:
-        # drinks consumed by now enter the stomach
+        # drinks downed in one go enter the stomach whole
         for i in list(pending):
             if ordered[i].minute <= t + 1e-9:
-                gut[i] += ordered[i].absorbed_grams
+                gut[i] += absorbed[i]
                 pending.remove(i)
 
         if t >= next_sample - 1e-9:
-            _, rate = derivatives(gut, c)
+            _, rate = derivatives(gut, c, t)
             samples.append(Sample(minute=t, bac=max(c, 0.0), rate=rate * 60.0))
             next_sample += sample_every
 
         # RK4
-        k1_g, k1_c = derivatives(gut, c)
+        k1_g, k1_c = derivatives(gut, c, t)
         g2 = [gut[i] + 0.5 * dt * k1_g[i] for i in range(len(gut))]
-        k2_g, k2_c = derivatives(g2, c + 0.5 * dt * k1_c)
+        k2_g, k2_c = derivatives(g2, c + 0.5 * dt * k1_c, t + 0.5 * dt)
         g3 = [gut[i] + 0.5 * dt * k2_g[i] for i in range(len(gut))]
-        k3_g, k3_c = derivatives(g3, c + 0.5 * dt * k2_c)
+        k3_g, k3_c = derivatives(g3, c + 0.5 * dt * k2_c, t + 0.5 * dt)
         g4 = [gut[i] + dt * k3_g[i] for i in range(len(gut))]
-        k4_g, k4_c = derivatives(g4, c + dt * k3_c)
+        k4_g, k4_c = derivatives(g4, c + dt * k3_c, t + dt)
 
         for i in range(len(gut)):
             gut[i] += dt / 6.0 * (k1_g[i] + 2 * k2_g[i] + 2 * k3_g[i] + k4_g[i])
@@ -207,8 +229,9 @@ def simulate(
         c = max(c, 0.0)
         t += dt
 
-        if c <= 1e-6 and not pending and all(g <= 1e-9 for g in gut) and t > 1:
-            _, rate = derivatives(gut, c)
+        still_pouring = any(t < d.minute + d.drinking_minutes for d in ordered)
+        if c <= 1e-6 and not pending and not still_pouring \
+                and all(g <= 1e-9 for g in gut) and t > 1:
             samples.append(Sample(minute=t, bac=0.0, rate=0.0))
             break
 

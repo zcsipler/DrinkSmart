@@ -246,21 +246,9 @@ struct LiveView: View {
             }
             .frame(height: 20)
 
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(verbatim: store.unit.formatRange(store.currentRange))
-                    .font(.readout(48))
-                    .foregroundStyle(Theme.tint(for: store.currentBAC))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                    .contentTransition(.numericText())
-                    .animation(.easeInOut(duration: 0.3), value: store.currentBAC)
+            BACReadout(store.currentRange, unit: store.unit, size: 48)
 
-                Text(verbatim: store.unit.suffix)
-                    .font(.system(size: 22, weight: .light, design: .rounded))
-                    .foregroundStyle(Theme.secondaryText)
-            }
-
-            Text("estimated range")
+            (store.currentRange.isPoint ? Text("estimated level") : Text("estimated range"))
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)

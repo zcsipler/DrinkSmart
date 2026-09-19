@@ -69,40 +69,51 @@ struct BACChartView: View {
         if let scrubDate {
             labelledValue(
                 title: Text(verbatim: scrubDate.hourMinute),
-                value: unit.formatRange(band.range(at: scrubDate)),
-                tint: Theme.tint(for: band.value(at: scrubDate))
+                range: band.range(at: scrubDate)
             )
         } else if let peak = model.upcomingPeak, let range = model.peakRange {
             labelledValue(
                 title: Text("Expected peak around \(peak.date.hourMinute)"),
-                value: unit.formatRange(range),
-                tint: Theme.tint(for: peak.bac)
+                range: range
             )
         } else if let peak = model.peak, let range = model.peakRange, peak.bac > 0 {
             labelledValue(
                 title: Text("Peaked around \(peak.date.hourMinute)"),
-                value: unit.formatRange(range),
-                tint: model.isLive ? Theme.secondaryText : Theme.tint(for: peak.bac)
+                range: range,
+                // A finished session is history, not a live reading.
+                tint: model.isLive ? Theme.secondaryText : nil
             )
         } else {
-            labelledValue(
-                title: Text("No active session"),
-                value: "—",
-                tint: Theme.secondaryText
-            )
+            labelledPlaceholder(title: Text("No active session"))
         }
     }
 
-    private func labelledValue(title: Text, value: String, tint: Color) -> some View {
+    private func labelledValue(
+        title: Text,
+        range: ClosedRange<Double>,
+        tint: Color? = nil
+    ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            title
-                .font(.sectionLabel)
-                .textCase(.uppercase)
-                .foregroundStyle(Theme.secondaryText)
-            Text(verbatim: value)
-                .font(.readout(26))
-                .foregroundStyle(tint)
+            caption(title)
+            BACReadout(range, unit: unit, size: 26, tint: tint)
         }
+    }
+
+    /// The no-session case has no figure to show, only a dash.
+    private func labelledPlaceholder(title: Text) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            caption(title)
+            Text(verbatim: "—")
+                .font(.readout(26))
+                .foregroundStyle(Theme.secondaryText)
+        }
+    }
+
+    private func caption(_ title: Text) -> some View {
+        title
+            .font(.sectionLabel)
+            .textCase(.uppercase)
+            .foregroundStyle(Theme.secondaryText)
     }
 
     /// Marks the absorption limb. This is the one piece of information a

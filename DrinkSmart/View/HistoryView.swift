@@ -124,7 +124,7 @@ private struct SessionRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 Text(verbatim: unit.formatRange(summary.peakRange))
                     .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
-                    .foregroundStyle(Theme.tint(for: summary.peakRange.upperBound))
+                    .foregroundStyle(Theme.tint(for: summary.peakRange.midpoint))
                 Text("peak")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .textCase(.uppercase)

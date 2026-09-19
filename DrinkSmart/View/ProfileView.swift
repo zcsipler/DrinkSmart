@@ -9,8 +9,14 @@ import BACKit
 /// The elimination rate deliberately does not appear as a raw number: no user
 /// can answer "what is your beta in per mille per hour", and a value set at
 /// random makes the estimate worse. We ask about drinking frequency instead —
-/// something everyone knows about themselves — and the raw parameters live
-/// under advanced settings.
+/// something everyone knows about themselves.
+///
+/// The raw rate is still reachable, and the block that holds it explains how
+/// someone could actually arrive at their own figure — from a breathalyser, or
+/// from watching whether they clear earlier than the app predicts. But it sits
+/// folded away at the very bottom of the advanced section, below everything
+/// else, because a control placed any higher reads as a question the user is
+/// expected to answer, and most of them cannot.
 struct ProfileView: View {
     let store: SessionStore
     @State private var showsAdvanced = false
@@ -103,7 +109,7 @@ struct ProfileView: View {
         } header: {
             Text("How often do you drink?")
         } footer: {
-            Text("This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. This is the weakest point of the model — which is why the app shows a range instead of a single number.")
+            Text("This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you.")
         }
         .listRowBackground(Theme.surface)
     }
@@ -193,58 +199,165 @@ struct ProfileView: View {
     private var advancedSection: some View {
         Section {
             DisclosureGroup(isExpanded: $showsAdvanced) {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Elimination rate")
-                        Spacer()
-                        Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
-                            .font(.system(.body, design: .rounded).monospacedDigit())
-                            .foregroundStyle(Theme.calm)
-                    }
-                    Slider(
-                        value: Binding(get: { store.profile.beta }, set: { store.profile.beta = $0 }),
-                        in: 0.10...0.25, step: 0.005
-                    )
-                    .tint(Theme.calm)
-                    .accessibilityLabel(Text("Elimination rate"))
-                }
-                .padding(.vertical, 4)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Uncertainty")
-                        Spacer()
-                        Text(verbatim: "± " + store.unit.formatted(store.profile.betaUncertainty))
-                            .font(.system(.body, design: .rounded).monospacedDigit())
-                            .foregroundStyle(Theme.calm)
-                    }
-                    Slider(
-                        value: Binding(
-                            get: { store.profile.betaUncertainty },
-                            set: { store.profile.betaUncertainty = $0 }
-                        ),
-                        in: 0.005...0.06, step: 0.005
-                    )
-                    .tint(Theme.calm)
-                    .accessibilityLabel(Text("Uncertainty"))
-                }
-                .padding(.vertical, 4)
-
-                HStack {
-                    Text("Range")
-                        .foregroundStyle(Theme.secondaryText)
-                    Spacer()
-                    Text(verbatim: store.unit.formatRange(store.profile.betaRange) + " /h")
-                        .font(.system(.body, design: .rounded).monospacedDigit())
-                        .foregroundStyle(Theme.primaryText)
-                }
+                uncertaintyControl
+                eliminationRateGroup
             } label: {
                 Text("Advanced")
             }
         } footer: {
-            Text("Only set these by hand if you have something to calibrate against — for example an actual breathalyser reading you can compare the estimate to.")
+            Text("Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. The rate below is not — leave it to the frequency question unless you have a measurement to match it against.")
         }
         .listRowBackground(Theme.surface)
+    }
+
+    /// How wide the band is — and therefore whether figures read as points or
+    /// as ranges.
+    ///
+    /// Zero by default (see `Physiology.defaultBetaUncertainty`), but the
+    /// control is a real one: above zero the app stops asserting a point and
+    /// reports the spread instead, which is the more literal reading of what
+    /// the model knows.
+    private var uncertaintyControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Uncertainty")
+                Spacer()
+                Text(verbatim: "± " + store.unit.formatted(store.profile.betaUncertainty))
+                    .font(.system(.body, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Theme.calm)
+            }
+            Slider(
+                value: Binding(
+                    get: { store.profile.betaUncertainty },
+                    set: { store.profile.betaUncertainty = $0 }
+                ),
+                in: 0...0.06, step: 0.005
+            )
+            .tint(Theme.calm)
+            .accessibilityLabel(Text("Uncertainty"))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("At zero every figure is a single number — the app's best estimate. Above zero the same figures are shown as ranges, and the band on the chart widens to match.")
+
+                Text("A single number is easier to learn against: over time you find out what your own 0.6 feels like. A range is the more literal answer, because the rate really is uncertain. Both are defensible — this is your call.")
+
+                Text("The spread suggested by your drinking frequency is ± \(store.unit.formatted(store.frequency.uncertainty)) per hour.")
+                    .foregroundStyle(Theme.calm)
+            }
+            .font(.system(size: 12, design: .rounded))
+            .foregroundStyle(Theme.secondaryText)
+        }
+        .padding(.vertical, 4)
+    }
+
+    /// The elimination rate, one level deeper still.
+    ///
+    /// Nobody knows their own beta, and nothing in daily life would ever
+    /// prompt someone to say "my clearance is 0.18 per hour". The drinking
+    /// frequency question above already sets it. It stays reachable for
+    /// calibration against a breathalyser, but at the very bottom of the
+    /// deepest section and folded away, so it is not offered as a choice.
+    private var eliminationRateGroup: some View {
+        DisclosureGroup {
+            eliminationExplainer
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Rate")
+                        .foregroundStyle(Theme.secondaryText)
+                    Spacer()
+                    Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
+                        .font(.system(.body, design: .rounded).monospacedDigit())
+                        .foregroundStyle(Theme.calm)
+                }
+                Slider(
+                    value: Binding(get: { store.profile.beta }, set: { store.profile.beta = $0 }),
+                    in: 0.10...0.25, step: 0.005
+                )
+                .tint(Theme.calm)
+                .accessibilityLabel(Text("Elimination rate"))
+            }
+            .padding(.vertical, 4)
+
+            HStack {
+                Text("Range")
+                    .foregroundStyle(Theme.secondaryText)
+                Spacer()
+                Text(verbatim: store.unit.formatRange(store.profile.betaRange) + " /h")
+                    .font(.system(.body, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Theme.primaryText)
+            }
+        } label: {
+            HStack {
+                Text("Elimination rate")
+                Spacer()
+                Text(verbatim: store.unit.formatted(store.profile.beta) + "/h")
+                    .font(.system(.footnote, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Theme.secondaryText)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// What the elimination rate actually is.
+    ///
+    /// Without this the slider is a number nobody can reason about. The live
+    /// clearing example is the part that makes it concrete — an abstract
+    /// "0.15 per hour" means nothing until you see it as hours of your evening.
+    private var eliminationExplainer: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve.")
+
+            Text("Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all.")
+
+            Text("At this setting, \(store.unit.formatted(1.0)) takes about \(clearingTimeFromOne) to clear. Almost everyone falls between \(store.unit.formatRange(0.10...0.25)) per hour.")
+                .foregroundStyle(Theme.calm)
+
+            Text("How to find yours")
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(Theme.primaryText)
+                .padding(.top, 2)
+
+            tip(
+                "With a breathalyser",
+                "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, with nothing in between. Subtract the second reading from the first and divide by the hours between them."
+            )
+
+            Text("For example \(store.unit.formatted(0.70)) and \(store.unit.formatted(0.42)) two hours later works out to \(store.unit.formatted(0.14)) per hour.")
+                .foregroundStyle(Theme.calm)
+                .padding(.leading, 2)
+
+            tip(
+                "Without one",
+                "The app tells you when it expects you to clear. If you are reliably back to normal well before that, your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes longer than predicted, nudge it down."
+            )
+
+            tip(
+                "What moves it",
+                "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs slightly higher in women on average, and lower on an empty stomach or with liver trouble."
+            )
+        }
+        .font(.system(size: 12, design: .rounded))
+        .foregroundStyle(Theme.secondaryText)
+        .padding(.vertical, 6)
+    }
+
+    private func tip(_ title: LocalizedStringKey, _ body: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .foregroundStyle(Theme.secondaryText.opacity(0.8))
+            Text(body)
+        }
+        .padding(.top, 2)
+    }
+
+    /// How long 1 g/L would take to clear at the current rate. Deliberately
+    /// ignores absorption: this is about the descending limb only.
+    private var clearingTimeFromOne: String {
+        let hours = 1.0 / max(store.profile.beta, 0.01)
+        return (hours * 3600).compactDuration
     }
 
     // MARK: Helpers

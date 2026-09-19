@@ -99,6 +99,7 @@ TRANSLATIONS = {
     # --- TodayView ---
     "Profile": "Profil",
     "End session": "Alkalom lezárása",
+    "estimated level": "becsült szint",
     "estimated range": "becsült tartomány",
     "Elapsed": "Tartam",
     "Drinks": "Italok",
@@ -113,17 +114,29 @@ TRANSLATIONS = {
     # --- Editing an already logged drink ---
     "Edit drink": "Ital szerkesztése",
     "Save changes": "Mentés",
-    "Without this": "Enélkül",
     "With this": "Ezzel",
     "Delete": "Törlés",
     "tap to edit · swipe to delete": "koppints a szerkesztéshez · húzd a törléshez",
+
+    # --- Drinking pace ---
+    "How fast": "Milyen tempóban",
+    "In one go": "Egy hajtásra",
+    "15 min": "15 perc",
+    "30 min": "30 perc",
+    "1 hr": "1 óra",
+    "Counts as a single swallow — the steepest possible rise.":
+        "Egyetlen kortynak számít — ez a lehető legmeredekebb emelkedés.",
+    "A quick drink. The level climbs fast.":
+        "Gyors ital. A szint meredeken emelkedik.",
+    "A normal pace.": "Szokásos tempó.",
+    "Nursed slowly. Much gentler climb for the same alcohol.":
+        "Lassan kortyolva. Ugyanannyi alkohol, sokkal szelídebb emelkedés.",
 
     # --- AddDrinkSheet ---
     "Cancel": "Mégse",
     "Now": "Most",
     "Projected peak": "Vetített csúcs",
     "Peak at": "Csúcs ekkor",
-    "Time to peak": "Csúcsig",
     "Clears": "Kiürül",
     "This would cross your limit": "Átlépnéd a saját határod",
     "Around %@, for up to %@.": "%@ körül, legfeljebb %@ hosszan.",
@@ -164,11 +177,11 @@ TRANSLATIONS = {
     "Drinking frequency": "Fogyasztás gyakorisága",
     "How often do you drink?": "Milyen gyakran iszol?",
     "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, "
-    "so frequent drinkers clear alcohol faster. This is the weakest point of the model — which is why the "
-    "app shows a range instead of a single number.":
+    "so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can "
+    "set under Advanced how much of that uncertainty the app shows you.":
         "Ebből becsüljük a lebontási sebességet. A rendszeres fogyasztás indukálja a máj CYP2E1 útvonalát, "
-        "ezért a gyakori fogyasztók gyorsabban bontják le az alkoholt. Ez a modell leggyengébb pontja — "
-        "ezért mutat az app tartományt egyetlen szám helyett.",
+        "ezért a gyakori fogyasztók gyorsabban bontják le az alkoholt. Ez a modell leggyengébb pontja, "
+        "ezért a Haladó beállításokban megadhatod, mennyit mutasson meg az app ebből a bizonytalanságból.",
     "Your limit": "Saját határ",
     "Your own reference number, not a legal limit. The app tells you when a planned drink would take you "
     "past it, and for how long you would stay above.":
@@ -185,13 +198,57 @@ TRANSLATIONS = {
         "A Widmark-faktor tipikusan 0,68 körül van férfiaknál és 0,55 körül nőknél. Ha a tiéd messze esik "
         "ettől, érdemes ellenőrizni a fenti adatokat.",
     "Elimination rate": "Lebontási sebesség",
+    "How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve.":
+        "Milyen gyorsan üríti a májad a már felszívódott alkoholt — ez a görbe lecsengő szakaszának meredeksége.",
+    "Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all.":
+        "Az alkohol nem százalékosan tűnik el, hanem óránként fix mennyiséggel, mert a lebontó enzim már nagyon alacsony szinten is teljes kapacitáson dolgozik. Innen van, hogy egyáltalán létezik olyan ökölszabály, mint az „óránként egy ital”.",
+    "At this setting, %@ takes about %@ to clear. Almost everyone falls between %@ per hour.":
+        "Ezzel a beállítással %@ körülbelül %@ alatt ürül ki. Szinte mindenkinél %@ közé esik ez az "
+        "érték óránként.",
+    "How to find yours": "Hogyan derítheted ki a sajátodat?",
+    "With a breathalyser": "Alkoholszondával",
+    "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, "
+    "with nothing in between. Subtract the second reading from the first and divide by the hours between "
+    "them.":
+        "Fújj kétszer, legalább egy óra különbséggel, a lecsengő ágon — az utolsó ital után legalább két "
+        "órával, és közben ne igyál. Vond ki a második mérést az elsőből, és oszd el a köztük eltelt órák "
+        "számával.",
+    "For example %@ and %@ two hours later works out to %@ per hour.":
+        "Például %@, majd két órával később %@: ez %@ óránként.",
+    "Without one": "Szonda nélkül",
+    "The app tells you when it expects you to clear. If you are reliably back to normal well before that, "
+    "your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes "
+    "longer than predicted, nudge it down.":
+        "Az app megmondja, mikorra várja a kiürülést. Ha ennél jóval hamarabb vagy rendben, a lebontásod "
+        "gyorsabb a beállítottnál — vidd feljebb egy lépéssel, és figyeld néhány alkalmon át. Ha tovább "
+        "tart, vidd lejjebb.",
+    "What moves it": "Mi befolyásolja",
+    "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs "
+    "slightly higher in women on average, and lower on an empty stomach or with liver trouble.":
+        "A rendszeres fogyasztás növeli: a munkát végző májenzim a használattól indukálódik. Nőknél "
+        "átlagosan valamivel magasabb, éhgyomorra és májbetegség esetén pedig alacsonyabb.",
     "Uncertainty": "Bizonytalanság",
+    "At zero every figure is a single number — the app's best estimate. Above zero the same figures are "
+    "shown as ranges, and the band on the chart widens to match.":
+        "Nullán minden szám egyetlen érték — az app legjobb becslése. Nulla fölött ugyanezek "
+        "tartományként jelennek meg, és a grafikon sávja is ennek megfelelően szélesedik.",
+    "A single number is easier to learn against: over time you find out what your own 0.6 feels like. "
+    "A range is the more literal answer, because the rate really is uncertain. Both are defensible — "
+    "this is your call.":
+        "Egyetlen számhoz könnyebb tanulni: idővel megtudod, nálad mit jelent a 0,6. A tartomány a szó "
+        "szerintibb válasz, mert a lebontási sebesség tényleg bizonytalan. Mindkettő védhető — ez a te "
+        "döntésed.",
+    "The spread suggested by your drinking frequency is ± %@ per hour.":
+        "A fogyasztási gyakoriságod alapján javasolt szórás ± %@ óránként.",
+    "Rate": "Sebesség",
     "Range": "Sáv",
     "Advanced": "Haladó beállítások",
-    "Only set these by hand if you have something to calibrate against — for example an actual breathalyser "
-    "reading you can compare the estimate to.":
-        "Csak akkor állítsd kézzel, ha van mihez igazítanod — például ha valaha alkoholszondával "
-        "visszamérted magad, és tudod, mennyire tért el a becslés.",
+    "Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. "
+    "The rate below is not — leave it to the frequency question unless you have a measurement to match "
+    "it against.":
+        "A bizonytalanság ízlés kérdése: ez dönti el, hogy a számok egy értékként vagy tartományként "
+        "jelennek meg. Az alatta lévő sebesség nem az — hagyd a gyakorisági kérdésre, hacsak nincs mért "
+        "értéked, amihez igazítanád.",
 }
 
 
@@ -250,6 +307,85 @@ def main() -> int:
     for block in re.finditer(r"DrinkTemplate\((.*?)\n        \)", sources, re.S):
         for m in re.finditer(r'name:\s*"((?:[^"\\]|\\.)*)"', block.group(1)):
             literals.add(m.group(1))
+
+    # Local helper views take LocalizedStringKey parameters, and a literal
+    # passed to one is just as translatable as the same literal inside Text().
+    #
+    # Position matters: the very same helpers also take plain Strings —
+    # already-formatted values, SF Symbol names — which must NOT be
+    # translated. So we read each signature, note which argument positions are
+    # LocalizedStringKey, and only harvest literals sitting at those positions
+    # of the call. Swift keeps argument order, so the index is enough.
+
+    def split_top_level(text: str) -> list[str]:
+        """Splits an argument or parameter list on its top-level commas."""
+        parts, depth, in_string, current = [], 0, False, []
+        i = 0
+        while i < len(text):
+            ch = text[i]
+            if in_string:
+                if ch == "\\":
+                    current.append(text[i : i + 2])
+                    i += 2
+                    continue
+                if ch == '"':
+                    in_string = False
+            elif ch == '"':
+                in_string = True
+            elif ch in "([{":
+                depth += 1
+            elif ch in ")]}":
+                depth -= 1
+            elif ch == "," and depth == 0:
+                parts.append("".join(current))
+                current = []
+                i += 1
+                continue
+            current.append(ch)
+            i += 1
+        parts.append("".join(current))
+        return parts
+
+    def argument_list(text: str, start: int) -> str | None:
+        """The balanced argument list that opens at `start` (just past `(`)."""
+        i, depth, in_string = start, 1, False
+        while i < len(text):
+            ch = text[i]
+            if in_string:
+                if ch == "\\":
+                    i += 2
+                    continue
+                if ch == '"':
+                    in_string = False
+            elif ch == '"':
+                in_string = True
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    return text[start:i]
+            i += 1
+        return None
+
+    for sig in re.finditer(r"func (\w+)\(", sources):
+        params = argument_list(sources, sig.end())
+        if params is None or "LocalizedStringKey" not in params:
+            continue
+        localized = {
+            i for i, p in enumerate(split_top_level(params))
+            if "LocalizedStringKey" in p
+        }
+        for call in re.finditer(rf"\b{sig.group(1)}\(", sources):
+            args = argument_list(sources, call.end())
+            if args is None:
+                continue
+            for i, arg in enumerate(split_top_level(args)):
+                if i not in localized:
+                    continue
+                lit = re.fullmatch(r'\s*(?:\w+:\s*)?"((?:[^"\\]|\\.)*)"\s*', arg)
+                if lit:
+                    literals.add(lit.group(1))
 
     def normalize(lit: str) -> str:
         """Replaces `\\(...)` interpolations with %@, keeping parens balanced."""
