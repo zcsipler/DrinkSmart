@@ -22,6 +22,134 @@ struct BACChartView: View {
     private var band: BACBand { model.band }
     private var unit: BACUnit { model.unit }
 
+    // MARK: Lane geometry
+    //
+    // The drinks used to be annotated onto the curve's own baseline, which put
+    // their icons inside the plot, on top of the band. Instead the y-scale is
+    // extended below zero and the drinks live in that strip: still on the same
+    // time axis — which is the whole point, the marks have to line up with the
+    // curve — but outside the area the curve occupies.
+    //
+    // The curve keeps a fixed height and the lane grows downwards under it, so
+    // a busy evening costs screen rather than legibility.
+
+    private static let curveHeight: CGFloat = 200
+    private static let rowHeight: CGFloat = 24
+    private static let lanePadding: CGFloat = 8
+    private static let axisAllowance: CGFloat = 30
+
+    /// Beyond this the chart is taller than it is useful. What does not fit is
+    /// put on the last row and may overlap there — in practice this only
+    /// happens to a whole evening typed in afterwards, all stamped "now".
+    private static let maxLevels = 6
+
+    /// How much two drinks may overlap and still share a row.
+    ///
+    /// Durations are whole minutes and every time on screen is shown to the
+    /// minute, so an overlap of seconds is not an overlap anybody can see. It
+    /// is easy to produce one: a beer started at 14:55:23 and given an hour
+    /// runs to 15:55:23, and the next beer logged at 15:55:10 misses the test
+    /// by thirteen seconds — then drops a row for a reason no one could name
+    /// while looking at the screen.
+    private static let overlapTolerance: TimeInterval = 60
+
+    /// The smallest stretch of time a drink claims on its row.
+    ///
+    /// Its only job is to keep two drinks logged at the very same moment from
+    /// being drawn on top of each other, so it has to be longer than the
+    /// tolerance — otherwise it would not separate them either.
+    private static let minimumFootprint: TimeInterval = 120
+
+    private struct LaneRow: Identifiable {
+        let drink: Drink
+        let level: Int
+        var id: UUID { drink.id }
+    }
+
+    /// The lane, worked out in a single pass.
+    ///
+    /// A value rather than a set of computed properties reading each other,
+    /// because `chartXSelection` re-evaluates the body on every drag sample and
+    /// the packing would otherwise run several times per mark, per frame.
+    private struct LaneLayout {
+        let rows: [LaneRow]
+        let height: CGFloat
+        let span: Double
+
+        /// A distance in points inside the lane, in chart units.
+        func units(_ points: CGFloat) -> Double {
+            guard height > 0 else { return 0 }
+            return span * Double(points / height)
+        }
+
+        /// The centre of a row, in chart units.
+        func level(_ index: Int) -> Double {
+            -units(BACChartView.lanePadding / 2
+                   + BACChartView.rowHeight * (CGFloat(index) + 0.5))
+        }
+    }
+
+    /// Packs the drinks into rows, first fit.
+    ///
+    /// Badges used to slide sideways to make room, with a dashed leader giving
+    /// the real time back. Rows are better: a drink that does not fit beside
+    /// its neighbour drops to the next row instead of drifting, so **every**
+    /// badge sits on the moment it was drunk, and nothing has to be read back
+    /// through a correction.
+    ///
+    /// **A row is a thread of drinking, and the test is overlap in time, not on
+    /// screen.** A beer finished at half past and another started at half past
+    /// share a row: they never coexisted. So do a beer given 30 minutes and the
+    /// next one twenty minutes later, because logging that one already cut the
+    /// first short (5.13) and the two now meet end to end. A shot pulled in the
+    /// middle of a beer does not — that beer is still in your other hand, and
+    /// the second row is the honest picture of it.
+    ///
+    /// The test runs to the minute, not to the second — see
+    /// `overlapTolerance`, which is what keeps a beer that ran out at 15:55:23
+    /// from evicting the one logged at 15:55:10.
+    ///
+    /// Sizing the footprint by the badge instead, as this once did, pushed
+    /// drinks apart that had nothing to do with each other: at phone width a
+    /// badge is about 6 % of the visible window, which is 20 minutes of a
+    /// six-hour evening.
+    private var laneLayout: LaneLayout {
+        let ordered = model.drinks.sorted { $0.consumedAt < $1.consumedAt }
+        guard !ordered.isEmpty else {
+            return LaneLayout(rows: [], height: 0, span: 0)
+        }
+
+        var occupiedUntil: [Date] = []
+        var rows: [LaneRow] = []
+
+        for drink in ordered {
+            let until = max(
+                drink.finishedAt,
+                drink.consumedAt.addingTimeInterval(Self.minimumFootprint)
+            )
+            let fits = drink.consumedAt.addingTimeInterval(Self.overlapTolerance)
+
+            var index = occupiedUntil.firstIndex { $0 <= fits } ?? occupiedUntil.count
+            index = min(index, Self.maxLevels - 1)
+
+            if index < occupiedUntil.count {
+                occupiedUntil[index] = max(occupiedUntil[index], until)
+            } else {
+                occupiedUntil.append(until)
+            }
+            rows.append(LaneRow(drink: drink, level: index))
+        }
+
+        let height = CGFloat(occupiedUntil.count) * Self.rowHeight + Self.lanePadding
+        return LaneLayout(
+            rows: rows,
+            height: height,
+            // So that the plot divides into a fixed-height curve and a lane of
+            // exactly `height` points.
+            span: model.yMaximum * Double(height / Self.curveHeight)
+        )
+    }
+
     /// The engine samples every minute — a 12-hour session is 720 points,
     /// more than is worth drawing. We thin to about 220, but always keep the
     /// peak, otherwise the top of the band would be clipped.
@@ -134,15 +262,21 @@ struct BACChartView: View {
     // MARK: Chart
 
     private var chart: some View {
-        Chart {
+        let lane = laneLayout
+
+        return Chart {
+            laneBackground(lane)
+            pourWindows(lane)
             uncertaintyBand
             centerLine
             limitRule
-            drinkMarkers
+            baseline
+            paceBars(lane)
+            drinkBadges(lane)
             focusMarks
         }
         .chartXScale(domain: model.visibleRange)
-        .chartYScale(domain: 0...model.yMaximum)
+        .chartYScale(domain: -lane.span...model.yMaximum)
         .chartXSelection(value: $scrubDate)
         .chartXAxis { xAxis }
         .chartYAxis { yAxis }
@@ -150,7 +284,10 @@ struct BACChartView: View {
             plot.background(Theme.surface.opacity(0.5))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .frame(height: 260)
+        .frame(height: Self.curveHeight + lane.height + Self.axisAllowance)
+        // The lane gains a row when a drink no longer fits beside its
+        // neighbour. Letting that snap would read as a glitch.
+        .animation(.easeInOut(duration: 0.25), value: lane.height)
     }
 
     /// The band: the area between fast and slow elimination.
@@ -206,24 +343,117 @@ struct BACChartView: View {
             }
     }
 
-    @ChartContentBuilder
-    private var drinkMarkers: some ChartContent {
-        ForEach(model.drinks) { drink in
-            RuleMark(x: .value("Drink", drink.consumedAt))
-                .foregroundStyle(Color.white.opacity(0.07))
-                .lineStyle(StrokeStyle(lineWidth: 1))
+    // MARK: The drink lane
 
-            PointMark(
-                x: .value("Drink", drink.consumedAt),
-                y: .value("Level", 0)
+    /// The strip the drinks sit in, darkened so it reads as its own register
+    /// rather than as part of the plot.
+    @ChartContentBuilder
+    private func laneBackground(_ lane: LaneLayout) -> some ChartContent {
+        if lane.span > 0 {
+            RectangleMark(
+                xStart: .value("Time", model.visibleRange.lowerBound),
+                xEnd: .value("Time", model.visibleRange.upperBound),
+                yStart: .value("Level", -lane.span),
+                yEnd: .value("Level", 0)
             )
-            .symbolSize(0)
-            .annotation(position: .top, spacing: 2) {
-                Image(systemName: DrinkCatalog.icon(for: drink))
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(Theme.secondaryText)
+            .foregroundStyle(Theme.background.opacity(0.55))
+        }
+    }
+
+    private var baseline: some ChartContent {
+        RuleMark(y: .value("Level", 0))
+            .foregroundStyle(Theme.hairline)
+            .lineStyle(StrokeStyle(lineWidth: 1))
+    }
+
+    /// Each drink's own column, running the full height of the chart.
+    ///
+    /// Two jobs at once. In the curve area it marks the stretch of rise the
+    /// drink is responsible for, which is the only thing that makes a length in
+    /// the lane mean something. Through the lane it is the sight line: once
+    /// there are five rows, a bar near the bottom is a long way from the time
+    /// axis, and the column is what tells you which moment it belongs to.
+    ///
+    /// Drawn first, so it sits behind the curve and behind the rows.
+    @ChartContentBuilder
+    private func pourWindows(_ lane: LaneLayout) -> some ChartContent {
+        ForEach(model.drinks) { drink in
+            if drink.drinkingMinutes > 0 {
+                RectangleMark(
+                    xStart: .value("Drink", drink.consumedAt),
+                    xEnd: .value("Drink", drink.finishedAt),
+                    yStart: .value("Level", -lane.span),
+                    yEnd: .value("Level", model.yMaximum)
+                )
+                .foregroundStyle(Color.white.opacity(0.05))
+            } else {
+                // Nothing to shade: a moment has no width. The dashed line is
+                // the whole mark. Finer and dimmer than the now-line, which is
+                // also dashed and must stay the louder of the two.
+                RuleMark(x: .value("Drink", drink.consumedAt))
+                    .foregroundStyle(Color.white.opacity(0.12))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [1.5, 2.5]))
             }
         }
+    }
+
+    /// How long each drink took, on its own row.
+    ///
+    /// A drink downed in one go has no bar — a bar of zero length is invisible,
+    /// and padding it out to a stub would assert a duration that did not
+    /// happen. Its badge simply sits alone on the row, in its dashed column.
+    /// The difference between a span and a moment is then the presence or
+    /// absence of the bar, which is as plain as it gets.
+    @ChartContentBuilder
+    private func paceBars(_ lane: LaneLayout) -> some ChartContent {
+        ForEach(lane.rows) { row in
+            if row.drink.drinkingMinutes > 0 {
+                RectangleMark(
+                    xStart: .value("Drink", row.drink.consumedAt),
+                    xEnd: .value("Drink", row.drink.finishedAt),
+                    yStart: .value("Level", lane.level(row.level) - lane.units(3.5)),
+                    yEnd: .value("Level", lane.level(row.level) + lane.units(3.5))
+                )
+                .foregroundStyle(Color.white.opacity(0.22))
+                .cornerRadius(3)
+
+                // End cap: it makes the bar a measured span with a definite
+                // end, rather than a shape that just stops.
+                RuleMark(
+                    x: .value("Drink", row.drink.finishedAt),
+                    yStart: .value("Level", lane.level(row.level) - lane.units(7)),
+                    yEnd: .value("Level", lane.level(row.level) + lane.units(7))
+                )
+                .foregroundStyle(Color.white.opacity(0.34))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round))
+            }
+        }
+    }
+
+    /// One badge per drink, sitting on the start of its own bar.
+    @ChartContentBuilder
+    private func drinkBadges(_ lane: LaneLayout) -> some ChartContent {
+        ForEach(lane.rows) { row in
+            PointMark(
+                x: .value("Drink", row.drink.consumedAt),
+                y: .value("Level", lane.level(row.level))
+            )
+            .symbolSize(0)
+            .annotation(position: .overlay, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                drinkBadge(row.drink)
+            }
+        }
+    }
+
+    /// Every badge looks the same. The pace is the bar row's job, and saying it
+    /// twice would only make the badge carry meaning it cannot really hold.
+    private func drinkBadge(_ drink: Drink) -> some View {
+        Image(systemName: DrinkCatalog.icon(for: drink))
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(Theme.secondaryText)
+            .frame(width: 18, height: 18)
+            .background(Theme.surfaceRaised, in: Circle())
+            .overlay { Circle().strokeBorder(Color.white.opacity(0.18), lineWidth: 1) }
     }
 
     /// The now-marker, and the scrub read-out.
@@ -278,8 +508,20 @@ struct BACChartView: View {
         }
     }
 
+    /// Explicit ticks rather than `.automatic`, because the scale now runs into
+    /// negative territory to make room for the drink lane — and a labelled
+    /// −0.2 ‰ would be a nonsense reading.
+    private var yTicks: [Double] {
+        let step: Double = switch model.yMaximum {
+        case ..<0.7: 0.2
+        case ..<1.6: 0.5
+        default: 1.0
+        }
+        return Array(stride(from: 0, through: model.yMaximum, by: step))
+    }
+
     private var yAxis: some AxisContent {
-        AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
+        AxisMarks(position: .leading, values: yTicks) { value in
             AxisGridLine().foregroundStyle(Theme.hairline)
             AxisValueLabel {
                 if let level = value.as(Double.self) {
@@ -294,26 +536,74 @@ struct BACChartView: View {
     // MARK: Legend
 
     private var legend: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 6) {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Theme.calm.opacity(0.35))
-                    .frame(width: 16, height: 9)
-                Text("possible range")
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 12) {
+                HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Theme.calm.opacity(0.35))
+                        .frame(width: 16, height: 9)
+                    Text("possible range")
+                }
+
+                Text(verbatim: "·")
+
+                if scrubDate == nil {
+                    Text("drag to read values")
+                } else {
+                    Text("release to go back")
+                }
+
+                Spacer()
             }
 
-            Text(verbatim: "·")
-
-            if scrubDate == nil {
-                Text("drag to read values")
-            } else {
-                Text("release to go back")
-            }
-
-            Spacer()
+            paceLegend
         }
         .font(.system(size: 10, design: .rounded))
         .foregroundStyle(Theme.secondaryText)
+    }
+
+    /// Only names the two marks that are actually on screen. On an evening of
+    /// shots there is no bar to explain, and vice versa.
+    @ViewBuilder
+    private var paceLegend: some View {
+        let hasPour = model.drinks.contains { $0.drinkingMinutes > 0 }
+        let hasInstant = model.drinks.contains { $0.drinkingMinutes <= 0 }
+
+        if hasPour || hasInstant {
+            HStack(spacing: 12) {
+                if hasPour {
+                    HStack(spacing: 6) {
+                        Capsule()
+                            .fill(Color.white.opacity(0.22))
+                            .frame(width: 16, height: 5)
+                        Text("pour time")
+                    }
+                }
+                if hasInstant {
+                    HStack(spacing: 6) {
+                        VerticalDash()
+                            .stroke(
+                                Color.white.opacity(0.45),
+                                style: StrokeStyle(lineWidth: 1, dash: [1.5, 2.5])
+                            )
+                            .frame(width: 2, height: 10)
+                        Text("in one go")
+                    }
+                }
+                Spacer()
+            }
+        }
+    }
+}
+
+/// The legend swatch for a drink that was downed in one go — the same dashed
+/// line the chart draws for it.
+private struct VerticalDash: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        return path
     }
 }
 

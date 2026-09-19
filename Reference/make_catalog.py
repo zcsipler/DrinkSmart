@@ -68,6 +68,8 @@ TRANSLATIONS = {
     "possible range": "lehetséges tartomány",
     "drag to read values": "húzd a leolvasáshoz",
     "release to go back": "engedd el a visszatéréshez",
+    "pour time": "fogyasztási idő",
+    "in one go": "egy hajtásra",
 
     # --- Live screen: the day with nothing on it ---
     "Live": "Élő",

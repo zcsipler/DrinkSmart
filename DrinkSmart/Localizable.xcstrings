@@ -2348,6 +2348,23 @@
         }
       }
     },
+    "in one go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in one go"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "egy hajtásra"
+          }
+        }
+      }
+    },
     "kg": {
       "extractionState": "manual",
       "localizations": {
@@ -2395,6 +2412,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "lehetséges tartomány"
+          }
+        }
+      }
+    },
+    "pour time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pour time"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fogyasztási idő"
           }
         }
       }

@@ -69,7 +69,7 @@ DrinkSmart/
 │   └── Tests/BACKitTests/      47 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   144 kulcs, en + hu
+│   ├── Localizable.xcstrings   146 kulcs, en + hu
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
@@ -344,6 +344,81 @@ elnavigált állapot, amit vissza kellene hozni), a `DayState` háromállapotú 
 (5.7), és a `DrinkingDay.offset(by:)` / `daysAgo(from:)` egyelőre hívó nélkül
 maradt — bent hagytuk, mert az Előzmény tartományválasztójának kelleni fog.
 
+### 5.12 Az italok saját sávot kaptak a görbe alatt
+
+Az italikonok korábban a nulla vonalra annotált `PointMark`-ok voltak, vagyis a
+plot **belsejében** ültek, a sáv alján. Két baj volt vele: ránézésre a
+görbéhez tartozó adatnak látszottak, és nem tudtak megmutatni semmit az
+`5.9`-es fogyasztási tempóból — pedig az adat ott van a modellben.
+
+**A megoldás:** a `chartYScale` tartománya `−lane.span ... yMaximum`. A nulla
+alatti rész nem a görbéé, hanem az italoké. Ugyanaz az időtengely — ez a
+lényeg, az ikonoknak illeszkedniük kell a görbéhez —, de a görbe területén
+kívül. Ezért van explicit `yTicks` a tengelyen: az `.automatic` felcímkézne egy
+−0,2 ‰-et, ami értelmetlen leolvasás.
+
+**A görbe fix 200 pt, a sáv lefelé nő.** Egy sűrű este így képernyőbe kerül, nem
+olvashatóságba. A `laneLayout` first fit módon sorokba pakolja az italokat.
+Soronként 24 pt, legfeljebb hat sor — afölött a chart magasabb, mint amennyire
+hasznos, és ami nem fér bele, az az utolsó sorban átfedhet.
+
+**Egy sor egy ivási szál, és az ütközés kérdése az idő, nem a képernyő.** Ami
+időben nem folyik egybe, az egy sorba kerül, akármilyen közel van:
+
+- 30 perces sör, utána fél órával egy másik → **egy sor**, sosem voltak
+  egyszerre a kézben.
+- 30 perces sör, utána 20 perccel egy másik → **egy sor**, mert a második
+  felvitele már levágta az elsőt 20 percre (5.13), és a kettő így pont
+  egymáshoz ér.
+- 30 perces sör közben egy pálinka → **külön sor**, mert a sör közben tényleg
+  a kézben volt.
+
+**Az összevetés percre megy, nem másodpercre** (`overlapTolerance`, 60 s). Az
+időtartamok egész percek, a képernyőn minden idő percre látszik, tehát egy
+másodperces átfedés nem átfedés. Könnyű előállítani: egy 14:55:23-kor kezdett,
+egy órásra állított sör 15:55:23-ig tart, a 15:55:10-kor felvitt következő pedig
+tizenhárom másodperccel elbukik a teszten — és leesik egy sorral olyan okból,
+amit a képernyőre nézve senki nem tudna megnevezni. A `pourCut` (5.13) az új
+adatot pontosan egymáshoz igazítja, a tolerancia a korábban felvitt és a kézzel
+szerkesztett soroknak kell.
+
+A kétperces lábnyom csak arra van, hogy két azonos pillanatra felvitt ital ne
+egymásra rajzolódjon — ezért kell hosszabbnak lennie a toleranciánál, különben
+azt sem választaná szét. **Volt egy hibás kör**, amiben a lábnyomot a badge
+szélessége adta: az telefonszélességen a látható ablak ~6 %-a, vagyis egy
+hatórás estén 20 perc — így egymás alá kerültek olyan italok, amiknek semmi
+közük nem volt egymáshoz. A képernyőméret nem dönthet arról, mi volt egyszerre.
+
+**Ennek az ára:** hat feles öt percenként egy sorba kerül, és ott a badge-ek
+átfedik egymást. Időrendben állnak, tehát sorozatként olvashatók, de ha ez
+zavaró lesz, egy gyenge (a badge felénél ütő) másodlagos feltétel visszahozható.
+
+- **Minden badge a valós idején áll.** Volt egy korábbi kör, amiben a badge-ek
+  oldalra csúsztak egymás elől, és egy szaggatott vezérvonal adta vissza az
+  igazi időt. A sor jobb: nem kell korrekción keresztül visszaolvasni semmit.
+- **Egy sor egy objektum.** A rúd a kezdéstől az utolsó kortyig fut végjellel,
+  a badge a kezdésen ül rajta. Aki egyben lehajtja, annak nincs rúdja — nulla
+  hosszú rúd láthatatlan, egy csonkká kerekítve pedig olyan időtartamot
+  állítana, ami nem volt. A tartam és a pillanat különbsége a rúd megléte.
+- **A badge-ek egyformák.** A tempót a rúd mondja el; kétszer elmondani csak
+  olyan jelentést aggatna a badge-re, amit nem bír el.
+
+**Az oszlop a teljes chart magasságán átfut**, a görbe mögött és a sorokon
+keresztül. Két dolgot csinál egyszerre: a görbén megmutatja, a felszálló ág
+melyik szakaszáért felel az ital (enélkül a rúd csak egy hossz lenne,
+összevetési alap nélkül), a sávban pedig ez a szemvonal — öt sornál egy alsó
+rúd messze kerül az időtengelytől, és az oszlop mondja meg, melyik pillanathoz
+tartozik. A kortyolt italnál halvány sáv, az egyben lehajtottnál szaggatott
+vonal, mert egy pillanatnak nincs szélessége. Finomabb és halványabb, mint a
+szintén szaggatott most-vonal, aminek hangosabbnak kell maradnia.
+
+A jelmagyarázat csak azt a kettőt nevezi meg, ami épp a képernyőn van.
+
+A `LaneLayout` **egyetlen menetben** számol, és a `chart` egy lokális
+konstansba kéri le. Nem stílus kérdése: a `chartXSelection` minden húzási
+mintánál újraértékeli a `body`-t, és külön computed propertykből a pakolás
+markonként többször futna le, frame-enként.
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -395,7 +470,7 @@ utána minden kör végén lefuttatható.
 amennyit az iOS nyelvi beállítása kér: magyar rendszeren magyar, minden más
 esetben angol.
 
-- `DrinkSmart/Localizable.xcstrings` — 152 kulcs, `en` és `hu`.
+- `DrinkSmart/Localizable.xcstrings` — 146 kulcs, `en` és `hu`.
 - A kulcs maga az **angol forrásszöveg**. Interpolációnál `%@`.
 - A nézetekben `LocalizedStringKey` (sima `Text("...")`), a modellrétegben
   `LocalizedStringResource` (enum `label` / `detail` / `explanation`).
