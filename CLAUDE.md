@@ -471,11 +471,17 @@ teszt rossz.**
 **Futásidő** (sandbox, ARM Linux — készüléken vélhetően 2–4× gyorsabb, de a
 nagyságrend áll). Ezek a számok döntik el, mit szabad gesztus közben hívni:
 
-| Hívás | 1 ital | 5 ital | 8 ital |
-|---|---|---|---|
-| `simulateBand` | 2,5 ms | 3,8 ms | 6,1 ms |
-| `projectBand` (6 szimuláció) | — | 7,3 ms (4 ital + jelölt) | — |
-| `BACBand.samples` | — | 0,05 ms | — |
+| Hívás | 1 ital | 5 ital | 8 ital | 7 ital, 17 órás este |
+|---|---|---|---|---|
+| `simulateBand` | 2,5 ms | 3,8 ms | 6,1 ms | **5,6 ms** |
+| `projectBand` (6 szimuláció) | — | 7,3 ms (4 ital + jelölt) | — | **12,0 ms** |
+| `BACBand.samples` | — | 0,05 ms | — | — |
+
+**Debug buildben ugyanez 14×**: a `projectBand` 167 ms, a `simulateBand` 73 ms.
+Ez nem mellékes, mert fejlesztés közben debug fut a készüléken — egy hívás ott
+húsz frame. Az utolsó oszlop a képernyőn is látott este: hét sör 14:55-től
+21:24-ig, 13,8 egység, ami reggel 7:47-re ürül ki, vagyis 17 órányi szimuláció
+(1074 mintapont).
 
 Referencia-fixture a sávhoz (80 kg férfi, 3 ital, béta 0,12/0,15/0,18):
 csúcssáv `0,510401 … 0,624922`, középcsúcs `0,565699` @ 138 perc,
@@ -555,6 +561,15 @@ cd Reference && python3 make_catalog.py
   invalidálja azt, aki olvasta — a `ProfileView`-ba ágyazva ez az egész `Form`
   volt. Ami az értékkel együtt kell hogy mozogjon (a kiürülési idő szövege, a
   sáv), az ezért a draftot birtokló nézetbe költözik, nem marad kívül.
+- **A projekció cache-e a `SessionStore`-ban van, nem a nézetben.** A
+  `project` megtartja az utolsó választ (`ProjectionKey`, `@ObservationIgnored`
+  — egy observed property írása body-értékelés közben azt a nézetet
+  invalidálná, amelyik épp kérdezett). Azért ott, mert az `AddDrinkSheet`-ben
+  volt egy `@State` cache, amit az `onAppear` töltött fel, és nil-re egy
+  közvetlen hívás volt a fallback: az **első** renderben tehát mind a kilenc
+  olvasás lefuttatta a 167 ms-os projekciót, a lap 5 másodperc alatt jött fel,
+  a cache pedig csak utána érkezett meg. Olyan cache, amit a hívó észrevétlenül
+  kikerülhet, rossz helyen van.
 - A chart ~220 pontra ritkít, de a csúcsot mindig megtartja.
 - A séma **CloudKit-kompatibilis**: minden tárolt mezőnek van alapértéke vagy
   opcionális, nincs `@Attribute(.unique)`, a kapcsolat inverzzel megy. Ezt új
@@ -713,9 +728,9 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
 - A Live és az Előzmény összekötése: kell-e egyáltalán, és ha igen, gesztus
   helyett mivel (5.11)
 - Az `AddDrinkSheet` élő előrejelzése minden lépésköznél `projectBand`-et hív
-  (7,3 ms, 6 szimuláció). Itt a késleltetés nem járható út, mert pont az élő
-  előreszimuláció a termék tézise (2., 5.10) — ezt a motor gyorsításával kell
-  megoldani. A belső ciklus RK4-lépésenként ~7 tömböt allokál (`dGut`, három
+  (egy hosszú estén 12 ms release, 167 ms debug; 6 szimuláció). Itt a
+  késleltetés nem járható út, mert pont az élő előreszimuláció a termék tézise
+  (2., 5.10) — ezt a motor gyorsításával kell megoldani. A belső ciklus RK4-lépésenként ~7 tömböt allokál (`dGut`, három
   `zip().map`), plusz lépésenként egy `pending.filter` és egy
   `indices.contains`; előre foglalt scratch bufferekkel nagyrészt kiirtható.
   A kimenetnek bitre azonosnak kell maradnia — `BACEngine.version` nem bumpolandó

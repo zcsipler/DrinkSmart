@@ -58,29 +58,18 @@ struct AddDrinkSheet: View {
 
     private var isEditing: Bool { editing != nil }
 
-    /// The simulation is not cheap, so it runs once when the input changes
-    /// rather than inside `body`.
-    @State private var cachedProjection: BandedProjection?
-
+    /// The simulation is not cheap — six RK4 runs — and the body reads this
+    /// from nine places. `SessionStore.project` keeps the last answer, so the
+    /// repeats are a comparison of eight drinks rather than six simulations.
+    ///
+    /// It used to be cached here instead, in a `@State` filled by `onAppear`,
+    /// with a direct call as the fallback while it was still nil. That fallback
+    /// was the whole first render: every one of those nine reads ran the
+    /// projection, the sheet took seconds to appear, and the cache it was
+    /// meant to protect only arrived afterwards. A cache that the caller can
+    /// silently miss is the wrong place for one.
     private var projection: BandedProjection {
-        cachedProjection ?? store.project(candidate, excluding: editing?.id, in: session)
-    }
-
-    /// Inputs to the projection. We only recompute when this changes.
-    private struct Input: Equatable {
-        var templateID: String
-        var volumeMl: Double
-        var abv: Double
-        var stomach: StomachState
-        var drinkingMinutes: Double
-        var consumedAt: Date
-    }
-
-    private var input: Input {
-        Input(
-            templateID: template.id, volumeMl: volumeMl, abv: abv,
-            stomach: stomach, drinkingMinutes: drinkingMinutes, consumedAt: consumedAt
-        )
+        store.project(candidate, excluding: editing?.id, in: session)
     }
 
     private var candidate: Drink {
@@ -122,12 +111,6 @@ struct AddDrinkSheet: View {
             .safeAreaInset(edge: .bottom) { confirmBar }
         }
         .preferredColorScheme(.dark)
-        .onAppear { recalculate() }
-        .onChange(of: input) { recalculate() }
-    }
-
-    private func recalculate() {
-        cachedProjection = store.project(candidate, excluding: editing?.id, in: session)
     }
 
     // MARK: Projection

@@ -363,6 +363,10 @@ final class SessionStore {
     /// session is evaluated with **its own** profile snapshot and limit, not
     /// today's — otherwise the projection would describe a night that never
     /// happened.
+    ///
+    /// The answer to the last question asked is kept, because a projection is
+    /// six simulations and a SwiftUI body reads it several times per pass. See
+    /// `ProjectionKey`.
     func project(
         _ candidate: Drink,
         excluding excludedID: UUID? = nil,
@@ -375,13 +379,42 @@ final class SessionStore {
         let others = (excludedID.map { id in all.filter { $0.id != id } } ?? all)
             .shorteningPour(for: candidate)
 
-        return engine.projectBand(
+        let key = ProjectionKey(
             profile: owner?.profile ?? settings.profile,
             consumed: others,
             candidate: candidate,
             limit: owner?.limit ?? limit
         )
+        if let lastProjection, lastProjection.key == key { return lastProjection.value }
+
+        let result = engine.projectBand(
+            profile: key.profile,
+            consumed: key.consumed,
+            candidate: key.candidate,
+            limit: key.limit
+        )
+        lastProjection = (key, result)
+        return result
     }
+
+    /// Everything a projection depends on.
+    ///
+    /// Comparing eight drinks costs nothing against six RK4 runs, and it is the
+    /// honest test: if all of it is equal, the answer cannot have changed.
+    /// The consumed list already has the pour cut applied, so an edit that only
+    /// shortens an earlier drink still registers here.
+    private struct ProjectionKey: Equatable {
+        let profile: BodyProfile
+        let consumed: [Drink]
+        let candidate: Drink
+        let limit: Double
+    }
+
+    /// Not observed. A read of `project` happens *during* a body evaluation,
+    /// and writing to an observed property there would invalidate the very view
+    /// that asked.
+    @ObservationIgnored
+    private var lastProjection: (key: ProjectionKey, value: BandedProjection)?
 
     func tick() {
         now = .now
