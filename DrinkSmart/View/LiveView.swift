@@ -2,37 +2,22 @@ import SwiftUI
 import SwiftData
 import BACKit
 
-/// The running session — and, by swiping, the days before it.
+/// The running session: today, and nothing else.
 ///
-/// Paging lives here rather than only in History because the most common
-/// question is not "show me March", it is "what did last night look like".
-///
-/// The swipe is deliberately **not** active on the curve itself: the chart
-/// already owns horizontal dragging for reading values off it, and two
-/// competing horizontal gestures on one surface cannot both win. It is applied
-/// block by block to everything around the chart, with `simultaneousGesture`
-/// so the enclosing `ScrollView` does not swallow it first.
+/// Looking back used to live here as a swipe between days, but a horizontal
+/// drag had to share the screen with the chart's own drag and with the drink
+/// rows' delete swipe, and it lost to both — it was there, it just took three
+/// attempts to hit. Reaching a past evening is what History is for. Whether the
+/// two get joined up again, and how, is an open question.
 struct LiveView: View {
     let store: SessionStore
-
-    /// Changes every time the user asks for this tab. See `MainTabView`.
-    let homeToken: Int
-
-    /// 0 is the current drinking day, −1 yesterday, and so on. Never positive:
-    /// there is nothing to see in the future. There is no lower bound —
-    /// paging past the start of tracking is allowed, it just says so.
-    @State private var dayOffset = 0
 
     @State private var showsAddDrink = false
     @State private var editingDrink: Drink?
     @State private var openRowID: UUID?
 
-    /// Live translation of the paging drag, for the follow-the-finger offset.
-    @State private var dragTranslation: CGFloat = 0
-
     /// All finished sessions. The volume is small — a heavy year is a few
-    /// hundred rows — so filtering by day in memory beats rebuilding a
-    /// predicate every time the offset changes.
+    /// hundred rows — so filtering by day in memory beats a predicate.
     @Query(
         filter: #Predicate<DrinkingSession> { $0.endedAt != nil },
         sort: \DrinkingSession.startedAt,
@@ -44,24 +29,24 @@ struct LiveView: View {
     /// on it we read.
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
-    // MARK: What this day is
+    // MARK: What today is
 
-    /// What the day has to show. Four cases, and the last two are genuinely
-    /// different: an empty day we were recording is evidence, an empty day
-    /// before we started recording is only ignorance.
+    /// Three cases. A fourth, `untracked`, used to exist for days before the
+    /// app kept records (see 5.7): today can never be one of those, so it lives
+    /// on in the model and belongs in History, not here.
     private enum DayState {
         case live
         case recorded([DrinkingSession])
         case dry
-        case untracked
     }
 
+    /// The drinking day, which turns over at 5 in the morning, not at midnight.
     private var day: DrinkingDay {
-        DrinkingDay.containing(store.now).offset(by: dayOffset)
+        DrinkingDay.containing(store.now)
     }
 
-    private var isCurrentDay: Bool { dayOffset == 0 }
-
+    /// Sessions already closed today — an evening that started before 5 this
+    /// morning and has since cleared still belongs to this day.
     private var sessionsOfDay: [DrinkingSession] {
         finishedSessions
             .filter { day.contains($0.startedAt) }
@@ -69,10 +54,8 @@ struct LiveView: View {
     }
 
     private var dayState: DayState {
-        if isCurrentDay, !store.drinks.isEmpty { return .live }
+        if !store.drinks.isEmpty { return .live }
         if !sessionsOfDay.isEmpty { return .recorded(sessionsOfDay) }
-        // Entirely before we kept records: we do not know, and must not guess.
-        if day.end <= store.settings.trackingStartedAt { return .untracked }
         return .dry
     }
 
@@ -82,16 +65,11 @@ struct LiveView: View {
         ZStack {
             Theme.background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                dayHeader
-                content
-            }
+            content
 
-            if isCurrentDay {
-                VStack {
-                    Spacer()
-                    addButton
-                }
+            VStack {
+                Spacer()
+                addButton
             }
         }
         .onReceive(clock) { _ in store.tick() }
@@ -101,70 +79,12 @@ struct LiveView: View {
         }
         .onChange(of: store.drinks.count) { openRowID = nil }
         .onChange(of: editingDrink?.id) { openRowID = nil }
-        .onChange(of: dayOffset) { openRowID = nil }
-        // Asking for this tab means asking for now, not for whichever day was
-        // left on screen last time.
-        .onChange(of: homeToken) {
-            guard dayOffset != 0 else { return }
-            withAnimation(.easeInOut(duration: 0.25)) { dayOffset = 0 }
-        }
     }
 
     /// Which session a drink belongs to — nil means the running one.
     private func sessionOwning(_ drink: Drink) -> DrinkingSession? {
         sessionsOfDay.first { session in
             (session.drinks ?? []).contains { $0.id == drink.id }
-        }
-    }
-
-    // MARK: Day header
-
-    private var dayHeader: some View {
-        HStack {
-            stepButton(systemName: "chevron.left", step: -1, enabled: true)
-
-            Spacer()
-
-            Text(verbatim: dayTitle)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(isCurrentDay ? Theme.secondaryText : Theme.primaryText)
-                .contentTransition(.opacity)
-
-            Spacer()
-
-            stepButton(systemName: "chevron.right", step: 1, enabled: !isCurrentDay)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 6)
-        .padding(.bottom, 10)
-        .animation(.easeInOut(duration: 0.2), value: dayOffset)
-        .simultaneousGesture(pagingGesture)
-    }
-
-    /// The chevrons are real buttons, not decoration.
-    ///
-    /// A gesture nobody discovers is a feature nobody has, and a tap target is
-    /// also the only way this works with VoiceOver or Switch Control.
-    private func stepButton(systemName: String, step: Int, enabled: Bool) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.25)) { page(by: step) }
-        } label: {
-            Image(systemName: systemName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Theme.secondaryText.opacity(enabled ? 0.7 : 0.15))
-                .frame(width: 44, height: 34)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .accessibilityLabel(step < 0 ? Text("Previous day") : Text("Next day"))
-    }
-
-    private var dayTitle: String {
-        switch day.daysAgo(from: store.now) {
-        case 0: String(localized: "Today")
-        case 1: String(localized: "Yesterday")
-        default: day.calendarDate.formatted(.dateTime.weekday(.wide).month().day())
         }
     }
 
@@ -185,51 +105,31 @@ struct LiveView: View {
                             openRowID: $openRowID,
                             showsProfileNote: false
                         )
-                        .simultaneousGesture(pagingGesture)
                     }
                 case .dry:
-                    emptyState(
-                        icon: "face.smiling",
-                        tint: Theme.calm,
-                        title: isCurrentDay ? "Nothing logged today" : "You didn't drink on this day",
-                        detail: isCurrentDay
-                            ? "Add a drink when you have one, or swipe to look back at earlier days."
-                            : "Nothing was logged between 5 in the morning and the next."
-                    )
-                case .untracked:
-                    emptyState(
-                        icon: "face.dashed",
-                        tint: Theme.secondaryText,
-                        title: "No data for this day",
-                        detail: "This is before the app started keeping records, so there is nothing to say about it either way."
-                    )
+                    emptyState
                 }
 
-                if isCurrentDay {
-                    disclaimer.simultaneousGesture(pagingGesture)
-                }
+                disclaimer
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, isCurrentDay ? 100 : 30)
-            // Follows the finger a little, so the swipe feels attached to the
-            // content rather than being a hidden command.
-            .offset(x: dragTranslation * 0.35)
+            .padding(.top, 10)
+            .padding(.bottom, 100)
         }
         .scrollIndicators(.hidden)
     }
 
     @ViewBuilder
     private var liveSession: some View {
-        hero.simultaneousGesture(pagingGesture)
+        hero
         BACChartView(model: store.chartModel)
-        liveStatRow.simultaneousGesture(pagingGesture)
+        liveStatRow
         DrinkListSection(
             drinks: store.drinks,
             openRowID: $openRowID,
             onEdit: { editingDrink = $0 },
             onDelete: { drink in withAnimation { store.remove(drink) } }
         )
-        .simultaneousGesture(pagingGesture)
     }
 
     // MARK: Hero
@@ -300,30 +200,24 @@ struct LiveView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: Empty days
+    // MARK: A day with nothing on it
     //
-    // A day with nothing on it is not an error state. For an app about
-    // drinking less it is the good outcome — so it says so plainly, without
-    // congratulating anyone for an ordinary Tuesday. And a day we have no
-    // records for says only that, because we genuinely do not know.
+    // Not an error state. For an app about drinking less it is the good
+    // outcome — so it says so plainly, without congratulating anyone for an
+    // ordinary Tuesday.
 
-    private func emptyState(
-        icon: String,
-        tint: Color,
-        title: LocalizedStringKey,
-        detail: LocalizedStringKey
-    ) -> some View {
+    private var emptyState: some View {
         VStack(spacing: 12) {
-            Image(systemName: icon)
+            Image(systemName: "face.smiling")
                 .font(.system(size: 42, weight: .thin))
-                .foregroundStyle(tint.opacity(0.75))
+                .foregroundStyle(Theme.calm.opacity(0.75))
 
-            Text(title)
+            Text("Nothing logged today")
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.primaryText)
                 .multilineTextAlignment(.center)
 
-            Text(detail)
+            Text("Add a drink when you have one.")
                 .font(.system(size: 12, design: .rounded))
                 .foregroundStyle(Theme.secondaryText)
                 .multilineTextAlignment(.center)
@@ -333,8 +227,6 @@ struct LiveView: View {
         .padding(.vertical, 54)
         .background(Theme.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 18))
         .padding(.top, 40)
-        .contentShape(Rectangle())
-        .simultaneousGesture(pagingGesture)
     }
 
     // MARK: Disclaimer
@@ -375,40 +267,8 @@ struct LiveView: View {
         .buttonStyle(.plain)
         .padding(.bottom, 12)
     }
-
-    // MARK: Paging
-
-    private func page(by step: Int) {
-        dayOffset = min(dayOffset + step, 0)
-    }
-
-    private var pagingGesture: some Gesture {
-        DragGesture(minimumDistance: 20, coordinateSpace: .local)
-            .onChanged { value in
-                // Ignore mostly-vertical drags so scrolling still works.
-                guard abs(value.translation.width) > abs(value.translation.height) else { return }
-
-                // Resist dragging towards the future, where there is nothing.
-                let raw = value.translation.width
-                dragTranslation = (isCurrentDay && raw > 0) ? raw * 0.25 : raw
-            }
-            .onEnded { value in
-                defer { withAnimation(.easeOut(duration: 0.2)) { dragTranslation = 0 } }
-                guard abs(value.translation.width) > abs(value.translation.height) else { return }
-
-                let travelled = value.predictedEndTranslation.width
-                guard abs(travelled) > 70 else { return }
-
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    // Right-to-left goes back in time, as asked. This is the
-                    // opposite of the usual paging convention, so it is written
-                    // down rather than left to be rediscovered.
-                    page(by: travelled < 0 ? -1 : 1)
-                }
-            }
-    }
 }
 
 #Preview {
-    LiveView(store: .preview, homeToken: 0)
+    LiveView(store: .preview)
 }

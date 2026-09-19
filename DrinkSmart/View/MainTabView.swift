@@ -12,34 +12,12 @@ struct MainTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: Tab = .live
 
-    /// Bumped whenever the user asks for the Live tab, including a re-tap on
-    /// the tab they are already on.
-    ///
-    /// Live keeps which day you paged to in its own state, and `TabView` does
-    /// not discard the view when you switch away. Without this you come back
-    /// from History still parked three days in the past — with no chart and no
-    /// add button, since that only belongs to today. Coming back to Live means
-    /// coming back to now.
-    @State private var liveHomeToken = 0
-
     enum Tab: Hashable {
         case history, live, profile
     }
 
-    /// Fires even when the selection does not change, which is what makes the
-    /// re-tap work.
-    private var selectionBinding: Binding<Tab> {
-        Binding(
-            get: { selection },
-            set: { newValue in
-                if newValue == .live { liveHomeToken += 1 }
-                selection = newValue
-            }
-        )
-    }
-
     var body: some View {
-        TabView(selection: selectionBinding) {
+        TabView(selection: $selection) {
             HistoryView(store: store)
                 .tabItem {
                     Label {
@@ -50,7 +28,7 @@ struct MainTabView: View {
                 }
                 .tag(Tab.history)
 
-            LiveView(store: store, homeToken: liveHomeToken)
+            LiveView(store: store)
                 .tabItem {
                     Label {
                         Text("Live")

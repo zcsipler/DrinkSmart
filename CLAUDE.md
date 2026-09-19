@@ -69,7 +69,7 @@ DrinkSmart/
 │   └── Tests/BACKitTests/      47 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   152 kulcs, en + hu
+│   ├── Localizable.xcstrings   144 kulcs, en + hu
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
@@ -88,7 +88,7 @@ DrinkSmart/
 │   │   └── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
 │   └── View/
 │       ├── MainTabView.swift        History / Live / Profil, Live középen
-│       ├── LiveView.swift           élő alkalom + naplapozás + négy nap-állapot
+│       ├── LiveView.swift           élő alkalom, csak a mai nap — három nap-állapot
 │       ├── HistoryView.swift        lezárt alkalmak listája
 │       ├── SessionDetailView.swift  navigációs keret egy múltbeli alkalomhoz
 │       ├── SessionContentView.swift a tartalom — LiveView és Detail is ezt használja
@@ -248,16 +248,20 @@ A **motort** viszont szándékosan nem fagyasztjuk be: a bemenet van eltárolva,
 
 A `DrinkingDay` hajnali 5-kor vált. Egy 22:00–03:00 este így egy naphoz
 tartozik; éjféli határral kettévágódna, a csúcs az egyik napon, a lecsengés a
-másikon. Ez dönti el a Live lapozását és azt is, melyik alkalomba kerül egy
-visszamenőlegesen felvitt ital.
+másikon. Ez dönti el, melyik alkalomba kerül egy visszamenőlegesen felvitt
+ital, és azt is, hogy a Live mit számít „mának".
 
-### 5.7 Négy nap-állapot, és a „nem tudjuk" külön
+### 5.7 „Nem ittál" és „nem tudjuk" nem ugyanaz
 
-A Live képernyő négy esetet ismer: `live`, `recorded`, `dry`, `untracked`.
-Az utolsó kettő **nem ugyanaz**. Egy üres nap, amit rögzítettünk, bizonyíték
-arra, hogy nem ittál. Egy nap az `AppSettings.trackingStartedAt` előtt csak
-annyit jelent, hogy nem tudjuk. Azt írni rá, hogy „nem ittál", találgatás
-lenne, ezért külön ikonja és szövege van.
+Egy üres nap, amit rögzítettünk, bizonyíték arra, hogy nem ittál. Egy nap az
+`AppSettings.trackingStartedAt` előtt csak annyit jelent, hogy nem tudjuk. Azt
+írni rá, hogy „nem ittál", találgatás lenne.
+
+A Live képernyő ma **három** állapotot ismer — `live`, `recorded`, `dry` —,
+mert csak a mai napot mutatja (5.11), és a mai nap definíció szerint nem eshet
+a rögzítés kezdete elé. A megkülönböztetés maga érvényes, csak nincs hol
+látszódnia: az Előzmény tabra tartozik, a tartományválasztóval együtt (12.).
+A `trackingStartedAt` addig is karban van tartva.
 
 ### 5.8 Egy szám alapból, tartomány ha a user kéri
 
@@ -317,6 +321,28 @@ választasz italt — már tudod, hogy sört akarsz —, így a lap tetején csa
 lenyomta a típusválasztót a fold alá. A gomb mellett viszont ott van, ahol a
 döntés születik, és a határátlépés-figyelmeztetés (5.2) belőle növi ki magát,
 amikor van mit mondani.
+
+### 5.11 A Live csak a mai nap
+
+Volt benne naplapozás — vízszintes swipe a korábbi napokra, `dayOffset`-tel és
+két chevronnal. Kivettük.
+
+**Miért.** A gesztus nem tudott megélni azon a képernyőn. A chart saját
+vízszintes húzást használ az értékek leolvasására, a `DrinkRow` pedig a törlés
+felfedésére; a lapozás ezért csak a köztük maradó blokkokra került, és ott is
+egy `ScrollView`-val versengve. Ami maradt belőle, az egy gesztus, amit
+harmadszorra lehetett eltalálni — ez rosszabb, mint ha nem is lenne. Egy első
+kör (a lista kivétele a lapozásból, és az irány megfordítása a szokásos
+balról-jobbra-a-múltba konvencióra) javított rajta, de nem eleget.
+
+Visszalapozni így az **Előzmény** tabon lehet. Hogy a kettőt érdemes-e
+összekötni, és hogyan, az nyitott kérdés — nem elvi döntés, hogy a Live-ból
+ne lehessen visszanézni.
+
+**Amit ez maga után vont:** a `MainTabView.liveHomeToken` elveszett (nem maradt
+elnavigált állapot, amit vissza kellene hozni), a `DayState` háromállapotú lett
+(5.7), és a `DrinkingDay.offset(by:)` / `daysAgo(from:)` egyelőre hívó nélkül
+maradt — bent hagytuk, mert az Előzmény tartományválasztójának kelleni fog.
 
 ## 6. Validáció
 
@@ -428,11 +454,11 @@ TestFlight (100 eszköz, Beta App Review nélkül).
 
 **Kész:** a motor sávval és ivási tempóval; SwiftData-perzisztencia alkalmanként
 befagyasztott profillal; migráció a régi UserDefaults-blobból; három tab;
-Live képernyő naplapozással és négy nap-állapottal; előzmény-lista és
+Live képernyő a mai napra, három nap-állapottal; előzmény-lista és
 alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
 is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyarázata
 és tippek a saját érték kiderítéséhez; 47 teszt; angol/magyar lokalizáció
-152 kulccsal.
+144 kulccsal.
 
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
@@ -554,7 +580,11 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
 - iCloud capability bekapcsolása Xcode-ban (lásd 11.4)
 - App-szintű teszt target — a `SessionPolicy`, a `DrinkingDay` és a migráció
   tiszta logika, és ez az a kód, ami adatot tud veszíteni
-- Tartományválasztó az Előzmény tabon (a 11.3 előfeltétele)
+- Tartományválasztó az Előzmény tabon (a 11.3 előfeltétele) — ide tartozik a
+  „nem ittál" kontra „nincs adat" megkülönböztetés is (5.7), aminek a Live-ból
+  már nincs hol látszódnia
+- A Live és az Előzmény összekötése: kell-e egyáltalán, és ha igen, gesztus
+  helyett mivel (5.11)
 - HealthKit: testadatok beolvasása, BAC és kalória visszaírása
 - Helyi értesítések: közeledsz a határhoz / mikorra leszel tiszta
 - watchOS-kiegészítő a gyors felvitelhez

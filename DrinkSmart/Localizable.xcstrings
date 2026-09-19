@@ -291,19 +291,19 @@
         }
       }
     },
-    "Add a drink when you have one, or swipe to look back at earlier days.": {
+    "Add a drink when you have one.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add a drink when you have one, or swipe to look back at earlier days."
+            "value": "Add a drink when you have one."
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vidd fel, amikor iszol valamit — vagy húzd oldalra, és nézd vissza a korábbi napokat."
+            "value": "Vidd fel, amikor iszol valamit."
           }
         }
       }
@@ -1277,23 +1277,6 @@
         }
       }
     },
-    "Next day": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Next day"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Következő nap"
-          }
-        }
-      }
-    },
     "No active session": {
       "extractionState": "manual",
       "localizations": {
@@ -1307,23 +1290,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nincs aktív alkalom"
-          }
-        }
-      }
-    },
-    "No data for this day": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No data for this day"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erről a napról nincs adat"
           }
         }
       }
@@ -1358,23 +1324,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ma még nincs felvitt ital"
-          }
-        }
-      }
-    },
-    "Nothing was logged between 5 in the morning and the next.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing was logged between 5 in the morning and the next."
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hajnali 5 és a másnap hajnali 5 között nem került fel semmi."
           }
         }
       }
@@ -1494,23 +1443,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saját határ"
-          }
-        }
-      }
-    },
-    "Previous day": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Previous day"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Előző nap"
           }
         }
       }
@@ -1889,23 +1821,6 @@
         }
       }
     },
-    "This is before the app started keeping records, so there is nothing to say about it either way.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This is before the app started keeping records, so there is nothing to say about it either way."
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ez a nap megelőzi, hogy az app elkezdett volna rögzíteni — így sem azt nem tudjuk, hogy ittál, sem azt, hogy nem."
-          }
-        }
-      }
-    },
     "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you.": {
       "extractionState": "manual",
       "localizations": {
@@ -1970,23 +1885,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Idő"
-          }
-        }
-      }
-    },
-    "Today": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Today"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ma"
           }
         }
       }
@@ -2344,40 +2242,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "SAJÁT HATÁR %@"
-          }
-        }
-      }
-    },
-    "Yesterday": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yesterday"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tegnap"
-          }
-        }
-      }
-    },
-    "You didn't drink on this day": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You didn't drink on this day"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ezen a napon nem ittál"
           }
         }
       }

@@ -11,7 +11,8 @@ import pathlib
 import re
 import sys
 
-APP = pathlib.Path("/sessions/affectionate-admiring-hawking/mnt/test/DrinkSmart/DrinkSmart")
+# Relative to this file, so the script runs from any checkout or sandbox.
+APP = pathlib.Path(__file__).resolve().parent.parent / "DrinkSmart"
 
 # en -> hu. In interpolated keys, %@ stands in for the substituted value.
 TRANSLATIONS = {
@@ -68,24 +69,12 @@ TRANSLATIONS = {
     "drag to read values": "húzd a leolvasáshoz",
     "release to go back": "engedd el a visszatéréshez",
 
-    # --- Live screen: day paging, the dry day and the unknown day ---
-    "Previous day": "Előző nap",
-    "Next day": "Következő nap",
-    "No data for this day": "Erről a napról nincs adat",
-    "This is before the app started keeping records, so there is nothing to say about it either way.":
-        "Ez a nap megelőzi, hogy az app elkezdett volna rögzíteni — így sem azt nem tudjuk, hogy ittál, sem azt, hogy nem.",
-
+    # --- Live screen: the day with nothing on it ---
     "Live": "Élő",
-    "Yesterday": "Tegnap",
     "Nothing logged today": "Ma még nincs felvitt ital",
-    "Add a drink when you have one, or swipe to look back at earlier days.":
-        "Vidd fel, amikor iszol valamit — vagy húzd oldalra, és nézd vissza a korábbi napokat.",
-    "You didn't drink on this day": "Ezen a napon nem ittál",
-    "Nothing was logged between 5 in the morning and the next.":
-        "Hajnali 5 és a másnap hajnali 5 között nem került fel semmi.",
+    "Add a drink when you have one.": "Vidd fel, amikor iszol valamit.",
 
     # --- Tabs and history ---
-    "Today": "Ma",
     "History": "Előzmény",
     "No past sessions yet": "Még nincs lezárt alkalom",
     "A session appears here once it has ended — when your level has cleared and a few hours have passed.":
