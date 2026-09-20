@@ -98,6 +98,7 @@ struct AddDrinkSheet: View {
                     stomachSection
                     paceSection
                     timeSection
+                    setDefaultButton
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
@@ -207,103 +208,31 @@ struct AddDrinkSheet: View {
         projection.limitCrossedAt?.hourMinute ?? candidate.consumedAt.hourMinute
     }
 
-    // MARK: Drink type
+    // MARK: Drink type, amount, strength
+    //
+    // The controls themselves live in `DrinkControls`, because the favourite
+    // editor needs the same four and a second copy would drift.
 
     private var typePicker: some View {
-        section("Type") {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                ForEach(DrinkCatalog.all) { item in
-                    Button {
-                        withAnimation(.easeOut(duration: 0.15)) { select(item) }
-                    } label: {
-                        VStack(spacing: 7) {
-                            Image(systemName: item.icon)
-                                .font(.system(size: 18))
-                            Text(item.name)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            template.id == item.id ? Theme.calm.opacity(0.18) : Theme.surface,
-                            in: RoundedRectangle(cornerRadius: 14)
-                        )
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(template.id == item.id ? Theme.calm : Theme.hairline, lineWidth: 1)
-                        }
-                        .foregroundStyle(template.id == item.id ? Theme.calm : Theme.primaryText)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+        DrinkTypePicker(template: $template) { item in
+            volumeMl = item.defaultVolumeMl
+            abv = item.defaultAbv
+            drinkingMinutes = item.defaultDrinkingMinutes
         }
     }
-
-    private func select(_ item: DrinkTemplate) {
-        template = item
-        volumeMl = item.defaultVolumeMl
-        abv = item.defaultAbv
-        drinkingMinutes = item.defaultDrinkingMinutes
-    }
-
-    // MARK: Volume
 
     private var volumeSection: some View {
-        section("Amount", trailing: "\(volumeMl.formatted(.number.precision(.fractionLength(0)))) ml") {
-            VStack(spacing: 12) {
-                HStack(spacing: 8) {
-                    ForEach(template.volumeOptions, id: \.self) { option in
-                        Button {
-                            withAnimation(.easeOut(duration: 0.15)) { volumeMl = option }
-                        } label: {
-                            Text(verbatim: option.formatted(.number.precision(.fractionLength(0))))
-                                .font(.system(size: 13, weight: .medium, design: .rounded).monospacedDigit())
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 9)
-                                .background(
-                                    abs(volumeMl - option) < 0.5 ? Theme.calm.opacity(0.18) : Theme.surface,
-                                    in: RoundedRectangle(cornerRadius: 10)
-                                )
-                                .foregroundStyle(abs(volumeMl - option) < 0.5 ? Theme.calm : Theme.secondaryText)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                Slider(value: $volumeMl, in: 10...1000, step: 10)
-                    .tint(Theme.calm)
-                    .accessibilityLabel(Text("Amount"))
-            }
-        }
+        DrinkVolumeControl(template: template, volumeMl: $volumeMl)
     }
 
-    // MARK: Strength
-
     private var abvSection: some View {
-        section("Strength", trailing: abv.formatted(.number.precision(.fractionLength(1))) + " %") {
-            VStack(spacing: 6) {
-                Slider(value: $abv, in: template.abvRange, step: 0.5)
-                    .tint(Theme.calm)
-                    .accessibilityLabel(Text("Strength"))
-
-                HStack {
-                    Text("\(candidate.standardUnits.formatted(.number.precision(.fractionLength(1)))) units")
-                    Spacer()
-                    Text("\(candidate.gramsEthanol.formatted(.number.precision(.fractionLength(0)))) g alcohol")
-                }
-                .font(.system(size: 11, design: .rounded))
-                .foregroundStyle(Theme.secondaryText)
-            }
-        }
+        DrinkStrengthControl(template: template, abv: $abv, volumeMl: volumeMl)
     }
 
     // MARK: Stomach state
 
     private var stomachSection: some View {
-        section("Stomach") {
+        ControlSection("Stomach") {
             VStack(spacing: 10) {
                 HStack(spacing: 8) {
                     ForEach(StomachState.allCases, id: \.self) { state in
@@ -345,75 +274,15 @@ struct AddDrinkSheet: View {
     }
 
     // MARK: Pace
-    //
-    // Across an evening this barely moves the peak, but it roughly halves the
-    // rate of rise — and that is the number memory impairment tracks. A shot
-    // thrown back and a pint nursed for half an hour are not the same event,
-    // even when the alcohol is identical.
 
     private var paceSection: some View {
-        section("How fast", trailing: paceLabel) {
-            VStack(spacing: 10) {
-                HStack(spacing: 8) {
-                    pacePreset("In one go", minutes: 0)
-                    pacePreset("15 min", minutes: 15)
-                    pacePreset("30 min", minutes: 30)
-                    pacePreset("1 hr", minutes: 60)
-                }
-
-                Slider(value: $drinkingMinutes, in: 0...180, step: 5)
-                    .tint(Theme.calm)
-                    .accessibilityLabel(Text("How fast"))
-
-                Text(paceExplanation)
-                    .font(.system(size: 11, design: .rounded))
-                    .foregroundStyle(Theme.secondaryText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
-
-    private var paceLabel: String {
-        drinkingMinutes <= 0
-            ? String(localized: "In one go")
-            : (drinkingMinutes * 60).compactDuration
-    }
-
-    private var paceExplanation: LocalizedStringResource {
-        switch drinkingMinutes {
-        case 0: "Counts as a single swallow — the steepest possible rise."
-        case ..<20: "A quick drink. The level climbs fast."
-        case ..<45: "A normal pace."
-        default: "Nursed slowly. Much gentler climb for the same alcohol."
-        }
-    }
-
-    private func pacePreset(_ label: LocalizedStringKey, minutes: Double) -> some View {
-        let isSelected = abs(drinkingMinutes - minutes) < 0.5
-
-        return Button {
-            withAnimation(.easeOut(duration: 0.15)) { drinkingMinutes = minutes }
-        } label: {
-            Text(label)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 9)
-                .background(
-                    isSelected ? Theme.calm.opacity(0.18) : Theme.surface,
-                    in: RoundedRectangle(cornerRadius: 10)
-                )
-                .foregroundStyle(isSelected ? Theme.calm : Theme.secondaryText)
-        }
-        .buttonStyle(.plain)
+        DrinkPaceControl(drinkingMinutes: $drinkingMinutes)
     }
 
     // MARK: Time
 
     private var timeSection: some View {
-        section("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
+        ControlSection("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
             VStack(spacing: 10) {
                 if showsTimePicker {
                     // Date as well as time, so a drink can be filled in days
@@ -477,6 +346,56 @@ struct AddDrinkSheet: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: The usual one
+    //
+    // Here rather than only in the profile, because this is where the answer is
+    // already typed in. Someone who has just dialled in a 400 ml at 4.5 % has
+    // described their usual drink; asking them to go and do it again in a
+    // settings screen is how a feature ends up unused.
+    //
+    // It writes immediately and does not wait for Add: setting what you usually
+    // drink and logging one are separate acts, and an edit of a drink from last
+    // Tuesday is a perfectly good moment to do the first without the second.
+    //
+    // Only the four fields a favourite carries. The time and the stomach state
+    // belong to this drink, not to the habit (see `FavouriteDrink`).
+
+    private var draftFavourite: FavouriteDrink {
+        FavouriteDrink(
+            templateID: template.id,
+            volumeMl: volumeMl,
+            abvPercent: abv,
+            drinkingMinutes: drinkingMinutes
+        )
+    }
+
+    private var isFavourite: Bool { store.favourite == draftFavourite }
+
+    private var setDefaultButton: some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.15)) { store.favourite = draftFavourite }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: isFavourite ? "star.fill" : "star")
+                    .font(.system(size: 13))
+                if isFavourite {
+                    Text("This is your quick-add drink")
+                } else {
+                    Text("Set as my quick-add drink")
+                }
+                Spacer()
+            }
+            .font(.system(size: 13, weight: .medium, design: .rounded))
+            .foregroundStyle(isFavourite ? Theme.secondaryText : Theme.calm)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isFavourite)
+    }
+
     // MARK: Confirmation
 
     private var confirmBar: some View {
@@ -517,30 +436,6 @@ struct AddDrinkSheet: View {
         .background(.ultraThinMaterial)
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.hairline).frame(height: 1)
-        }
-    }
-
-    // MARK: Section chrome
-
-    private func section<Content: View>(
-        _ title: LocalizedStringKey,
-        trailing: String? = nil,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(title)
-                    .font(.sectionLabel)
-                    .textCase(.uppercase)
-                    .foregroundStyle(Theme.secondaryText)
-                Spacer()
-                if let trailing {
-                    Text(verbatim: trailing)
-                        .font(.system(size: 12, weight: .medium, design: .rounded).monospacedDigit())
-                        .foregroundStyle(Theme.primaryText)
-                }
-            }
-            content()
         }
     }
 }

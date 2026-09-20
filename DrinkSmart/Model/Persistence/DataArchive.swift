@@ -128,6 +128,26 @@ struct ArchivedPerson: Codable, Equatable {
     var frequencyRaw: String
     var limit: Double
     var trackingStartedAt: Date
+
+    /// The quick-add favourite. Optional throughout, and that is what keeps
+    /// `schemaVersion` at 1: an archive written before this existed decodes to
+    /// nil rather than throwing, and an older build reading a newer file simply
+    /// ignores keys it does not know. The version is for changes an older build
+    /// cannot read, and this is not one.
+    var favouriteTemplateID: String?
+    var favouriteVolumeMl: Double?
+    var favouriteAbvPercent: Double?
+    var favouriteDrinkingMinutes: Double?
+
+    var favourite: FavouriteDrink? {
+        guard let favouriteTemplateID else { return nil }
+        return FavouriteDrink(
+            templateID: favouriteTemplateID,
+            volumeMl: favouriteVolumeMl ?? 0,
+            abvPercent: favouriteAbvPercent ?? 0,
+            drinkingMinutes: favouriteDrinkingMinutes ?? 0
+        )
+    }
 }
 
 /// One occasion, with its frozen profile and its drinks.

@@ -2,6 +2,23 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
+    "%@ added": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ added"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ felvéve"
+          }
+        }
+      }
+    },
     "%@ drinks": {
       "extractionState": "manual",
       "localizations": {
@@ -308,6 +325,40 @@
         }
       }
     },
+    "Add %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hozzáadása"
+          }
+        }
+      }
+    },
+    "Add a different drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a different drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Másik ital felvitele"
+          }
+        }
+      }
+    },
     "Add a drink when you have one.": {
       "extractionState": "manual",
       "localizations": {
@@ -474,6 +525,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Szinte naponta"
+          }
+        }
+      }
+    },
+    "Always add this one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always add this one"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindig ezt vigye fel"
           }
         }
       }
@@ -661,6 +729,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mégse"
+          }
+        }
+      }
+    },
+    "Choose a favourite drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a favourite drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Válassz kedvenc italt"
           }
         }
       }
@@ -1379,6 +1464,23 @@
         }
       }
     },
+    "Logs it straight away, without opening anything.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs it straight away, without opening anything."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Azonnal felviszi, mindenféle felugró nélkül."
+          }
+        }
+      }
+    },
     "Lower": {
       "extractionState": "manual",
       "localizations": {
@@ -1634,6 +1736,40 @@
         }
       }
     },
+    "One tap on the Live screen logs this, with the projected peak on the button. How full your stomach is comes from the drink before it, and can be corrected straight after.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One tap on the Live screen logs this, with the projected peak on the button. How full your stomach is comes from the drink before it, and can be corrected straight after."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az Élő képernyőn egy koppintás felviszi, a gombon pedig ott a várható csúcs. A gyomor telítettségét az előző italtól veszi át, és utána azonnal javítható."
+          }
+        }
+      }
+    },
+    "Peak %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csúcs %@"
+          }
+        }
+      }
+    },
     "Peak at": {
       "extractionState": "manual",
       "localizations": {
@@ -1719,6 +1855,23 @@
         }
       }
     },
+    "Pick the drink you usually order, and a button on the Live screen will log it in one tap.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick the drink you usually order, and a button on the Live screen will log it in one tap."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Válaszd ki, mit szoktál rendelni, és az Élő képernyőn egy gombnyomással felviheted."
+          }
+        }
+      }
+    },
     "Profile": {
       "extractionState": "manual",
       "localizations": {
@@ -1749,6 +1902,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vetített csúcs"
+          }
+        }
+      }
+    },
+    "Quick add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick add"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gyorsfelvitel"
           }
         }
       }
@@ -1821,6 +1991,40 @@
         }
       }
     },
+    "Remove favourite": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove favourite"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kedvenc törlése"
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentés"
+          }
+        }
+      }
+    },
     "Save changes": {
       "extractionState": "manual",
       "localizations": {
@@ -1834,6 +2038,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mentés"
+          }
+        }
+      }
+    },
+    "Set as my quick-add drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set as my quick-add drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legyen ez a gyorsfelvitel itala"
           }
         }
       }
@@ -2178,6 +2399,40 @@
         }
       }
     },
+    "This is now your usual": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is now your usual"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez lett a szokásos"
+          }
+        }
+      }
+    },
+    "This is your quick-add drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is your quick-add drink"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a gyorsfelvitel itala"
+          }
+        }
+      }
+    },
     "This might cross your limit": {
       "extractionState": "manual",
       "localizations": {
@@ -2327,6 +2582,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "A bizonytalanság ízlés kérdése: ez dönti el, hogy a számok egy értékként vagy tartományként jelennek meg. Az alatta lévő sebesség nem az — hagyd a gyakorisági kérdésre, hacsak nincs mért értéked, amihez igazítanád."
+          }
+        }
+      }
+    },
+    "Undo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visszavonás"
           }
         }
       }

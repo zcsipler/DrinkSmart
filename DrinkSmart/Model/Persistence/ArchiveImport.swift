@@ -131,6 +131,7 @@ enum ArchiveImport {
                 limit: archived.limit,
                 trackingStartedAt: archived.trackingStartedAt
             )
+            person.favourite = archived.favourite
 
             context.insert(person)
             created[archived.id] = person

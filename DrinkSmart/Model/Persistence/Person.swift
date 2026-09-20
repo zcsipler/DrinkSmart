@@ -74,6 +74,35 @@ final class Person {
     /// not know; after it, it means they did not drink (5.7).
     var trackingStartedAt: Date = Date.now
 
+    // MARK: The quick-add favourite
+    //
+    // On the person rather than in `AppSettings`, and the split is the same one
+    // that governs everything else here: what someone usually orders describes
+    // them, not the device they happen to be holding. A guest does not drink
+    // the owner's pint, and a new phone should arrive knowing the answer —
+    // which it will, because this side syncs and `AppSettings` deliberately
+    // does not.
+    //
+    // Not behind `Feature.multiPerson` or any other flag: a flag must never
+    // gate the schema (11.5). Flat fields rather than one encoded blob, for the
+    // reason `DrinkingSession` flattens its snapshot — CloudKit prefers
+    // scalars, and a diff then shows what actually changed.
+
+    /// `nil` means no favourite has been chosen, and the quick-add button does
+    /// not appear at all.
+    ///
+    /// Optional rather than defaulted to beer: a favourite nobody picked would
+    /// put a drink this person may never order one tap away, which is exactly
+    /// the kind of silent assertion the app avoids everywhere else.
+    var favouriteTemplateID: String?
+
+    /// Only meaningful while `favouriteTemplateID` is non-nil. Defaulted rather
+    /// than optional because three more optionals would buy nothing: they are
+    /// never read without the identifier.
+    var favouriteVolumeMl: Double = 0
+    var favouriteAbvPercent: Double = 0
+    var favouriteDrinkingMinutes: Double = 0
+
     @Relationship(deleteRule: .cascade, inverse: \DrinkingSession.person)
     var sessions: [DrinkingSession]? = []
 
@@ -138,6 +167,31 @@ final class Person {
     var accent: PersonAccent {
         get { PersonAccent(rawValue: accentRaw) ?? .teal }
         set { accentRaw = newValue.rawValue }
+    }
+
+    /// The quick-add favourite, or nil if there is none.
+    ///
+    /// Setting nil clears the identifier and leaves the numbers where they
+    /// were. They are dead weight until a favourite exists again, and wiping
+    /// them would mean that turning the button back on starts from the template
+    /// defaults rather than from what was last chosen.
+    var favourite: FavouriteDrink? {
+        get {
+            guard let favouriteTemplateID else { return nil }
+            return FavouriteDrink(
+                templateID: favouriteTemplateID,
+                volumeMl: favouriteVolumeMl,
+                abvPercent: favouriteAbvPercent,
+                drinkingMinutes: favouriteDrinkingMinutes
+            )
+        }
+        set {
+            favouriteTemplateID = newValue?.templateID
+            guard let newValue else { return }
+            favouriteVolumeMl = newValue.volumeMl
+            favouriteAbvPercent = newValue.abvPercent
+            favouriteDrinkingMinutes = newValue.drinkingMinutes
+        }
     }
 
     // MARK: Presentation

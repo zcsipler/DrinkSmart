@@ -16,6 +16,10 @@ struct LiveView: View {
     @State private var editingDrink: Drink?
     @State private var openRowID: UUID?
 
+    /// The last quick add, while its correction strip is still up. Nil the rest
+    /// of the time, which is nearly always.
+    @State private var receipt: QuickAddReceipt?
+
     /// All finished sessions. The volume is small — a heavy year is a few
     /// hundred rows — so filtering by day in memory beats a predicate.
     @Query(
@@ -73,9 +77,28 @@ struct LiveView: View {
 
             content
 
-            VStack {
+            VStack(spacing: 0) {
                 Spacer()
-                addButton
+
+                if let receipt {
+                    QuickAddStrip(
+                        receipt: receipt,
+                        onCorrect: { store.correct(receipt.drink, stomach: $0) },
+                        onSetDefault: { store.makeFavourite(receipt.drink) },
+                        onUndo: {
+                            store.undoQuickAdd(receipt)
+                            dismissStrip()
+                        }
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
+                QuickAddBar(
+                    store: store,
+                    offer: store.quickAddOffer,
+                    onQuickAdd: quickAdd,
+                    onOpenSheet: { showsAddDrink = true }
+                )
             }
         }
         .onReceive(clock) { _ in store.tick() }
@@ -85,6 +108,38 @@ struct LiveView: View {
         }
         .onChange(of: store.drinks.count) { openRowID = nil }
         .onChange(of: editingDrink?.id) { openRowID = nil }
+        // A quick add is silent by design, so the phone says what the screen
+        // does not have to: the user is looking at a bar, not at this. Only on
+        // the way in — the strip expiring is not an event worth a buzz, and a
+        // plain `.success` trigger would fire for that too.
+        .sensoryFeedback(trigger: receipt?.id) { _, new in
+            new == nil ? nil : .success
+        }
+        // Keyed on the drink, so a second quick add restarts the countdown
+        // rather than inheriting the remains of the first one's.
+        .task(id: receipt?.id) {
+            guard receipt != nil else { return }
+            try? await Task.sleep(for: .seconds(Self.stripDuration))
+            guard !Task.isCancelled else { return }
+            dismissStrip()
+        }
+    }
+
+    /// How long the correction strip stays up.
+    ///
+    /// Long enough to notice a mis-tap and read the drink's name, short enough
+    /// that it is gone before the next round. It covers the list, and the list
+    /// is what the screen is for.
+    private static let stripDuration: Double = 6
+
+    private func quickAdd() {
+        guard let added = store.quickAdd() else { return }
+        openRowID = nil
+        withAnimation(.easeOut(duration: 0.22)) { receipt = added }
+    }
+
+    private func dismissStrip() {
+        withAnimation(.easeOut(duration: 0.2)) { receipt = nil }
     }
 
     /// Which session a drink belongs to — nil means the running one.
@@ -253,29 +308,13 @@ struct LiveView: View {
         .padding(.horizontal, 10)
     }
 
-    // MARK: Add button
+    // The add controls live in `QuickAddBar`.
     //
-    // Floats above the tab bar rather than moving into the navigation bar:
+    // They float above the tab bar rather than moving into the navigation bar:
     // logging a drink is the app's most frequent action, and it happens
-    // one-handed in a bar. Thumb reach beats tidiness here.
-
-    private var addButton: some View {
-        Button { showsAddDrink = true } label: {
-            HStack(spacing: 9) {
-                Image(systemName: "plus")
-                    .font(.system(size: 15, weight: .bold))
-                Text("Add drink")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-            }
-            .foregroundStyle(Theme.background)
-            .padding(.horizontal, 26)
-            .padding(.vertical, 15)
-            .background(Theme.calm, in: Capsule())
-            .shadow(color: Theme.background.opacity(0.7), radius: 16, y: 6)
-        }
-        .buttonStyle(.plain)
-        .padding(.bottom, 12)
-    }
+    // one-handed in a bar. Thumb reach beats tidiness here — which is also why
+    // the quick add did not become a long press on the same capsule. A hidden
+    // gesture is not a shortcut.
 }
 
 #Preview {

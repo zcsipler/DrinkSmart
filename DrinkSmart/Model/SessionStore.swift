@@ -173,6 +173,18 @@ final class SessionStore {
         set { settings.unit = newValue }
     }
 
+    /// The quick-add favourite. Nil means there is none, and the quick-add
+    /// button does not appear.
+    ///
+    /// No `rebuild()`: this changes nothing that has already been logged.
+    var favourite: FavouriteDrink? {
+        get { person.favourite }
+        set {
+            person.favourite = newValue
+            save()
+        }
+    }
+
     var frequency: DrinkingFrequency {
         get { person.frequency }
         set {
@@ -440,12 +452,28 @@ final class SessionStore {
     /// a default, and the app has no record of a default it has replaced. The
     /// duration is editable on both rows, which is the way out.
     private func applyPourCut(of drink: Drink, in target: DrinkingSession) {
+        lastPourCut = nil
+
         guard let cut = target.sortedDrinks.pourCut(by: drink),
               let record = (target.drinks ?? []).first(where: { $0.id == cut.drinkID })
         else { return }
 
+        lastPourCut = PourCutRecord(drinkID: cut.drinkID, previousMinutes: record.drinkingMinutes)
         record.drinkingMinutes = cut.drinkingMinutes
     }
+
+    /// The duration the last `add` overwrote, if it shortened anything.
+    ///
+    /// Not observed and not persisted — it survives exactly until the next
+    /// `add`. The paragraph in 5.13 about the app not keeping a record of
+    /// defaults it has replaced still holds for delete and for edit; this is a
+    /// receipt for the call that just happened, and it exists so that the quick
+    /// add's undo can be a true inverse rather than an apology. That path is
+    /// there for the tap that happened in a pocket, and an undo that leaves the
+    /// previous drink shortened to four minutes would leave behind exactly the
+    /// false steepness 5.13 warns about.
+    @ObservationIgnored
+    private var lastPourCut: PourCutRecord?
 
     /// Corrects a drink. `target` defaults to the running session; the history
     /// detail passes a past one, because a mistake noticed three weeks later is
@@ -484,6 +512,139 @@ final class SessionStore {
 
         save()
         rebuild()
+    }
+
+    // MARK: Quick add
+    //
+    // One tap, no sheet. Everything still goes through `add`, so session
+    // routing, the pour cut (5.13) and `backdateTracking` apply unchanged: the
+    // quick path is a shortcut through the interface, never through the rules.
+
+    /// What the quick-add button is offering, or nil when it has nothing to
+    /// offer and should not be shown.
+    ///
+    /// Three steps, in order:
+    ///
+    /// 1. **The favourite**, if one is set. A standing choice is the only thing
+    ///    that survives an evening that goes beer, pálinka, Jäger, where
+    ///    repeating the last drink would be wrong exactly when the button is
+    ///    most tempting.
+    /// 2. **The last drink of the running session** — mid-evening, the one you
+    ///    just had.
+    /// 3. **The most recent drink on record**, from whatever night that was.
+    ///    Not as good as being told, but a decent guess at the usual order, and
+    ///    it means the button works before anyone has configured anything.
+    ///
+    /// Steps 2 and 3 are a bootstrap, not a policy: the strip after such an add
+    /// offers to promote it to the favourite, which is why there is no
+    /// first-launch questionnaire for this.
+    ///
+    /// **The stomach state is the one field none of the three carries.** It
+    /// comes from the previous drink of the *running session* — within an
+    /// evening the best evidence available, and free — and falls back to
+    /// `.light`, which is what `AddDrinkSheet` already assumes when nobody
+    /// touches the control. So the button asserts nothing the sheet would not
+    /// have. Deliberately not inherited from step 3: what your stomach was like
+    /// last Friday says nothing about tonight.
+    ///
+    /// What it does mean is that the state **chains** within an evening: an
+    /// `.empty` chosen at seven is still `.empty` at eleven, by which time you
+    /// have eaten. The correction strip is the way out of that, rather than a
+    /// second sheet nobody wanted.
+    ///
+    /// Timed at `now`, not `.now`. The clock moves in half-minute steps, so the
+    /// offer is stable between ticks and the projection behind the button's
+    /// label is computed once per tick instead of on every body evaluation —
+    /// and, more importantly, the drink that gets logged is bit-for-bit the one
+    /// that was projected. Half a minute of drift on a drink's timestamp is
+    /// below anything the model can distinguish.
+    var quickAddOffer: QuickAddOffer? {
+        let stomach = drinks.last?.stomach ?? .light
+
+        if let favourite = person.favourite {
+            return QuickAddOffer(
+                drink: favourite.drink(at: now, stomach: stomach),
+                source: .favourite
+            )
+        }
+
+        guard let recent = drinks.last ?? mostRecentRecordedDrink() else { return nil }
+        return QuickAddOffer(
+            drink: FavouriteDrink(recent).drink(at: now, stomach: stomach),
+            source: .lastDrink
+        )
+    }
+
+    /// The newest drink on record for the active person, ignoring the running
+    /// session.
+    ///
+    /// A fetch, so it is reached only on the path that needs it: no favourite
+    /// **and** nothing logged tonight. Once either exists the checks above
+    /// short-circuit, and the one screen that can land here is an empty Live
+    /// screen, which has nothing else to do.
+    private func mostRecentRecordedDrink() -> Drink? {
+        let personID = person.id
+        var descriptor = FetchDescriptor<DrinkingSession>(
+            predicate: #Predicate { $0.personID == personID },
+            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        return (try? context.fetch(descriptor))?.first?.sortedDrinks.last
+    }
+
+    /// Logs whatever the button is offering.
+    ///
+    /// - Returns: what was logged, what it shortened and where it came from, or
+    ///   nil when there was nothing to log. The caller needs all three: to
+    ///   offer an undo, to let the inherited stomach state be corrected, and to
+    ///   know whether to offer making this the favourite.
+    @discardableResult
+    func quickAdd() -> QuickAddReceipt? {
+        guard let offer = quickAddOffer else { return nil }
+        add(offer.drink)
+        return QuickAddReceipt(
+            drink: offer.drink,
+            shortened: lastPourCut,
+            source: offer.source
+        )
+    }
+
+    /// Promotes a logged drink to the standing favourite.
+    ///
+    /// Only the four fields a favourite carries — the time and the stomach
+    /// state stay with the drink they describe.
+    func makeFavourite(_ drink: Drink) {
+        favourite = FavouriteDrink(drink)
+    }
+
+    /// Takes back a quick add, including the shortening it caused.
+    func undoQuickAdd(_ receipt: QuickAddReceipt) {
+        // Captured before the removal: an emptied session is deleted, and the
+        // reference would be to an object that is no longer in the store.
+        let holder = session
+
+        remove(receipt.drink)
+
+        guard let cut = receipt.shortened,
+              let holder,
+              let record = (holder.drinks ?? []).first(where: { $0.id == cut.drinkID })
+        else { return }
+
+        record.drinkingMinutes = cut.previousMinutes
+        holder.invalidateSummary()
+        reconcile(holder)
+        save()
+        rebuild()
+    }
+
+    /// Corrects the stomach state of a drink that was just logged.
+    ///
+    /// A thin wrapper over `update`, so the correction strip does not have to
+    /// know how to build a modified drink.
+    func correct(_ drink: Drink, stomach: StomachState) {
+        var corrected = drink
+        corrected.stomach = stomach
+        update(corrected)
     }
 
     // A session is never ended by hand.

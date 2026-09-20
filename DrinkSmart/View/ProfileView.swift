@@ -30,6 +30,7 @@ struct ProfileView: View {
                 bodySection
                 metabolismSection
                 limitSection
+                FavouriteDrinkSection(store: store)
                 unitSection
                 derivedSection
                 advancedSection

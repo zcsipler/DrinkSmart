@@ -35,7 +35,11 @@ enum ArchiveExport {
                 betaUncertainty: person.betaUncertainty,
                 frequencyRaw: person.frequencyRaw,
                 limit: person.limit,
-                trackingStartedAt: person.trackingStartedAt
+                trackingStartedAt: person.trackingStartedAt,
+                favouriteTemplateID: person.favouriteTemplateID,
+                favouriteVolumeMl: person.favouriteVolumeMl,
+                favouriteAbvPercent: person.favouriteAbvPercent,
+                favouriteDrinkingMinutes: person.favouriteDrinkingMinutes
             )
         }
     }
