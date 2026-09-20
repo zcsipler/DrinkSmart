@@ -24,26 +24,50 @@ struct DrinkSmartApp: App {
         .modelContainer(container)
     }
 
-    /// Builds the store, falling back to local-only if CloudKit is not usable.
+    /// The CloudKit container this app syncs through.
     ///
-    /// Syncing needs the iCloud capability with CloudKit, and Background Modes
-    /// with remote notifications, enabled on the target in Xcode. Until that is
-    /// set up the container would fail to open — and an app that will not
-    /// launch is a worse outcome than one that does not sync yet. So we try
-    /// CloudKit, and on failure open the same store without it.
+    /// Named explicitly rather than left to `.automatic`, and that is the whole
+    /// point. `.automatic` means "mirror to whichever container the entitlement
+    /// grants, **if** it grants one" — with no iCloud entitlement it opens a
+    /// plain local store and does not throw. The `catch` below then never runs,
+    /// the assertion never trips, and the app reports success while syncing
+    /// nothing. That is exactly how this went unnoticed: it looked like it
+    /// worked on a build that had no CloudKit at all.
     ///
-    /// The fallback is not silent for the developer: it trips an assertion in
-    /// debug builds.
+    /// Naming the container makes the failure real. A missing entitlement, a
+    /// typo here, a container the signing team does not own — all of it throws,
+    /// which is what the fallback was written for.
+    private static let cloudKitContainerID = "iCloud.dev.zcsipler.drinksmart"
+
+    /// Builds the store: with CloudKit when the build is provisioned for it,
+    /// local-only otherwise.
+    ///
+    /// Two different situations, deliberately told apart.
+    ///
+    /// `BuildCapabilities.cloudSync` off means the target has no iCloud
+    /// capability *and we know it* — there is nothing to warn about, so the
+    /// local store is opened directly and the app behaves as it always has.
+    ///
+    /// With it on, a failure is a real problem: the entitlement is missing, the
+    /// container identifier is wrong, or the signing team does not own it. Then
+    /// the fallback keeps the app running — an app that will not launch is a
+    /// worse outcome than one that does not sync — but trips an assertion, so a
+    /// debug build says so instead of pretending.
     private static func makeContainer() -> ModelContainer {
         let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self])
 
-        do {
-            return try ModelContainer(
-                for: schema,
-                configurations: ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
-            )
-        } catch {
-            assertionFailure("CloudKit container unavailable, falling back to local: \(error)")
+        if BuildCapabilities.cloudSync {
+            do {
+                return try ModelContainer(
+                    for: schema,
+                    configurations: ModelConfiguration(
+                        schema: schema,
+                        cloudKitDatabase: .private(cloudKitContainerID)
+                    )
+                )
+            } catch {
+                assertionFailure("CloudKit container unavailable, falling back to local: \(error)")
+            }
         }
 
         do {

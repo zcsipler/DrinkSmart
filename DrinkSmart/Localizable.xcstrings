@@ -1,2609 +1,2845 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@ drinks" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ drinks"
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "%@ drinks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ drinks"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ ital"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ital"
           }
         }
       }
     },
-    "%@ g alcohol" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ g alcohol"
+    "%@ g alcohol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ g alcohol"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ g alkohol"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ g alkohol"
           }
         }
       }
     },
-    "%@ units" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ units"
+    "%@ units": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ units"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ egység"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ egység"
           }
         }
       }
     },
-    "1 hr" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 hr"
+    "1 hr": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hr"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 óra"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 óra"
           }
         }
       }
     },
-    "1 hr ago" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 hr ago"
+    "1 hr ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hr ago"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 órája"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 órája"
           }
         }
       }
     },
-    "15 min" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 min"
+    "15 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 min"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 perc"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 perc"
           }
         }
       }
     },
-    "15 min ago" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 min ago"
+    "15 min ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 min ago"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 perce"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 perce"
           }
         }
       }
     },
-    "30 min" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 min"
+    "30 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 min"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 perc"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 perc"
           }
         }
       }
     },
-    "30 min ago" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 min ago"
+    "30 min ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 min ago"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 perce"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 perce"
           }
         }
       }
     },
-    "A few occasions a year" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A few occasions a year"
+    "A backup holds every person, occasion and drink. Importing adds what is missing — it never changes or removes anything already here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A backup holds every person, occasion and drink. Importing adds what is missing — it never changes or removes anything already here."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Évente néhány alkalom"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mentés minden személyt, alkalmat és italt tartalmaz. A visszatöltés csak a hiányzókat adja hozzá — a már meglévő adatot nem módosítja és nem törli."
           }
         }
       }
     },
-    "A few times a month" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A few times a month"
+    "A few occasions a year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A few occasions a year"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Havonta párszor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Évente néhány alkalom"
           }
         }
       }
     },
-    "A normal pace." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A normal pace."
+    "A few times a month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A few times a month"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szokásos tempó."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Havonta párszor"
           }
         }
       }
     },
-    "A quick drink. The level climbs fast." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A quick drink. The level climbs fast."
+    "A normal pace.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A normal pace."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gyors ital. A szint meredeken emelkedik."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szokásos tempó."
           }
         }
       }
     },
-    "A session appears here once it has ended — when your level has cleared and a few hours have passed." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A session appears here once it has ended — when your level has cleared and a few hours have passed."
+    "A quick drink. The level climbs fast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A quick drink. The level climbs fast."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egy alkalom akkor kerül ide, ha lezárult — amikor a szinted kiürült, és eltelt néhány óra."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gyors ital. A szint meredeken emelkedik."
           }
         }
       }
     },
-    "A single number is easier to learn against: over time you find out what your own 0.6 feels like. A range is the more literal answer, because the rate really is uncertain. Both are defensible — this is your call." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A single number is easier to learn against: over time you find out what your own 0.6 feels like. A range is the more literal answer, because the rate really is uncertain. Both are defensible — this is your call."
+    "A session appears here once it has ended — when your level has cleared and a few hours have passed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A session appears here once it has ended — when your level has cleared and a few hours have passed."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyetlen számhoz könnyebb tanulni: idővel megtudod, nálad mit jelent a 0,6. A tartomány a szó szerintibb válasz, mert a lebontási sebesség tényleg bizonytalan. Mindkettő védhető — ez a te döntésed."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egy alkalom akkor kerül ide, ha lezárult — amikor a szinted kiürült, és eltelt néhány óra."
           }
         }
       }
     },
-    "Actual values vary considerably between individuals. Never use this to decide whether you can drive." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actual values vary considerably between individuals. Never use this to decide whether you can drive."
+    "A single number is easier to learn against: over time you find out what your own 0.6 feels like. A range is the more literal answer, because the rate really is uncertain. Both are defensible — this is your call.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A single number is easier to learn against: over time you find out what your own 0.6 feels like. A range is the more literal answer, because the rate really is uncertain. Both are defensible — this is your call."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A tényleges érték egyénenként jelentősen eltérhet. Soha ne használd annak eldöntésére, hogy vezethetsz-e."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egyetlen számhoz könnyebb tanulni: idővel megtudod, nálad mit jelent a 0,6. A tartomány a szó szerintibb válasz, mert a lebontási sebesség tényleg bizonytalan. Mindkettő védhető — ez a te döntésed."
           }
         }
       }
     },
-    "Add" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add"
+    "Actual values vary considerably between individuals. Never use this to decide whether you can drive.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actual values vary considerably between individuals. Never use this to decide whether you can drive."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hozzáadás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tényleges érték egyénenként jelentősen eltérhet. Soha ne használd annak eldöntésére, hogy vezethetsz-e."
           }
         }
       }
     },
-    "Add a drink when you have one." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a drink when you have one."
+    "Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vidd fel, amikor iszol valamit."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hozzáadás"
           }
         }
       }
     },
-    "Add drink" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add drink"
+    "Add a drink when you have one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a drink when you have one."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ital hozzáadása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidd fel, amikor iszol valamit."
           }
         }
       }
     },
-    "Add person" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add person"
+    "Add drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add drink"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Személy hozzáadása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ital hozzáadása"
           }
         }
       }
     },
-    "Advanced" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advanced"
+    "Add person": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add person"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haladó beállítások"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Személy hozzáadása"
           }
         }
       }
     },
-    "Age" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Age"
+    "Added %@ occasions and %@ drinks.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %@ occasions and %@ drinks."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Életkor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hozzáadva %@ alkalom és %@ ital."
           }
         }
       }
     },
-    "Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all."
+    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az alkohol nem százalékosan tűnik el, hanem óránként fix mennyiséggel, mert a lebontó enzim már nagyon alacsony szinten is teljes kapacitáson dolgozik. Innen van, hogy egyáltalán létezik olyan ökölszabály, mint az „óránként egy ital”."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hozzáad %@ alkalmat és %@ italt. A meglévő adatok nem változnak és nem vesznek el."
           }
         }
       }
     },
-    "All four change the curve, so none of them can be guessed for someone else." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All four change the curve, so none of them can be guessed for someone else."
+    "Advanced": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mind a négy módosítja a görbét, így egyiket sem lehet megtippelni valaki más helyett."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haladó beállítások"
           }
         }
       }
     },
-    "Almost daily" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Almost daily"
+    "Age": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Age"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szinte naponta"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Életkor"
           }
         }
       }
     },
-    "Amount" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Amount"
+    "Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alcohol leaves at a roughly fixed amount per hour rather than a percentage, because the enzyme that breaks it down already runs at full capacity at almost any level. That is why rules of thumb like “one drink an hour” exist at all."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mennyiség"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az alkohol nem százalékosan tűnik el, hanem óránként fix mennyiséggel, mert a lebontó enzim már nagyon alacsony szinten is teljes kapacitáson dolgozik. Innen van, hogy egyáltalán létezik olyan ökölszabály, mint az „óránként egy ital”."
           }
         }
       }
     },
-    "Around %@, for up to %@." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Around %@, for up to %@."
+    "All four change the curve, so none of them can be guessed for someone else.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All four change the curve, so none of them can be guessed for someone else."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ körül, legfeljebb %@ hosszan."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mind a négy módosítja a görbét, így egyiket sem lehet megtippelni valaki más helyett."
           }
         }
       }
     },
-    "At this setting, %@ takes about %@ to clear. Almost everyone falls between %@ per hour." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At this setting, %@ takes about %@ to clear. Almost everyone falls between %@ per hour."
+    "Almost daily": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almost daily"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ezzel a beállítással %@ körülbelül %@ alatt ürül ki. Szinte mindenkinél %@ közé esik ez az érték óránként."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szinte naponta"
           }
         }
       }
     },
-    "At zero every figure is a single number — the app's best estimate. Above zero the same figures are shown as ranges, and the band on the chart widens to match." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At zero every figure is a single number — the app's best estimate. Above zero the same figures are shown as ranges, and the band on the chart widens to match."
+    "Amount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amount"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nullán minden szám egyetlen érték — az app legjobb becslése. Nulla fölött ugyanezek tartományként jelennek meg, és a grafikon sávja is ennek megfelelően szélesedik."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mennyiség"
           }
         }
       }
     },
-    "Beer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beer"
+    "Around %@, for up to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around %@, for up to %@."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sör"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ körül, legfeljebb %@ hosszan."
           }
         }
       }
     },
-    "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, with nothing in between. Subtract the second reading from the first and divide by the hours between them." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, with nothing in between. Subtract the second reading from the first and divide by the hours between them."
+    "At this setting, %@ takes about %@ to clear. Almost everyone falls between %@ per hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At this setting, %@ takes about %@ to clear. Almost everyone falls between %@ per hour."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fújj kétszer, legalább egy óra különbséggel, a lecsengő ágon — az utolsó ital után legalább két órával, és közben ne igyál. Vond ki a második mérést az elsőből, és oszd el a köztük eltelt órák számával."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezzel a beállítással %@ körülbelül %@ alatt ürül ki. Szinte mindenkinél %@ közé esik ez az érték óránként."
           }
         }
       }
     },
-    "Body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Body"
+    "At zero every figure is a single number — the app's best estimate. Above zero the same figures are shown as ranges, and the band on the chart widens to match.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At zero every figure is a single number — the app's best estimate. Above zero the same figures are shown as ranges, and the band on the chart widens to match."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Testalkat"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nullán minden szám egyetlen érték — az app legjobb becslése. Nulla fölött ugyanezek tartományként jelennek meg, és a grafikon sávja is ennek megfelelően szélesedik."
           }
         }
       }
     },
-    "Calculated values" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calculated values"
+    "Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Számított értékek"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biztonsági mentés"
           }
         }
       }
     },
-    "Calculated with your profile at the time" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calculated with your profile at the time"
+    "Beer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beer"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az akkori profiloddal számolva"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sör"
           }
         }
       }
     },
-    "Cancel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
+    "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, with nothing in between. Subtract the second reading from the first and divide by the hours between them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blow twice, at least an hour apart, on the falling side — two hours or more after your last drink, with nothing in between. Subtract the second reading from the first and divide by the hours between them."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mégse"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fújj kétszer, legalább egy óra különbséggel, a lecsengő ágon — az utolsó ital után legalább két órával, és közben ne igyál. Vond ki a második mérést az elsőből, és oszd el a köztük eltelt órák számával."
           }
         }
       }
     },
-    "Clears" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clears"
+    "Body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kiürül"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testalkat"
           }
         }
       }
     },
-    "Cocktail" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cocktail"
+    "Calculated values": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculated values"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koktél"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Számított értékek"
           }
         }
       }
     },
-    "Counts as a single swallow — the steepest possible rise." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Counts as a single swallow — the steepest possible rise."
+    "Calculated with your profile at the time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculated with your profile at the time"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyetlen kortynak számít — ez a lehető legmeredekebb emelkedés."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az akkori profiloddal számolva"
           }
         }
       }
     },
-    "Custom" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Custom"
+    "Cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyedi"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mégse"
           }
         }
       }
     },
-    "Daily or nearly daily" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daily or nearly daily"
+    "Clears": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clears"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Napi vagy majdnem napi"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiürül"
           }
         }
       }
     },
-    "Delete" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
+    "Cocktail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cocktail"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Törlés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koktél"
           }
         }
       }
     },
-    "Display" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Display"
+    "Could not import": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not import"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Megjelenítés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A visszatöltés nem sikerült"
           }
         }
       }
     },
-    "Distribution volume" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Distribution volume"
+    "Counts as a single swallow — the steepest possible rise.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts as a single swallow — the steepest possible rise."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eloszlási térfogat"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egyetlen kortynak számít — ez a lehető legmeredekebb emelkedés."
           }
         }
       }
     },
-    "Done" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
+    "Custom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kész"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egyedi"
           }
         }
       }
     },
-    "Drink" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drink"
+    "Daily or nearly daily": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily or nearly daily"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ital"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Napi vagy majdnem napi"
           }
         }
       }
     },
-    "Drinking frequency" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drinking frequency"
+    "Delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fogyasztás gyakorisága"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Törlés"
           }
         }
       }
     },
-    "Drinks" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drinks"
+    "Display": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Italok"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Megjelenítés"
           }
         }
       }
     },
-    "Drinks this session" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drinks this session"
+    "Distribution volume": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribution volume"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az alkalom italai"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eloszlási térfogat"
           }
         }
       }
     },
-    "Edit drink" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit drink"
+    "Done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ital szerkesztése"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kész"
           }
         }
       }
     },
-    "Elapsed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elapsed"
+    "Drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drink"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tartam"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ital"
           }
         }
       }
     },
-    "Elimination rate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elimination rate"
+    "Drinking frequency": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drinking frequency"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lebontási sebesség"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fogyasztás gyakorisága"
           }
         }
       }
     },
-    "Empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empty"
+    "Drinks": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drinks"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Éhgyomor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Italok"
           }
         }
       }
     },
-    "Empty stomach" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empty stomach"
+    "Drinks this session": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drinks this session"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Éhgyomor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az alkalom italai"
           }
         }
       }
     },
-    "Expected peak around %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expected peak around %@"
+    "Edit drink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit drink"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Várható csúcs %@ körül"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ital szerkesztése"
           }
         }
       }
     },
-    "Expected to clear" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expected to clear"
+    "Elapsed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elapsed"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Várhatóan ekkorra ürül ki"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tartam"
           }
         }
       }
     },
-    "Fast absorption, higher and earlier peak." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fast absorption, higher and earlier peak."
+    "Elimination rate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimination rate"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gyors felszívódás, magasabb és korábbi csúcs."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lebontási sebesség"
           }
         }
       }
     },
-    "Female" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Female"
+    "Empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nő"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éhgyomor"
           }
         }
       }
     },
-    "For example %@ and %@ two hours later works out to %@ per hour." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For example %@ and %@ two hours later works out to %@ per hour."
+    "Empty stomach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty stomach"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Például %@, majd két órával később %@: ez %@ óránként."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éhgyomor"
           }
         }
       }
     },
-    "Full" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full"
+    "Everything in this backup is already here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything in this backup is already here."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Teli"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mentés minden eleme már megvan."
           }
         }
       }
     },
-    "Full stomach" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full stomach"
+    "Expected peak around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expected peak around %@"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Teli has"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Várható csúcs %@ körül"
           }
         }
       }
     },
-    "Height" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Height"
+    "Expected to clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expected to clear"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Magasság"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Várhatóan ekkorra ürül ki"
           }
         }
       }
     },
-    "History" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "History"
+    "Export a backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export a backup"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Előzmény"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentés exportálása"
           }
         }
       }
     },
-    "How fast" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How fast"
+    "Fast absorption, higher and earlier peak.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast absorption, higher and earlier peak."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Milyen tempóban"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gyors felszívódás, magasabb és korábbi csúcs."
           }
         }
       }
     },
-    "How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve."
+    "Female": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Female"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Milyen gyorsan üríti a májad a már felszívódott alkoholt — ez a görbe lecsengő szakaszának meredeksége."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nő"
           }
         }
       }
     },
-    "How often do you drink?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How often do you drink?"
+    "For example %@ and %@ two hours later works out to %@ per hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example %@ and %@ two hours later works out to %@ per hour."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Milyen gyakran iszol?"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Például %@, majd két órával később %@: ez %@ óránként."
           }
         }
       }
     },
-    "How to find yours" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How to find yours"
+    "Full": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hogyan derítheted ki a sajátodat?"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teli"
           }
         }
       }
     },
-    "In one go" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In one go"
+    "Full stomach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full stomach"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egy hajtásra"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teli has"
           }
         }
       }
     },
-    "Lasted" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lasted"
+    "Height": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tartam"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magasság"
           }
         }
       }
     },
-    "Level" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Level"
+    "History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szint"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Előzmény"
           }
         }
       }
     },
-    "Live" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live"
+    "How fast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How fast"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Élő"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milyen tempóban"
           }
         }
       }
     },
-    "Lower" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lower"
+    "How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How fast your liver clears alcohol once it has been absorbed — the slope of the falling side of the curve."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alsó"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milyen gyorsan üríti a májad a már felszívódott alkoholt — ez a görbe lecsengő szakaszának meredeksége."
           }
         }
       }
     },
-    "Lower estimate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lower estimate"
+    "How often do you drink?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How often do you drink?"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alsó becslés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milyen gyakran iszol?"
           }
         }
       }
     },
-    "Male" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Male"
+    "How to find yours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to find yours"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Férfi"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hogyan derítheted ki a sajátodat?"
           }
         }
       }
     },
-    "Moderate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderate"
+    "Import": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Közepes"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visszatöltés"
           }
         }
       }
     },
-    "Moderate absorption." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderate absorption."
+    "Import a backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import a backup"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mérsékelt felszívódás."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentés visszatöltése"
           }
         }
       }
     },
-    "Moderately full" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderately full"
+    "Import finished": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import finished"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Közepesen telt"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A visszatöltés kész"
           }
         }
       }
     },
-    "Multiple people" : {
-      "comment" : "Title of the feature that lets the user record drinks for more than one person.",
-      "extractionState" : "manual",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Multiple people"
+    "Import this backup?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import this backup?"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Több személy"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visszatöltöd ezt a mentést?"
           }
         }
       }
     },
-    "Name" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name"
+    "In one go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In one go"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Név"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egy hajtásra"
           }
         }
       }
     },
-    "New person" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New person"
+    "Lasted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lasted"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Új személy"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tartam"
           }
         }
       }
     },
-    "No active session" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No active session"
+    "Level": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nincs aktív alkalom"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szint"
           }
         }
       }
     },
-    "No past sessions yet" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No past sessions yet"
+    "Live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Még nincs lezárt alkalom"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élő"
           }
         }
       }
     },
-    "Nothing logged today" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing logged today"
+    "Lower": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ma még nincs felvitt ital"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alsó"
           }
         }
       }
     },
-    "Now" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Now"
+    "Lower estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower estimate"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Most"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alsó becslés"
           }
         }
       }
     },
-    "Nursed slowly. Much gentler climb for the same alcohol." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nursed slowly. Much gentler climb for the same alcohol."
+    "Male": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Male"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lassan kortyolva. Ugyanannyi alkohol, sokkal szelídebb emelkedés."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Férfi"
           }
         }
       }
     },
-    "Peak at" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peak at"
+    "Moderate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Csúcs ekkor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Közepes"
           }
         }
       }
     },
-    "Peaked around %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peaked around %@"
+    "Moderate absorption.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate absorption."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Csúcs volt %@ körül"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mérsékelt felszívódás."
           }
         }
       }
     },
-    "Per mille" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Per mille"
+    "Moderately full": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderately full"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ezrelék"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Közepesen telt"
           }
         }
       }
     },
-    "Percent" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Percent"
+    "Multiple people": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multiple people"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Százalék"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Több személy"
           }
         }
       }
     },
-    "Personal limit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personal limit"
+    "Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saját határ"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Név"
           }
         }
       }
     },
-    "Profile" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profile"
+    "New person": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New person"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profil"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Új személy"
           }
         }
       }
     },
-    "Projected peak" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Projected peak"
+    "No active session": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No active session"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vetített csúcs"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nincs aktív alkalom"
           }
         }
       }
     },
-    "Range" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Range"
+    "No past sessions yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No past sessions yet"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sáv"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Még nincs lezárt alkalom"
           }
         }
       }
     },
-    "Rarely" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rarely"
+    "Nothing logged today": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing logged today"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritkán"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ma még nincs felvitt ital"
           }
         }
       }
     },
-    "Rate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rate"
+    "Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sebesség"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most"
           }
         }
       }
     },
-    "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs slightly higher in women on average, and lower on an empty stomach or with liver trouble." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs slightly higher in women on average, and lower on an empty stomach or with liver trouble."
+    "Nursed slowly. Much gentler climb for the same alcohol.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nursed slowly. Much gentler climb for the same alcohol."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A rendszeres fogyasztás növeli: a munkát végző májenzim a használattól indukálódik. Nőknél átlagosan valamivel magasabb, éhgyomorra és májbetegség esetén pedig alacsonyabb."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lassan kortyolva. Ugyanannyi alkohol, sokkal szelídebb emelkedés."
           }
         }
       }
     },
-    "Save changes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save changes"
+    "OK": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mentés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
     },
-    "Set exact time" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set exact time"
+    "Peak at": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak at"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pontos idő megadása"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csúcs ekkor"
           }
         }
       }
     },
-    "Several times a week" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Several times a week"
+    "Peaked around %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peaked around %@"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hetente többször"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csúcs volt %@ körül"
           }
         }
       }
     },
-    "Sex" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sex"
+    "Per mille": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per mille"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nem"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezrelék"
           }
         }
       }
     },
-    "Slow absorption, lower and later peak." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slow absorption, lower and later peak."
+    "Percent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Percent"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lassú felszívódás, alacsonyabb és későbbi csúcs."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Százalék"
           }
         }
       }
     },
-    "Social drinking" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Social drinking"
+    "Personal limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal limit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkalmi, társasági fogyasztás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saját határ"
           }
         }
       }
     },
-    "Sparkling" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sparkling"
+    "Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pezsgő"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
           }
         }
       }
     },
-    "Spirit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spirit"
+    "Projected peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projected peak"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tömény"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vetített csúcs"
           }
         }
       }
     },
-    "Started" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Started"
+    "Range": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kezdés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáv"
           }
         }
       }
     },
-    "Still rising" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Still rising"
+    "Rarely": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rarely"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Még emelkedik"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ritkán"
           }
         }
       }
     },
-    "Stomach" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stomach"
+    "Rate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gyomor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sebesség"
           }
         }
       }
     },
-    "Strength" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Strength"
+    "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs slightly higher in women on average, and lower on an empty stomach or with liver trouble.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular drinking raises it: the liver enzyme that does the work is induced by use. It also runs slightly higher in women on average, and lower on an empty stomach or with liver trouble."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkoholfok"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A rendszeres fogyasztás növeli: a munkát végző májenzim a használattól indukálódik. Nőknél átlagosan valamivel magasabb, éhgyomorra és májbetegség esetén pedig alacsonyabb."
           }
         }
       }
     },
-    "Switch person" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Switch person"
+    "Save changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save changes"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Személyváltás"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mentés"
           }
         }
       }
     },
-    "The Widmark factor is typically around 0.68 for men and 0.55 for women. If yours is far from that, it is worth checking the values above." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The Widmark factor is typically around 0.68 for men and 0.55 for women. If yours is far from that, it is worth checking the values above."
+    "Set exact time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set exact time"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A Widmark-faktor tipikusan 0,68 körül van férfiaknál és 0,55 körül nőknél. Ha a tiéd messze esik ettől, érdemes ellenőrizni a fenti adatokat."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pontos idő megadása"
           }
         }
       }
     },
-    "The app tells you when it expects you to clear. If you are reliably back to normal well before that, your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes longer than predicted, nudge it down." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The app tells you when it expects you to clear. If you are reliably back to normal well before that, your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes longer than predicted, nudge it down."
+    "Several times a week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several times a week"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az app megmondja, mikorra várja a kiürülést. Ha ennél jóval hamarabb vagy rendben, a lebontásod gyorsabb a beállítottnál — vidd feljebb egy lépéssel, és figyeld néhány alkalmon át. Ha tovább tart, vidd lejjebb."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hetente többször"
           }
         }
       }
     },
-    "The spread suggested by your drinking frequency is ± %@ per hour." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The spread suggested by your drinking frequency is ± %@ per hour."
+    "Sex": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sex"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A fogyasztási gyakoriságod alapján javasolt szórás ± %@ óránként."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem"
           }
         }
       }
     },
-    "Their own limit and the finer settings can be changed later on the Profile tab, while they are the selected person." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Their own limit and the finer settings can be changed later on the Profile tab, while they are the selected person."
+    "Slow absorption, lower and later peak.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slow absorption, lower and later peak."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A saját határ és a finomabb beállítások később a Profil fülön módosíthatók, amíg ő a kiválasztott személy."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lassú felszívódás, alacsonyabb és későbbi csúcs."
           }
         }
       }
     },
-    "This is an estimate, not a measurement." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is an estimate, not a measurement."
+    "Social drinking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Social drinking"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ez egy becslés, nem mérés."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alkalmi, társasági fogyasztás"
           }
         }
       }
     },
-    "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you."
+    "Sparkling": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparkling"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ebből becsüljük a lebontási sebességet. A rendszeres fogyasztás indukálja a máj CYP2E1 útvonalát, ezért a gyakori fogyasztók gyorsabban bontják le az alkoholt. Ez a modell leggyengébb pontja, ezért a Haladó beállításokban megadhatod, mennyit mutasson meg az app ebből a bizonytalanságból."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pezsgő"
           }
         }
       }
     },
-    "This might cross your limit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This might cross your limit"
+    "Spirit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spirit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Átlépheted a saját határod"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tömény"
           }
         }
       }
     },
-    "This would cross your limit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This would cross your limit"
+    "Started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Átlépnéd a saját határod"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kezdés"
           }
         }
       }
     },
-    "Time" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time"
+    "Still rising": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still rising"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Idő"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Még emelkedik"
           }
         }
       }
     },
-    "Total body water" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total body water"
+    "Stomach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stomach"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Teljes testvíz"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gyomor"
           }
         }
       }
     },
-    "Total body water comes from the Watson equations, which set the volume alcohol distributes into." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total body water comes from the Watson equations, which set the volume alcohol distributes into."
+    "Strength": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A teljes testvíz a Watson-formulákból jön, ez adja meg az alkohol eloszlási terét."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alkoholfok"
           }
         }
       }
     },
-    "Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result."
+    "Switch person": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch person"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A teljes testvíz a Watson-formulákból jön, ez adja meg az alkohol eloszlási terét. A női egyenlet nem tartalmazza az életkort, ezért annak állítása nem változtat az eredményen."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Személyváltás"
           }
         }
       }
     },
-    "Type" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+    "The Widmark factor is typically around 0.68 for men and 0.55 for women. If yours is far from that, it is worth checking the values above.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Widmark factor is typically around 0.68 for men and 0.55 for women. If yours is far from that, it is worth checking the values above."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Típus"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Widmark-faktor tipikusan 0,68 körül van férfiaknál és 0,55 körül nőknél. Ha a tiéd messze esik ettől, érdemes ellenőrizni a fenti adatokat."
           }
         }
       }
     },
-    "Uncertainty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uncertainty"
+    "The app tells you when it expects you to clear. If you are reliably back to normal well before that, your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes longer than predicted, nudge it down.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app tells you when it expects you to clear. If you are reliably back to normal well before that, your rate is higher than the setting — nudge it up a step and watch for a few sessions. If it takes longer than predicted, nudge it down."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bizonytalanság"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az app megmondja, mikorra várja a kiürülést. Ha ennél jóval hamarabb vagy rendben, a lebontásod gyorsabb a beállítottnál — vidd feljebb egy lépéssel, és figyeld néhány alkalmon át. Ha tovább tart, vidd lejjebb."
           }
         }
       }
     },
-    "Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. The rate below is not — leave it to the frequency question unless you have a measurement to match it against." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. The rate below is not — leave it to the frequency question unless you have a measurement to match it against."
+    "The spread suggested by your drinking frequency is ± %@ per hour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The spread suggested by your drinking frequency is ± %@ per hour."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A bizonytalanság ízlés kérdése: ez dönti el, hogy a számok egy értékként vagy tartományként jelennek meg. Az alatta lévő sebesség nem az — hagyd a gyakorisági kérdésre, hacsak nincs mért értéked, amihez igazítanád."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A fogyasztási gyakoriságod alapján javasolt szórás ± %@ óránként."
           }
         }
       }
     },
-    "Unit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unit"
+    "Their own limit and the finer settings can be changed later on the Profile tab, while they are the selected person.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their own limit and the finer settings can be changed later on the Profile tab, while they are the selected person."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mértékegység"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A saját határ és a finomabb beállítások később a Profil fülön módosíthatók, amíg ő a kiválasztott személy."
           }
         }
       }
     },
-    "Units" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Units"
+    "This backup was made by a newer version of DrinkSmart. Update the app and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup was made by a newer version of DrinkSmart. Update the app and try again."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egység"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezt a mentést a DrinkSmart újabb verziója készítette. Frissítsd az appot, és próbáld újra."
           }
         }
       }
     },
-    "Upper" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upper"
+    "This file is not a DrinkSmart backup, or it is damaged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file is not a DrinkSmart backup, or it is damaged."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Felső"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a fájl nem a DrinkSmart mentése, vagy megsérült."
           }
         }
       }
     },
-    "Upper estimate" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upper estimate"
+    "This is an estimate, not a measurement.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is an estimate, not a measurement."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Felső becslés"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez egy becslés, nem mérés."
           }
         }
       }
     },
-    "Weekly routine" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekly routine"
+    "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is how we estimate your elimination rate. Regular drinking induces the liver's CYP2E1 pathway, so frequent drinkers clear alcohol faster. It is the weakest point of the model, which is why you can set under Advanced how much of that uncertainty the app shows you."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Heti rendszeresség"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ebből becsüljük a lebontási sebességet. A rendszeres fogyasztás indukálja a máj CYP2E1 útvonalát, ezért a gyakori fogyasztók gyorsabban bontják le az alkoholt. Ez a modell leggyengébb pontja, ezért a Haladó beállításokban megadhatod, mennyit mutasson meg az app ebből a bizonytalanságból."
           }
         }
       }
     },
-    "Weight" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weight"
+    "This might cross your limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This might cross your limit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Testsúly"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Átlépheted a saját határod"
           }
         }
       }
     },
-    "What moves it" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What moves it"
+    "This would cross your limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This would cross your limit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mi befolyásolja"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Átlépnéd a saját határod"
           }
         }
       }
     },
-    "When" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When"
+    "Time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Időpont"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idő"
           }
         }
       }
     },
-    "Widmark factor" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Widmark factor"
+    "Total body water": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total body water"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Widmark-faktor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teljes testvíz"
           }
         }
       }
     },
-    "Wine" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wine"
+    "Total body water comes from the Watson equations, which set the volume alcohol distributes into.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total body water comes from the Watson equations, which set the volume alcohol distributes into."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bor"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A teljes testvíz a Watson-formulákból jön, ez adja meg az alkohol eloszlási terét."
           }
         }
       }
     },
-    "With a breathalyser" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "With a breathalyser"
+    "Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total body water comes from the Watson equations, which set the volume alcohol distributes into. The female equation does not include age, so changing it will not affect the result."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alkoholszondával"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A teljes testvíz a Watson-formulákból jön, ez adja meg az alkohol eloszlási terét. A női egyenlet nem tartalmazza az életkort, ezért annak állítása nem változtat az eredményen."
           }
         }
       }
     },
-    "With slower metabolism yes, with faster no. That's the uncertainty of the estimate." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "With slower metabolism yes, with faster no. That's the uncertainty of the estimate."
+    "Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A lassabb lebontás esetén igen, a gyorsabbnál nem. Ez a becslés bizonytalansága."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Típus"
           }
         }
       }
     },
-    "With this" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "With this"
+    "Uncertainty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uncertainty"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ezzel"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bizonytalanság"
           }
         }
       }
     },
-    "Without one" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Without one"
+    "Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. The rate below is not — leave it to the frequency question unless you have a measurement to match it against.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uncertainty is a matter of taste: it decides whether figures read as one number or as a range. The rate below is not — leave it to the frequency question unless you have a measurement to match it against."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szonda nélkül"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A bizonytalanság ízlés kérdése: ez dönti el, hogy a számok egy értékként vagy tartományként jelennek meg. Az alatta lévő sebesség nem az — hagyd a gyakorisági kérdésre, hacsak nincs mért értéked, amihez igazítanád."
           }
         }
       }
     },
-    "YOUR LIMIT %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOUR LIMIT %@"
+    "Unit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unit"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SAJÁT HATÁR %@"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mértékegység"
           }
         }
       }
     },
-    "You" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You"
+    "Units": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Units"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Te"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egység"
           }
         }
       }
     },
-    "Your limit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your limit"
+    "Upper": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saját határ"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Felső"
           }
         }
       }
     },
-    "Your own reference number, not a legal limit. The app tells you when a planned drink would take you past it, and for how long you would stay above." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your own reference number, not a legal limit. The app tells you when a planned drink would take you past it, and for how long you would stay above."
+    "Upper estimate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upper estimate"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A te referenciaszámod, nem jogi limit. Az app jelzi, ha egy tervezett ital átvinne rajta — és azt is, mennyi ideig maradnál fölötte."
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Felső becslés"
           }
         }
       }
     },
-    "cm" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cm"
+    "Weekly routine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly routine"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cm"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heti rendszeresség"
           }
         }
       }
     },
-    "drag to read values" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "drag to read values"
+    "Weight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "húzd a leolvasáshoz"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testsúly"
           }
         }
       }
     },
-    "estimated level" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "estimated level"
+    "What moves it": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What moves it"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "becsült szint"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi befolyásolja"
           }
         }
       }
     },
-    "estimated range" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "estimated range"
+    "When": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "becsült tartomány"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Időpont"
           }
         }
       }
     },
-    "in one go" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "in one go"
+    "Widmark factor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widmark factor"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "egy hajtásra"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widmark-faktor"
           }
         }
       }
     },
-    "kg" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kg"
+    "Wine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kg"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bor"
           }
         }
       }
     },
-    "peak" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "peak"
+    "With a breathalyser": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With a breathalyser"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "csúcs"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alkoholszondával"
           }
         }
       }
     },
-    "possible range" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "possible range"
+    "With slower metabolism yes, with faster no. That's the uncertainty of the estimate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With slower metabolism yes, with faster no. That's the uncertainty of the estimate."
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lehetséges tartomány"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A lassabb lebontás esetén igen, a gyorsabbnál nem. Ez a becslés bizonytalansága."
           }
         }
       }
     },
-    "pour time" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pour time"
+    "With this": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With this"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "fogyasztási idő"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezzel"
           }
         }
       }
     },
-    "release to go back" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "release to go back"
+    "Without one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without one"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "engedd el a visszatéréshez"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szonda nélkül"
           }
         }
       }
     },
-    "tap to edit · swipe to delete" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tap to edit · swipe to delete"
+    "YOUR LIMIT %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YOUR LIMIT %@"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "koppints a szerkesztéshez · húzd a törléshez"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SAJÁT HATÁR %@"
           }
         }
       }
     },
-    "yrs" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "yrs"
+    "You": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
           }
         },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "év"
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te"
+          }
+        }
+      }
+    },
+    "Your limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your limit"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saját határ"
+          }
+        }
+      }
+    },
+    "Your own reference number, not a legal limit. The app tells you when a planned drink would take you past it, and for how long you would stay above.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your own reference number, not a legal limit. The app tells you when a planned drink would take you past it, and for how long you would stay above."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A te referenciaszámod, nem jogi limit. Az app jelzi, ha egy tervezett ital átvinne rajta — és azt is, mennyi ideig maradnál fölötte."
+          }
+        }
+      }
+    },
+    "cm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cm"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cm"
+          }
+        }
+      }
+    },
+    "drag to read values": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drag to read values"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "húzd a leolvasáshoz"
+          }
+        }
+      }
+    },
+    "estimated level": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "estimated level"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "becsült szint"
+          }
+        }
+      }
+    },
+    "estimated range": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "estimated range"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "becsült tartomány"
+          }
+        }
+      }
+    },
+    "in one go": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in one go"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "egy hajtásra"
+          }
+        }
+      }
+    },
+    "kg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kg"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kg"
+          }
+        }
+      }
+    },
+    "peak": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "csúcs"
+          }
+        }
+      }
+    },
+    "possible range": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "possible range"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lehetséges tartomány"
+          }
+        }
+      }
+    },
+    "pour time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pour time"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fogyasztási idő"
+          }
+        }
+      }
+    },
+    "release to go back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "release to go back"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "engedd el a visszatéréshez"
+          }
+        }
+      }
+    },
+    "tap to edit · swipe to delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tap to edit · swipe to delete"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "koppints a szerkesztéshez · húzd a törléshez"
+          }
+        }
+      }
+    },
+    "yrs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "yrs"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "év"
           }
         }
       }
     }
-  },
-  "version" : "1.1"
+  }
 }

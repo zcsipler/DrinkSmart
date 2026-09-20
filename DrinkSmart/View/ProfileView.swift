@@ -3,8 +3,9 @@ import BACKit
 
 /// Body composition, metabolism and the personal limit.
 ///
-/// Its own tab rather than a sheet: this is where the iCloud switch, data
-/// export and deletion will land, and a sheet does not have room to grow.
+/// Its own tab rather than a sheet: backup and restore live here too
+/// (`DataTransferSection`), deletion will follow, and a sheet does not have
+/// room to grow.
 ///
 /// The elimination rate deliberately does not appear as a raw number: no user
 /// can answer "what is your beta in per mille per hour", and a value set at
@@ -32,6 +33,7 @@ struct ProfileView: View {
                 unitSection
                 derivedSection
                 advancedSection
+                DataTransferSection(store: store)
                 #if DEBUG
                 developerSection
                 #endif

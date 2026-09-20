@@ -1,3 +1,4 @@
+import CoreData
 import Foundation
 import Observation
 import SwiftData
@@ -50,6 +51,13 @@ final class SessionStore {
 
         restoreActivePerson()
         refreshFromStore()
+        observeRemoteChanges()
+    }
+
+    deinit {
+        if let remoteChangeObserver {
+            NotificationCenter.default.removeObserver(remoteChangeObserver)
+        }
     }
 
     // MARK: People
@@ -554,6 +562,97 @@ final class SessionStore {
     func tick() {
         now = .now
         closeSessionIfEnded()
+    }
+
+    // MARK: Export and import
+    //
+    // Through the store like everything else (3.): the views do not touch
+    // SwiftData, and an import in particular has to leave this object's own
+    // state consistent, which only this object knows how to do.
+
+    /// Everyone and every occasion, ready to be written to a file.
+    func archive(at date: Date = .now) -> DataArchive {
+        ArchiveExport.archive(from: context, at: date)
+    }
+
+    /// What importing this archive would change, without changing anything.
+    func importPlan(for archive: DataArchive) -> ArchiveImport.Plan {
+        ArchiveImport.plan(archive, in: context)
+    }
+
+    /// Merges an archive in, then puts this store back on its feet.
+    ///
+    /// The owner is reassigned rather than assumed unchanged: the import
+    /// resolves two owners into one, and the loser is deleted. Holding the
+    /// deleted one would leave every query filtering on a person who is no
+    /// longer there — an app that looks empty while the data sits in the
+    /// database. `restoreActivePerson` then runs for the same reason it runs at
+    /// launch: the remembered person may have arrived, or may never have
+    /// existed here.
+    @discardableResult
+    func importArchive(_ plan: ArchiveImport.Plan) -> ArchiveImport.Outcome {
+        let outcome = ArchiveImport.apply(plan, in: context)
+
+        owner = outcome.owner
+        person = outcome.owner
+        restoreActivePerson()
+        refreshFromStore()
+
+        return outcome
+    }
+
+    // MARK: Changes made on another device
+    //
+    // CloudKit writes straight into the store, behind our back. `@Query` picks
+    // that up on its own, but this store does not: `session` and `band` only
+    // move when `rebuild` runs. Without this, a drink logged on the phone would
+    // appear in the list on the iPad with the curve underneath it unchanged —
+    // the two halves of the same screen disagreeing.
+    //
+    // The scene-phase hook in `MainTabView` covers the app coming back to the
+    // foreground. This covers the app already being there.
+
+    /// Not observed, and not part of the store's value: a token and a timer.
+    ///
+    /// `nonisolated(unsafe)` because `deinit` is not main-actor isolated and
+    /// has to read it. Written once in `init` and read once in `deinit`, both
+    /// while nothing else holds the object, so there is nothing to race with.
+    @ObservationIgnored
+    nonisolated(unsafe) private var remoteChangeObserver: (any NSObjectProtocol)?
+
+    @ObservationIgnored
+    private var pendingRemoteRefresh: Task<Void, Never>?
+
+    private func observeRemoteChanges() {
+        remoteChangeObserver = NotificationCenter.default.addObserver(
+            forName: .NSPersistentStoreRemoteChange,
+            object: nil,
+            queue: nil          // posted off the main thread; we hop ourselves
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.scheduleRemoteRefresh()
+            }
+        }
+    }
+
+    /// Collapses a burst of notifications into one refresh.
+    ///
+    /// A sync posts one notification per batch, and a first sync posts many.
+    /// Each `refreshFromStore` runs the closing policy over every open session
+    /// and then rebuilds the band — two `simulateBand` calls in the ordinary
+    /// case, which is ~5 ms release but ~146 ms debug (6.). Answering every
+    /// notification would spend that repeatedly for one visible result.
+    ///
+    /// Half a second: longer than the gap between batches of one sync, short
+    /// enough that a drink logged on the other device still lands while you are
+    /// looking at the screen.
+    private func scheduleRemoteRefresh() {
+        pendingRemoteRefresh?.cancel()
+        pendingRemoteRefresh = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            self?.refreshFromStore()
+        }
     }
 
     // MARK: Plumbing

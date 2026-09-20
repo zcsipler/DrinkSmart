@@ -1,6 +1,33 @@
 import Foundation
 import Observation
 
+/// What this *build* is provisioned for — as opposed to what the user has
+/// bought, which is `FeatureFlags`.
+///
+/// Deliberately not a `Feature`. `FeatureFlags.isEnabled` falls through to
+/// `isPurchased`, so anything listed there becomes a paid feature the moment
+/// StoreKit lands. Syncing is not something anyone buys; it is something the
+/// target either carries an entitlement for or does not.
+///
+/// A compile-time constant rather than a debug toggle, for the same reason:
+/// flipping a switch at runtime cannot conjure an entitlement, and the store is
+/// opened once at launch, before any switch could be read.
+enum BuildCapabilities {
+
+    /// Whether to open the store with CloudKit mirroring.
+    ///
+    /// **Off, and this is the only line to change.** Turning it on requires the
+    /// iCloud capability on the target, which requires a paid Apple Developer
+    /// Program membership — a Personal Team cannot add it, and Xcode does not
+    /// even list it. See 11.4 in CLAUDE.md for the full checklist.
+    ///
+    /// With this off the app opens a local store and behaves exactly as it did
+    /// before any of the sync work: nothing is gated, nothing is hidden, and no
+    /// code is dead — `DrinkSmartApp.makeContainer` and the remote-change
+    /// observer in `SessionStore` are both written and waiting.
+    static let cloudSync = false
+}
+
 /// A feature that can be switched off.
 ///
 /// The set is deliberately short, and the Live screen will never be in it: the

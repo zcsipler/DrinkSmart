@@ -112,8 +112,9 @@ SwiftData a motort hívják, soha nem fordítva. Ha valami élettani logika a
 
 **A nézetek nem beszélnek SwiftDatával közvetlenül**, egy kivétellel: a
 `@Query` a `HistoryView`-ban és a `LiveView`-ban, mert az listázás. Minden írás
-a `SessionStore`-on megy át — nyolc művelet: `refreshFromStore`, `add`,
-`update`, `remove`, `project`, `tick`, `activate`, `addPerson`.
+a `SessionStore`-on megy át — tizenegy művelet: `refreshFromStore`, `add`,
+`update`, `remove`, `project`, `tick`, `activate`, `addPerson`, `archive`,
+`importPlan`, `importArchive`.
 
 Alkalmat **kézzel nem lehet lezárni**. Volt egy „End session" gomb, de olyan
 kérdésre válaszolt, amit senki nem tesz fel: az alkalom akkor ér véget, amikor
@@ -658,6 +659,11 @@ is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyar�
 és a migráció mindenkinél fut, a váltó és a személy-felvitel csak bekapcsolva
 látszik — debug buildben a Profil alján, a „Developer" szekcióban.
 
+A CloudKit szinkron kódja megvan, de **ki van kapcsolva**
+(`BuildCapabilities.cloudSync = false`), mert az iCloud capability fizetős
+fejlesztői tagságot igényel — a részletek és a teendőlista a 11.4-ben.
+Kikapcsolva az app pontosan úgy viselkedik, mint a szinkron-munka előtt.
+
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
 Utolsó commit: `d0ef5aa` — „Add drinking pace, and show one number unless you
@@ -714,14 +720,159 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
 **A követelmény:** ha Zoltán készüléket vált ugyanazzal az Apple ID-val, az
 adatok ne vesszenek el. Ez nem opcionális kényelem.
 
-A séma már **CloudKit-kompatibilis** (8.), a konténer kódban ott van, csak a
-capability nincs bekapcsolva Xcode-ban — addig lokálisra esik vissza.
+**A döntés megszületett (2026. szeptember): iCloud / CloudKit private database,
+saját login és regisztráció nélkül.** Nincs se e-mail/jelszó, se Sign in with
+Apple. A kettő nem ugyanaz, és ezt könnyű összekeverni: a Sign in with Apple
+*identitás egy saját backendhez* — bejelentkező képernyő, stabil user ID, és egy
+szerver, amin az adat áll. A CloudKit *szinkron*: nincs bejelentkező képernyő,
+mert a felhasználó már be van jelentkezve, és az adat az ő iCloud-kvótáján ül.
 
-Nyitott döntés: elég-e az iCloud / Apple ID kötés, vagy kell saját
-login/regisztráció is. Az iCloud egyszerűbb és privátabb (nincs szerverünk, ami
-alkoholfogyasztási adatot tárol — ez adatvédelmileg komoly érv), viszont
-Androidra vagy webre nem vihető át, és nem támogat megosztást. **Ezt még meg
-kell beszélni.**
+Amiért ez az ág nyert: nincs szerverünk, ami alkoholfogyasztási adatot tárol —
+ez ennél az appnál nem mellékes adatvédelmi érv, hanem termékérv is (2., 9.).
+Ára, hogy Androidra és webre nem vihető át, és megosztást nem támogat. Ha
+egyszer kell web- vagy Android-kliens, akkor jön a Sign in with Apple és egy
+saját backend — de az külön fázis, és semmit nem rontunk el azzal, hogy most
+CloudKitre építünk.
+
+#### Ami a kódban már megvan
+
+- A séma **CloudKit-kompatibilis** (8.): minden mezőnek van alapértéke vagy
+  opcionális, nincs `@Attribute(.unique)`, a kapcsolatok inverzzel mennek.
+- `DrinkSmartApp.makeContainer()` — CloudKit ág `.private(cloudKitContainerID)`-vel,
+  lokális fallbackkel és debug-assertionnel.
+- A kétszeres tulajdonos elleni dedupe: `PersonMigration.resolveOwner` a korábbi
+  `createdAt`-ot tartja meg, és a `merge(_:into:)` átviszi a másik alkalmait.
+- `SessionStore.observeRemoteChanges()` — feliratkozás a
+  `NSPersistentStoreRemoteChange` értesítésre, 500 ms-os debounce-szal. E nélkül
+  egy másik készüléken felvitt ital megjelenne a `@Query`-s itallistában, de a
+  görbe alatta nem rajzolódna újra, mert a `band`-et csak a `rebuild()` mozgatja.
+  A `MainTabView` scenePhase hookja az előtérbe kerülést fedi; ez azt, amikor az
+  app már ott van.
+
+#### A kapcsoló
+
+`BuildCapabilities.cloudSync` a `Support/FeatureFlags.swift`-ben, **alapból
+`false`**. Ez az egyetlen sor, amit át kell írni.
+
+Szándékosan **nem** `Feature`, és nem debugban kapcsolgatható. A `FeatureFlags`
+a végén `isPurchased`-re esik, vagyis azt modellezi, mit *vásárolt* a
+felhasználó — a szinkron nem ilyen, azt nem veszi meg senki, azt a target
+entitlementje vagy hordozza, vagy nem. Ha `Feature` lenne, a StoreKit
+megérkezésekor csendben fizetős funkcióvá válna. Fordítási idejű konstans, mert
+futásidejű kapcsoló nem tud entitlementet előállítani, a store pedig egyszer
+nyílik meg induláskor, még mielőtt bármilyen kapcsolót ki lehetne olvasni.
+
+#### A blokkoló: fizetős tagság
+
+**Az iCloud capability nem adható hozzá Personal Team alatt.** Az Xcode a
+capability-listát a team jogosultságai szerint szűri, tehát nem hibaüzenetet ad,
+hanem az iCloud meg sem jelenik a `+ Capability` listában. Kézzel írt
+entitlements fájl sem kerüli meg: a provisioning profile nem tartalmazná az
+entitlementet, és az aláírás bukna.
+
+Kell hozzá **Apple Developer Program, Individual, 99 USD/év**. Zoltán döntése
+(2026. szeptember): **ez várhat, amíg az app élesedik.** Addig `cloudSync =
+false`, és az app pontosan úgy viselkedik, mint a szinkron-munka előtt.
+
+#### Teendők, amikor a tagság megvan — sorrendben
+
+1. **Előbb mentés.** Xcode → Window → Devices and Simulators → a készülék →
+   DrinkSmart → **Download Container**. A signing team váltása megváltoztatja az
+   app aláírását, az iOS pedig nem engedi rátelepíteni a régire ugyanazzal a
+   bundle ID-val: az Xcode törli és újratelepíti, **a helyi adatokkal együtt**.
+   Ugyanez a menü tud Replace Containert, tehát ez a visszaút.
+2. developer.apple.com → Account → a **Program License Agreement** elfogadása.
+   Amíg ez függőben van, az Xcode ugyanúgy nem lát capabilityket, mint fizetős
+   tagság nélkül.
+3. Xcode → Settings → Accounts → **Download Manual Profiles**, és a targeten az
+   új team kiválasztása (a „Personal Team" felirat eltűnik mellőle).
+4. **+ Capability → iCloud** → CloudKit pipa → konténer:
+   `iCloud.dev.zcsipler.drinksmart`. Ha az Xcode mást hoz létre, a
+   `DrinkSmartApp.cloudKitContainerID` konstanst kell hozzáigazítani.
+5. **+ Capability → Background Modes** → Remote notifications. E nélkül a
+   szinkron csak app-indításkor mozdul, push nem érkezik.
+6. `BuildCapabilities.cloudSync = true`.
+7. Futtatás **előbb a készüléken**, a meglévő adatokkal: itt dől el, hogy a
+   meglévő lokális store átáll-e tükrözésre. Siker esetén a `CD_Person` /
+   `CD_DrinkingSession` / `CD_DrinkRecord` rekordok megjelennek a CloudKit
+   Console Development környezetében. Ha az assertion store-inkompatibilitásra
+   hasal el, a kiút az app törlése és újratelepítése, majd Replace Container.
+8. Csak ezután a második pont (szimulátor ugyanazzal az Apple ID-val, iCloud
+   Drive bekapcsolva). A szimulátorra a push megbízhatatlan, ezért ott
+   háttérbe-előtérbe kell tenni az appot.
+
+Ellenőrzés, hogy a 4–5. pont tényleg megtörtént: keletkezett-e `.entitlements`
+fájl a projektben.
+
+#### Amibe egyszer már belefutottunk
+
+A `makeContainer()` eredetileg `cloudKitDatabase: .automatic`-kal próbálkozott,
+és a `catch` ágban volt egy assertion, ami elvileg jelezte volna, ha nincs
+CloudKit. **Nem jelezte.** Az `.automatic` azt jelenti: „tükrözz arra a
+konténerre, amit az entitlement megad — *ha* megad egyet"; entitlement nélkül
+egyszerűen lokális store-t nyit, és **nem dob hibát**. Így a `catch` soha nem
+futott le, az app pedig sikert jelentett, miközben semmit nem szinkronizált.
+Egy teljes tesztkör ment el arra, hogy egy olyan buildet vizsgáltunk, amiben
+nem is volt CloudKit.
+
+Ezért van a konténer néven megadva (`.private(...)`) és nem `.automatic`-kal: a
+hiányzó entitlement, az elgépelt azonosító és a nem birtokolt konténer így mind
+dob, vagyis a fallback végre azt csinálja, amire írva lett.
+
+#### Export / import — megépítve
+
+Nem csak az Apple ID váltás miatt: **az iCloud nem biztonsági mentés** (a
+felhasználó törölheti az app iCloud-adatát, és nincs kuka), a lokális fallback
+ágon futóknak ez az egyetlen átviteli mód, egy elrontott séma-migráció után ez a
+visszaút, és adathordozhatóság (GDPR 20. cikk) is. Azért készült el a CloudKit
+előtt, mert a tagságtól függetlenül megírható, és mire a szinkron bekapcsol,
+addigra védőháló is van meg ellenőrzési eszköz is: két készülékről exportálva a
+két fájl összevethető.
+
+Fájlok: `DataArchive` (Codable értéktípusok), `ArchiveExport`, `ArchiveImport`,
+`Support/ArchiveDocument.swift` (`FileDocument` az exporthoz),
+`View/DataTransferSection.swift` (a Profil alján).
+
+A megvalósítás:
+
+- **JSON, nem store-fájl másolat.** A `.sqlite` viszi a SwiftData/CloudKit
+  metaadatokat, és verziók között nem stabil. A fájl fejlécében `schemaVersion`
+  és `exportedAt`.
+- **Amit exportálunk:** `Person`, `DrinkingSession` (a profil-pillanatképpel) és
+  `DrinkRecord` minden tárolt mezője. Ugyanaz az elv, mint 5.5-nél: a bemenet
+  megy bele, nem a görbe.
+- **Amit nem:** a `cachedPeak*` / `cachedSoberAt` / `cachedEngineVersion` mezők.
+  Újraszámolhatók, és a `BACEngine.version`-höz kötöttek — egy másik verziójú
+  buildbe importálva hazudnának. Az `AppSettings` sem, az a készüléké.
+- **Import: merge `id` alapján, idempotensen.** Ismeretlen id bejön, ismert id
+  marad. Készülékváltásnál üres adatbázisba tölt, tehát ott mindegy — de egy
+  régi export visszatöltése egy használt appra így nem veszít adatot.
+- **Az `isOwner` ütközés a `PersonMigration.merge(_:into:)`-n keresztül.** A
+  célkészüléken a migráció már létrehozott egy tulajdonost, mielőtt bármi
+  importálna; a fájlban is van egy. Ez ugyanaz a probléma, mint a CloudKit-race,
+  tehát ugyanaz a szabály oldja meg — egy szabály, két hívó.
+- **`assign(to:)`-on keresztül** kell beírni a `person` kapcsolatot és a
+  `personID`-t, különben a `@Query` nem találja meg a behozott alkalmakat.
+  Import után egy `refreshFromStore()` elég: a `closeEndedSessions` minden
+  nyitott alkalmon végigmegy, tehát egy régi „nyitott" importált este magától
+  rendbe jön.
+- **A meglévő alkalom egészben marad ki, az italaival együtt.** Italonként
+  összefésülni azt igényelné, hogy eldöntsük, melyik oldal nyer egy mindkét
+  helyen meglévő, de eltérő időpontú italnál — és erre nincs becsületes szabály,
+  mert nem tároljuk, melyik szerkesztés volt később. A kihagyás kiszámítható és
+  egy mondatban elmondható, ami egy visszafordíthatatlan műveletnél követelmény.
+- **UI:** `DataTransferSection` a `ProfileView` alján, nem a főfolyamatban. Az
+  import előbb tervet készít (`ArchiveImport.Plan`), és a megerősítő ablak abból
+  mondja meg, mi fog történni — utána ír csak bármit.
+- **Fájlformátum `.json`, nem saját UTI.** Egy privát típus rendezettebb lenne a
+  megosztó lapon, de Info.plistben kellene deklarálni, és minden más app elől
+  elzárná a fájlt — egy mentésnél, aminek pont az a dolga, hogy elhagyja az
+  appot, ez rossz csere. A verzió a fájlon belül van (`schemaVersion`), ott, ahol
+  ellenőrizni is lehet.
+
+**Hátravan:** tesztek. Ez a kód pontosan az a fajta, amit a 11.8 és a 12. leír —
+nem crashel és nem logol, csak rossz emberhez tesz egy alkalmat vagy kihagy
+egyet. App-szintű teszt target nélkül nem is futtatható teszt rá.
 
 ### 11.5 Több profil — megépítve, flag mögött, tesztek nélkül
 
@@ -862,7 +1013,10 @@ A `Reference/run_tests.sh` óta ez nem csak elvárás: minden kör végén lefut
 
 Nem termékfunkciók, hanem amit rendbe kell tenni:
 
-- iCloud capability bekapcsolása Xcode-ban (lásd 11.4)
+- **iCloud capability bekapcsolása Xcode-ban — fizetős Apple Developer Program
+  tagságra vár, lásd a 11.4 teendőlistáját.** A kód készen áll, a
+  `BuildCapabilities.cloudSync` konstans kapcsolja. Az export / import ettől
+  függetlenül **megvan** (11.4), tesztek nélkül.
 - **App-szintű teszt target — a tesztek már megvannak, a target nincs.** A
   `DrinkSmartTests/` mappában ott a 18 teszt (`PersonMigrationTests`,
   `SessionRoutingTests`, `ActivePersonTests`, `TestSupport`), de **egyik sem

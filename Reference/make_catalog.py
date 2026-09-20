@@ -89,7 +89,6 @@ TRANSLATIONS = {
 
     # --- TodayView ---
     "Profile": "Profil",
-    "End session": "Alkalom lezárása",
     "estimated level": "becsült szint",
     "estimated range": "becsült tartomány",
     "Elapsed": "Tartam",
@@ -240,6 +239,44 @@ TRANSLATIONS = {
         "A bizonytalanság ízlés kérdése: ez dönti el, hogy a számok egy értékként vagy tartományként "
         "jelennek meg. Az alatta lévő sebesség nem az — hagyd a gyakorisági kérdésre, hacsak nincs mért "
         "értéked, amihez igazítanád.",
+
+    # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
+    "Multiple people": "Több személy",
+    "Switch person": "Személyváltás",
+    "Add person": "Személy hozzáadása",
+    "New person": "Új személy",
+    "You": "Te",
+    "Name": "Név",
+    "All four change the curve, so none of them can be guessed for someone else.":
+        "Mind a négy módosítja a görbét, így egyiket sem lehet megtippelni valaki más helyett.",
+    "Their own limit and the finer settings can be changed later on the Profile tab, while they are "
+    "the selected person.":
+        "A saját határ és a finomabb beállítások később a Profil fülön módosíthatók, amíg ő a "
+        "kiválasztott személy.",
+
+    # --- DataTransferSection: backup and restore ---
+    "Backup": "Biztonsági mentés",
+    "Export a backup": "Mentés exportálása",
+    "Import a backup": "Mentés visszatöltése",
+    "A backup holds every person, occasion and drink. Importing adds what is missing — it never "
+    "changes or removes anything already here.":
+        "A mentés minden személyt, alkalmat és italt tartalmaz. A visszatöltés csak a hiányzókat adja "
+        "hozzá — a már meglévő adatot nem módosítja és nem törli.",
+    "Import this backup?": "Visszatöltöd ezt a mentést?",
+    "Import": "Visszatöltés",
+    "Everything in this backup is already here.": "A mentés minden eleme már megvan.",
+    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
+        "Hozzáad %@ alkalmat és %@ italt. A meglévő adatok nem változnak és nem vesznek el.",
+    "Import finished": "A visszatöltés kész",
+    "Added %@ occasions and %@ drinks.": "Hozzáadva %@ alkalom és %@ ital.",
+    "OK": "OK",
+
+    # --- DataArchive: why a file could not be read ---
+    "Could not import": "A visszatöltés nem sikerült",
+    "This file is not a DrinkSmart backup, or it is damaged.":
+        "Ez a fájl nem a DrinkSmart mentése, vagy megsérült.",
+    "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
+        "Ezt a mentést a DrinkSmart újabb verziója készítette. Frissítsd az appot, és próbáld újra.",
 }
 
 
