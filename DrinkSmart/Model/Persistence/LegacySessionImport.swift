@@ -16,8 +16,8 @@ struct LegacySessionSnapshot: Codable {
 
     static let storageKey = "drinksmart.session.v2"
 
-    static func stored() -> LegacySessionSnapshot? {
-        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return nil }
+    static func stored(in defaults: UserDefaults = .standard) -> LegacySessionSnapshot? {
+        guard let data = defaults.data(forKey: storageKey) else { return nil }
         return try? JSONDecoder().decode(LegacySessionSnapshot.self, from: data)
     }
 }

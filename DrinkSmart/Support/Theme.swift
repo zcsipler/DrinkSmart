@@ -61,6 +61,21 @@ enum Theme {
         return last.color
     }
 
+    /// The colour tagging a person in the switcher.
+    ///
+    /// Only ever on the chip. The level colours above mean something — how
+    /// close you are to your own limit — and a second colour system on the same
+    /// screen would make both of them noise.
+    static func accent(for accent: PersonAccent) -> Color {
+        switch accent {
+        case .teal: calm
+        case .violet: Color(red: 0.604, green: 0.514, blue: 0.937)
+        case .amber: caution
+        case .rose: Color(red: 0.929, green: 0.475, blue: 0.639)
+        case .sky: Color(red: 0.365, green: 0.624, blue: 0.941)
+        }
+    }
+
     private static func blend(_ a: Color, _ b: Color, t: Double) -> Color {
         let t = min(max(t, 0), 1)
         let ca = rgba(a), cb = rgba(b)

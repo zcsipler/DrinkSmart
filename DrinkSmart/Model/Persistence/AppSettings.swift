@@ -2,123 +2,112 @@ import Foundation
 import Observation
 import BACKit
 
-/// User settings: who you are and how you want the numbers shown.
+/// What belongs to this device rather than to a person.
 ///
-/// Deliberately separate from the session history. Settings describe you
-/// *now*; a session records who you were *then*. Conflating the two is what
-/// would make old curves rewrite themselves.
+/// The body, the elimination rate, the personal limit and the start of records
+/// moved onto `Person` — they describe someone, and there can now be more than
+/// one of them. What is left describes the app: the unit the figures are shown
+/// in, and who is currently being recorded.
 ///
-/// Still in UserDefaults rather than SwiftData. A single settings row is
-/// awkward under CloudKit — two devices can each create one before the first
-/// sync, and then you have to pick a winner. Re-entering four values on a new
-/// device is cheaper than getting that merge wrong. Worth revisiting once the
-/// history sync has proven itself.
+/// Still UserDefaults rather than SwiftData, and now for a second reason on top
+/// of the original one. The original: a single settings row is awkward under
+/// CloudKit, because two devices can each create one before the first sync and
+/// then somebody has to lose. The new one: the active person is a piece of UI
+/// state. Syncing it would mean that switching to a guest on the phone in a bar
+/// also switches the iPad at home, which nobody asked for.
 @Observable
 final class AppSettings {
-
-    var profile: BodyProfile {
-        didSet { persist() }
-    }
-
-    /// The personal limit in g/L. Not a legal limit.
-    var limit: Double {
-        didSet { persist() }
-    }
 
     var unit: BACUnit {
         didSet { persist() }
     }
 
-    /// Proxy for the elimination rate. Setting it rewrites the profile's beta.
-    var frequency: DrinkingFrequency {
-        didSet {
-            guard frequency != oldValue else { return }
-            frequency.apply(to: &profile)   // profile's didSet persists
-        }
+    // MARK: Who is being recorded
+    //
+    // Two values, not one: the id, and when it was chosen. Switching to
+    // somebody else is an evening's context, and the most likely mistake with
+    // it is not mis-tapping — it is switching at 11pm and forgetting by
+    // morning. So the choice expires with the drinking day (5.6).
+    //
+    // Expiry by timestamp rather than by "was the app relaunched": coming back
+    // from the background must not reset anything, and an app the system kills
+    // at midnight must not silently start recording the wrong person's drinks.
+
+    private(set) var activePersonID: UUID?
+    private(set) var activePersonChosenAt: Date?
+
+    func setActivePerson(_ id: UUID, at date: Date = .now) {
+        activePersonID = id
+        activePersonChosenAt = date
+        persist()
     }
 
-    /// When this app started keeping records.
-    ///
-    /// Needed to tell two very different empty days apart. Before this date we
-    /// have no idea whether you drank; after it, an empty day means you did
-    /// not. Claiming the first is the second would be inventing history.
-    var trackingStartedAt: Date {
-        didSet { persist() }
+    func clearActivePerson() {
+        guard activePersonID != nil || activePersonChosenAt != nil else { return }
+        activePersonID = nil
+        activePersonChosenAt = nil
+        persist()
     }
 
-    init(
-        profile: BodyProfile = .init(sex: .male, age: 35, heightCm: 180, weightKg: 80),
-        limit: Double = 0.8,
-        unit: BACUnit = .perMille
-    ) {
-        self.profile = profile
-        self.limit = limit
+    /// The active person, but only while the choice is still today's.
+    /// Nil means the owner.
+    func activePersonIDIfCurrent(at date: Date = .now) -> UUID? {
+        guard let activePersonID, let activePersonChosenAt else { return nil }
+        guard DrinkingDay.containing(activePersonChosenAt).isCurrent(at: date) else { return nil }
+        return activePersonID
+    }
+
+    /// `defaults` is injectable for the same reason `LegacyProfileSettings`
+    /// takes one: a test must be able to run against a throwaway suite, and
+    /// one test leaking its active person into the next is exactly the kind of
+    /// flake that gets a whole suite disabled.
+    private let defaults: UserDefaults
+
+    init(unit: BACUnit = .perMille, defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         self.unit = unit
-        self.frequency = .closest(toBeta: profile.beta)
-        self.trackingStartedAt = .now
         load()
     }
 
-    /// Moves the start of tracking earlier, never later.
-    ///
-    /// Called by the legacy import: drinks that predate this install are
-    /// evidence that we were already keeping records then.
-    func backdateTracking(to date: Date) {
-        guard date < trackingStartedAt else { return }
-        trackingStartedAt = date
-    }
-
     // MARK: Storage
+    //
+    // A new key. The old one (`LegacyProfileSettings.storageKey`) still holds
+    // the profile that `PersonMigration` reads, and writing over it with a
+    // slimmer shape would destroy the only copy that predates the database.
 
     private struct Snapshot: Codable {
-        var profile: BodyProfile
-        var limit: Double
         var unit: BACUnit
-        var frequency: DrinkingFrequency
-        /// Optional so a snapshot written before this existed still decodes.
-        var trackingStartedAt: Date?
+        var activePersonID: UUID?
+        var activePersonChosenAt: Date?
     }
 
-    private static let storageKey = "drinksmart.settings.v1"
+    private static let storageKey = "drinksmart.device.v1"
 
     private func persist() {
         let snapshot = Snapshot(
-            profile: profile, limit: limit, unit: unit,
-            frequency: frequency, trackingStartedAt: trackingStartedAt
+            unit: unit,
+            activePersonID: activePersonID,
+            activePersonChosenAt: activePersonChosenAt
         )
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
-        UserDefaults.standard.set(data, forKey: Self.storageKey)
+        defaults.set(data, forKey: Self.storageKey)
     }
 
     private func load() {
-        guard
-            let data = UserDefaults.standard.data(forKey: Self.storageKey),
-            let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data)
-        else {
-            // No settings of our own yet — the legacy session blob carried them.
-            loadFromLegacyIfPresent()
+        if let data = defaults.data(forKey: Self.storageKey),
+           let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) {
+            unit = snapshot.unit
+            activePersonID = snapshot.activePersonID
+            activePersonChosenAt = snapshot.activePersonChosenAt
             return
         }
 
-        profile = snapshot.profile
-        limit = snapshot.limit
-        unit = snapshot.unit
-        frequency = snapshot.frequency
-        // An older snapshot has no start date; the install is the best guess.
-        trackingStartedAt = snapshot.trackingStartedAt ?? .now
-    }
-
-    /// The pre-SwiftData store kept settings inside the session snapshot.
-    /// Lift them out so a user upgrading does not lose their profile.
-    private func loadFromLegacyIfPresent() {
-        guard let legacy = LegacySessionSnapshot.stored() else { return }
-        profile = legacy.profile
-        limit = legacy.limit
-        unit = legacy.unit
-        frequency = legacy.frequency
-        if let earliest = legacy.drinks.map(\.consumedAt).min() {
-            trackingStartedAt = earliest
+        // First launch after the split: the unit is the one setting here that
+        // the user had already chosen, so it is carried over rather than reset.
+        if let legacy = LegacyProfileSettings.stored(in: defaults) {
+            unit = legacy.unit
+        } else if let blob = LegacySessionSnapshot.stored(in: defaults) {
+            unit = blob.unit
         }
-        persist()
     }
 }

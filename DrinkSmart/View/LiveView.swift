@@ -47,9 +47,15 @@ struct LiveView: View {
 
     /// Sessions already closed today — an evening that started before 5 this
     /// morning and has since cleared still belongs to this day.
+    ///
+    /// Filtered by person here rather than in the `@Query` predicate: a query
+    /// filter is fixed when the view is created, and the active person can
+    /// change while this screen is on screen. The volume argument above applies
+    /// to both filters equally.
     private var sessionsOfDay: [DrinkingSession] {
-        finishedSessions
-            .filter { day.contains($0.startedAt) }
+        let personID = store.person.id
+        return finishedSessions
+            .filter { $0.personID == personID && day.contains($0.startedAt) }
             .sorted { $0.startedAt < $1.startedAt }
     }
 
@@ -92,25 +98,38 @@ struct LiveView: View {
 
     private var content: some View {
         ScrollView {
-            VStack(spacing: 26) {
-                switch dayState {
-                case .live:
-                    liveSession
-                case .recorded(let sessions):
-                    ForEach(sessions) { session in
-                        SessionContentView(
-                            session: session,
-                            store: store,
-                            editingDrink: $editingDrink,
-                            openRowID: $openRowID,
-                            showsProfileNote: false
-                        )
+            VStack(spacing: 14) {
+                // Above the day, not inside it: the most likely moment to add
+                // someone is a day with nothing on it yet, and a switcher that
+                // only appears once a session is running would be missing
+                // exactly then.
+                if FeatureFlags.shared.multiPerson {
+                    HStack {
+                        Spacer()
+                        PersonSwitcher(store: store)
                     }
-                case .dry:
-                    emptyState
                 }
 
-                disclaimer
+                VStack(spacing: 26) {
+                    switch dayState {
+                    case .live:
+                        liveSession
+                    case .recorded(let sessions):
+                        ForEach(sessions) { session in
+                            SessionContentView(
+                                session: session,
+                                store: store,
+                                editingDrink: $editingDrink,
+                                openRowID: $openRowID,
+                                showsProfileNote: false
+                            )
+                        }
+                    case .dry:
+                        emptyState
+                    }
+
+                    disclaimer
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
@@ -136,16 +155,6 @@ struct LiveView: View {
 
     private var hero: some View {
         VStack(spacing: 6) {
-            HStack {
-                Spacer()
-                Button { store.clearSession() } label: {
-                    Text("End session")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundStyle(Theme.secondaryText)
-                }
-            }
-            .frame(height: 20)
-
             BACReadout(store.currentRange, unit: store.unit, limit: store.limit, size: 48)
 
             (store.currentRange.isPoint ? Text("estimated level") : Text("estimated range"))

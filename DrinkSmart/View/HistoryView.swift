@@ -19,7 +19,15 @@ struct HistoryView: View {
         sort: \DrinkingSession.startedAt,
         order: .reverse
     )
-    private var sessions: [DrinkingSession]
+    private var allSessions: [DrinkingSession]
+
+    /// The active person's history. Filtered in memory for the same reason as
+    /// in `LiveView`: a `@Query` predicate is fixed at view creation, and the
+    /// person can change underneath it.
+    private var sessions: [DrinkingSession] {
+        let personID = store.person.id
+        return allSessions.filter { $0.personID == personID }
+    }
 
     var body: some View {
         NavigationStack {
@@ -34,6 +42,15 @@ struct HistoryView: View {
             }
             .navigationTitle(Text("History"))
             .navigationBarTitleDisplayMode(.inline)
+            // Whose history this is has to be visible here too, or the list
+            // silently becomes somebody else's.
+            .toolbar {
+                if FeatureFlags.shared.multiPerson {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        PersonSwitcher(store: store)
+                    }
+                }
+            }
         }
     }
 

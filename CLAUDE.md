@@ -78,14 +78,18 @@ DrinkSmart/
 │   │   ├── DrinkingFrequency.swift  a béta proxyja
 │   │   ├── SessionStore.swift       @Observable, SwiftData-alapú, a nyitott alkalom
 │   │   └── Persistence/
-│   │       ├── DrinkingSession.swift     @Model, profil-pillanatkép + cache
+│   │       ├── Person.swift              @Model, kinek a fogyasztása — test, béta, határ
+│   │       ├── PersonMigration.swift     tulajdonos + gazdátlan alkalmak örökbefogadása
+│   │       ├── DrinkingSession.swift     @Model, profil-pillanatkép + cache + személy
 │   │       ├── DrinkRecord.swift         @Model, a tárolt ital
 │   │       ├── SessionPolicy.swift       mikor ér véget egy alkalom
-│   │       ├── AppSettings.swift         ki vagy MOST (UserDefaults)
+│   │       ├── AppSettings.swift         ami a KÉSZÜLÉKÉ: mértékegység, aktív személy
+│   │       ├── LegacyProfileSettings.swift a régi profil-beállítások olvasója
 │   │       ├── LegacySessionImport.swift egyszeri import a régi blobból
 │   │       └── SessionStore+Preview.swift in-memory store a previewekhez
 │   ├── Support/
 │   │   ├── Theme.swift         színek, a görbe színe a határhoz viszonyítva változik
+│   │   ├── FeatureFlags.swift  egy hely, ami eldönti, mi van bekapcsolva
 │   │   └── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
 │   └── View/
 │       ├── MainTabView.swift        History / Live / Profil, Live középen
@@ -97,6 +101,7 @@ DrinkSmart/
 │       ├── DrinkListSection.swift   az itallista, koppintás + húzás
 │       ├── DrinkRow.swift           egy sor, kézzel írt swipe-pal
 │       ├── AddDrinkSheet.swift      felvitel és szerkesztés + élő előrejelzés
+│       ├── PersonSwitcher.swift     ki van kiválasztva + új személy felvitele
 │       └── ProfileView.swift        testalkat, gyakoriság, saját határ, haladó
 └── Reference/                  Python referencia, katalógusgenerátor, run_tests.sh
 ```
@@ -107,8 +112,19 @@ SwiftData a motort hívják, soha nem fordítva. Ha valami élettani logika a
 
 **A nézetek nem beszélnek SwiftDatával közvetlenül**, egy kivétellel: a
 `@Query` a `HistoryView`-ban és a `LiveView`-ban, mert az listázás. Minden írás
-a `SessionStore`-on megy át — hét művelet: `refreshFromStore`, `add`, `update`,
-`remove`, `clearSession`, `project`, `tick`.
+a `SessionStore`-on megy át — nyolc művelet: `refreshFromStore`, `add`,
+`update`, `remove`, `project`, `tick`, `activate`, `addPerson`.
+
+Alkalmat **kézzel nem lehet lezárni**. Volt egy „End session" gomb, de olyan
+kérdésre válaszolt, amit senki nem tesz fel: az alkalom akkor ér véget, amikor
+az alkohol kitisztult és eltelt pár óra (`SessionPolicy`) — ez tény az estéről,
+nem döntés. Korán megnyomva hamis lezárási időt írt volna, és a következő ital
+ugyanazon az estén egy második alkalmat nyitott volna.
+
+A `@Query` mindkét helyen **szűretlen**, és a személyre szűrés memóriában
+történik. Nem lustaságból: a `@Query` predikátuma a nézet létrehozásakor
+befagy, az aktív személy viszont a nézet alatt változik — ugyanaz a
+megfontolás, ami miatt a napra szűrés is memóriában van.
 
 ## 4. A modell
 
@@ -638,7 +654,9 @@ Live képernyő a mai napra, három nap-állapottal; előzmény-lista és
 alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
 is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyarázata
 és tippek a saját érték kiderítéséhez; 56 teszt; angol/magyar lokalizáció
-144 kulccsal.
+154 kulccsal. Több személy (11.5) a `FeatureFlags.multiPerson` mögött: a séma
+és a migráció mindenkinél fut, a váltó és a személy-felvitel csak bekapcsolva
+látszik — debug buildben a Profil alján, a „Developer" szekcióban.
 
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
@@ -675,6 +693,12 @@ Tervezési megjegyzés: a flageket ne a nézetekbe szórjuk szét. Egy központi
 `FeatureFlags` (vagy `Entitlements`) típus kell, ami a StoreKit-állapotot és a
 debug-override-ot egy helyen fogja össze, és a nézetek csak kérdezik.
 
+A váz megvan: `Support/FeatureFlags.swift`, `flags.multiPerson` alakú
+lekérdezéssel, release-ben kikapcsolva, debugban a Profil alján kapcsolható.
+StoreKit még nincs mögötte — az `isPurchased` ma mindig hamis, és ez az egyetlen
+hely, ahova a jogosultság-lekérdezés majd bekerül. Az első vevő a több profil
+(11.5); ami nem flagelendő, az a séma és a migráció, csak a UI.
+
 ### 11.3 Sokkal komplexebb Előzmény
 
 Havi / heti / éves bontás, line chartokkal a fogyasztásról. Nem csak
@@ -699,17 +723,98 @@ alkoholfogyasztási adatot tárol — ez adatvédelmileg komoly érv), viszont
 Androidra vagy webre nem vihető át, és nem támogat megosztást. **Ezt még meg
 kell beszélni.**
 
-### 11.5 Több profil
+### 11.5 Több profil — megépítve, flag mögött, tesztek nélkül
 
 Egy estén belül át lehessen váltani másik emberre — pl. a barátnő profiljára —,
-és oda is felvinni az italokat.
+és oda is felvinni az italokat, gyorsan, a helyszínen.
 
 Ez a legmélyebb séma-változás a listán. A `DrinkingSession` ma a profilt
-*pillanatképként* tárolja (5.5), de nincs fogalma arról, hogy *kié*. Kell egy
-`Person` entitás, és minden alkalomnak hozzá kell tartoznia. A migrációt úgy
-kell megírni, hogy a meglévő alkalmak egy alapértelmezett személyhez kerüljenek.
-A `SessionStore` ma egyetlen nyitott alkalmat ismer — több emberrel egyszerre
-több nyitott alkalom van.
+*pillanatképként* tárolja (5.5), de nincs fogalma arról, hogy *kié*.
+
+Megbeszélve és megépítve 2026 szeptemberében, a `FeatureFlags.multiPerson`
+mögött. Ami itt áll, az működő viselkedés, nem terv — a tesztek kivételével.
+Amikor a flag élesedik, az alábbi döntések átköltöznek az 5. fejezetbe.
+
+**A váltás globális, és naponta visszaáll a tulajdonosra.** Mindhárom tab az
+aktív személyt mutatja: az Előzmény az ő alkalmait, a Profil az ő testadatait
+szerkeszti. Egy mentális modell van, nem kettő, és a vendég testadatai
+ugyanott állíthatók, ahol a tieid. A legvalószínűbb hiba az, hogy este átváltasz
+és másnap reggel elfelejted — ezért az aktív személy visszaáll a tulajdonosra,
+ha a váltás nem a mai ivási napon (5.6) történt. Nem „hideg indítás"
+detektálással, hanem a váltás időbélyegéből: a háttérből visszatérés így nem
+zavar, egy esti app-kilövés nem veszíti el a kontextust, reggel viszont
+magától te vagy.
+
+**A feature flag a UI-t takarja, nem a sémát.** A `Person` entitás és a
+migráció a flagtől függetlenül mindig lefut, mindenki a tulajdonoshoz tartozik,
+és csak a váltó, a személy-felvitel és a személyenkénti szűrés van
+`FeatureFlags.multiPerson` mögött (11.2). Ha a séma is flag alatt lenne, a flag
+bekapcsolása egy meglévő installon ugyanúgy migrációt igényelne, a kikapcsolása
+pedig elrejtené egy létező személy adatait — vagyis két adatállapotot kellene
+karbantartani. Flag nélkül az app pontosan úgy viselkedik, mint korábban, és a
+kódban egy ág van, nem kettő.
+
+**Séma.** A `Person` viszi mindazt, ami személyenkénti: a testadatokat, a
+gyakoriságot, a saját határt és a `trackingStartedAt`-ot — vagyis a mai
+`AppSettings` nagy részét. Az `AppSettings` a `unit`-ra és az aktív személy
+azonosítójára fogy le; a régi kulcsot **nem töröljük**, ugyanazon az alapon,
+amiért a `LegacySessionImport` sem törli a sajátját (az az egyetlen másolat,
+amiből a migráció újrajátszható). A `DrinkingSession` kap egy `person`
+kapcsolatot **és** egy denormalizált `personID`-t: a `@Query` a `LiveView`-ban
+és a `HistoryView`-ban skalárra tud szűrni, opcionális kapcsolaton keresztül
+nem megbízhatóan. A kettő egy helyen íródik.
+
+**Migráció.** `PersonMigration.run(in:)`, a `LegacySessionImport` mintájára:
+tulajdonos-`Person` a régi beállításokból (`LegacyProfileSettings`, ami a
+`drinksmart.settings.v1` kulcsot olvassa, és soha többé nem írja), majd minden
+gazdátlan alkalom hozzá. **Nincs „már lefutott" UserDefaults-kulcs**, és ez
+szándékos: a védelem maga az adat — tulajdonos csak akkor jön létre, ha nincs,
+és a söprés csak a gazdátlan alkalmakhoz nyúl. Egy marker itt kifejezetten
+rossz lenne, mert CloudKit mellett egy régebbi verziójú készülékről érkező
+alkalom a marker beállítása **után** is befuthat, és akkor sosem kapna gazdát.
+Két lekérdezés induláskor az olcsóbb hiba. CloudKit mellett két készülék az első szinkron
+előtt két tulajdonost hozhat létre — ugyanaz a probléma, ami miatt az
+`AppSettings` ma nincs SwiftDatában (lásd ott). Olcsó védelem a dedupe-lépés
+indításkor: a korábbi `createdAt` nyer, a másik alkalmai átkerülnek hozzá.
+
+**Store.** Egy `SessionStore` marad, `switch(to:)`-szal újrapontozva — a sáv
+újraszámolása váltáskor pár ezredmásodperc, cserébe nincs párhuzamos állapot a
+memóriában. Négy hely, ahol több emberrel a mai kód csendben rossz adatot
+csinálna:
+
+- `fetchOpenSession` és `sessionCovering` — szűrés nélkül a visszamenőleg
+  felvitt italod beleeshet a másik ember aznapi alkalmába
+- `profileApplicable(at:)` — a „legközelebbi alkalom profilja" fallback (5.5)
+  az ő testalkatát fagyasztaná be a te alkalmadba
+- `closeSessionIfEnded` — ma csak az aktív nyitott alkalmat zárja; több emberrel
+  egyszerre több nyitott alkalom van, és a nem aktívé örökre nyitva maradna, ezért
+  a `refreshFromStore` az összesen végigfuttatja a szabályt
+- a `LiveView` és a `HistoryView` `@Query`-je, ami közvetlenül listáz
+
+**UI (`PersonSwitcher.swift`).** A váltó egy chip — monogram, név, chevron —,
+és **nem a heróban ül, hanem a Live tartalom tetején**, a nap-állapoton kívül.
+A hero csak akkor van a képernyőn, ha fut alkalom; a legvalószínűbb pillanat
+viszont, amikor valakit fel akarsz venni, pont egy üres nap. Ott ült eddig az
+„End session", ami nem átkerült, hanem **megszűnt** (3.). Az Előzmény és a Profil `NavigationStack`-jében ugyanez a chip
+a toolbarban van — a Profil mezői a *kiválasztott* ember testadatait írják, és
+enélkül semmi nem mondaná meg, kiét. A hozzáadó lap név, nem, testsúly,
+magasság, kor: mind a négy testadat alakítja a görbét, ezért egyiket sem
+tippeljük meg (4.). A gyakoriság és a határ alapértékkel megy, mert utólag
+állítható és nem a görbe alakját szabja. A chip kap személyre szabott színt
+(`PersonAccent`, a soron következő szabad szín automatikusan), a görbe **nem**:
+az a limithez viszonyított skála (5.14), és két színrendszer egy képernyőn
+olvashatatlan.
+
+**Fázisok.** 1. `FeatureFlags` váz ✔ — 2. `Person`, migráció, store-szűrés ✔ —
+3. váltó, hozzáadó lap, a kézi lezárás kivezetése ✔ — 4. Előzmény és Profil a
+kontextusra kötve ✔ — 5. tesztek: **hátravan**. A 2. fázis pont az a kód, ami a
+11.8 és a 12. szerint **adatot tud veszíteni**, és ma nincs rá app-szintű teszt
+target.
+
+**Nyitva maradt:** a vendég határa app-alapértelmezés legyen-e vagy a tiéd
+másolva (az első a javaslat — a határ személyes döntés, nem háztartási
+beállítás), és hogy a személy törlése cascade-del vigye-e az alkalmait, vagy
+legyen külön archiválás.
 
 ### 11.6 Józan napok streak
 
@@ -758,8 +863,16 @@ A `Reference/run_tests.sh` óta ez nem csak elvárás: minden kör végén lefut
 Nem termékfunkciók, hanem amit rendbe kell tenni:
 
 - iCloud capability bekapcsolása Xcode-ban (lásd 11.4)
-- App-szintű teszt target — a `SessionPolicy`, a `DrinkingDay` és a migráció
-  tiszta logika, és ez az a kód, ami adatot tud veszíteni
+- **App-szintű teszt target — a tesztek már megvannak, a target nincs.** A
+  `DrinkSmartTests/` mappában ott a 18 teszt (`PersonMigrationTests`,
+  `SessionRoutingTests`, `ActivePersonTests`, `TestSupport`), de **egyik sem
+  fut**, mert nincs mibe fordulniuk. Xcode-ban: File → New → Target → Unit
+  Testing Bundle, neve `DrinkSmartTests`, host application a `DrinkSmart`. A
+  file-system synchronized group (objectVersion 77) utána magától felveszi a
+  meglévő fájlokat. Amíg ez nincs meg, a teszt csak dokumentáció.
+  A kód, amit védenek, az, ami **adatot tud veszíteni** — nem crashel és nem
+  logol, csak rossz emberhez tesz egy italt vagy elérhetetlenné tesz egy
+  alkalmat. A `SessionPolicy` és a `DrinkingDay` ugyanide tartozik.
 - Tartományválasztó az Előzmény tabon (a 11.3 előfeltétele) — ide tartozik a
   „nem ittál" kontra „nincs adat" megkülönböztetés is (5.7), aminek a Live-ból
   már nincs hol látszódnia

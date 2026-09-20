@@ -50,6 +50,21 @@ final class DrinkingSession {
     /// The personal limit as it stood for this session.
     var limit: Double = 0.8
 
+    // MARK: Whose session this is
+    //
+    // Both, deliberately. The relationship is the truth and carries the
+    // cascade; the flat id is what `@Query` can filter on — a predicate that
+    // has to walk an optional relationship is the kind that stops compiling
+    // for reasons nobody can explain. They are written together, in `assign`.
+
+    var person: Person?
+    var personID: UUID = Person.unassignedID
+
+    func assign(to person: Person) {
+        self.person = person
+        self.personID = person.id
+    }
+
     // MARK: Drinks
 
     @Relationship(deleteRule: .cascade, inverse: \DrinkRecord.session)
@@ -71,6 +86,7 @@ final class DrinkingSession {
         id: UUID = UUID(),
         startedAt: Date = .now,
         endedAt: Date? = nil,
+        person: Person? = nil,
         profile: BodyProfile,
         limit: Double
     ) {
@@ -79,6 +95,8 @@ final class DrinkingSession {
         self.endedAt = endedAt
         self.limit = limit
         self.drinks = []
+        self.person = person
+        self.personID = person?.id ?? Person.unassignedID
         applySnapshot(of: profile)
     }
 

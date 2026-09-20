@@ -21,6 +21,14 @@ final class SessionStore {
     private let engine = BACEngine()
     let settings: AppSettings
 
+    /// The app's own person. Always exists, never deleted.
+    private(set) var owner: Person
+
+    /// Whose drinks are being recorded and shown. The owner unless someone
+    /// switched, and the owner again from the next drinking day (5.6) —
+    /// see `AppSettings.activePersonIDIfCurrent`.
+    private(set) var person: Person
+
     /// The session currently accepting drinks. Nil until the first one.
     private(set) var session: DrinkingSession?
 
@@ -33,31 +41,122 @@ final class SessionStore {
         self.context = context
         self.settings = settings
         LegacySessionImport.run(in: context)
+
+        // Before anything reads a session: until this has run, sessions exist
+        // that belong to nobody, and every query below filters on a person.
+        let owner = PersonMigration.run(in: context)
+        self.owner = owner
+        self.person = owner
+
+        restoreActivePerson()
         refreshFromStore()
+    }
+
+    // MARK: People
+
+    /// Owner first, then in the order they were added.
+    ///
+    /// Sorted in memory because `Bool` is not `Comparable` and a
+    /// `SortDescriptor` cannot express "owner first"; the list is a handful of
+    /// rows, so this costs nothing.
+    var people: [Person] {
+        let all = (try? context.fetch(FetchDescriptor<Person>())) ?? []
+        return all.sorted { lhs, rhs in
+            if lhs.isOwner != rhs.isOwner { return lhs.isOwner }
+            return lhs.createdAt < rhs.createdAt
+        }
+    }
+
+    /// Switches who is being recorded. Everything else follows: the open
+    /// session, the curve, the profile the settings screen edits.
+    func activate(_ next: Person) {
+        guard next.id != person.id else { return }
+        person = next
+
+        if next.id == owner.id {
+            settings.clearActivePerson()
+        } else {
+            settings.setActivePerson(next.id, at: now)
+        }
+
+        refreshFromStore()
+    }
+
+    /// Adds someone and switches to them: you add a person in order to record
+    /// their next drink, not to admire the list.
+    @discardableResult
+    func addPerson(
+        name: String,
+        profile: BodyProfile,
+        frequency: DrinkingFrequency,
+        limit: Double
+    ) -> Person {
+        let new = Person(
+            name: name,
+            accent: nextAccent(),
+            profile: profile,
+            frequency: frequency,
+            limit: limit
+        )
+        context.insert(new)
+        save()
+        activate(new)
+        return new
+    }
+
+    /// The first colour nobody is using, so two people are told apart at a
+    /// glance without anyone being asked to pick a colour in a bar.
+    private func nextAccent() -> PersonAccent {
+        let taken = Set(people.map(\.accent))
+        return PersonAccent.allCases.first { !taken.contains($0) } ?? .teal
+    }
+
+    /// Restores the choice made earlier this evening, and lets it lapse
+    /// otherwise. A person deleted on another device leaves a dangling id;
+    /// that falls back to the owner too.
+    private func restoreActivePerson() {
+        guard
+            let id = settings.activePersonIDIfCurrent(at: now),
+            id != owner.id,
+            let stored = fetchPerson(id)
+        else {
+            settings.clearActivePerson()
+            person = owner
+            return
+        }
+        person = stored
+    }
+
+    private func fetchPerson(_ id: UUID) -> Person? {
+        var descriptor = FetchDescriptor<Person>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try? context.fetch(descriptor).first
     }
 
     // MARK: Settings passthrough
     //
-    // The views talk to the store; whether a value is a setting or session data
-    // is not their concern.
+    // The views talk to the store; whether a value belongs to the person, the
+    // device or the session is not their concern.
 
     var profile: BodyProfile {
-        get { settings.profile }
+        get { person.profile }
         set {
-            settings.profile = newValue
+            person.apply(newValue)
             // An open session follows the current profile: a correction made
             // mid-evening should fix the curve you are looking at. A closed
             // one never moves.
             session?.applySnapshot(of: newValue)
+            save()
             rebuild()
         }
     }
 
     var limit: Double {
-        get { settings.limit }
+        get { person.limit }
         set {
-            settings.limit = newValue
+            person.limit = newValue
             session?.limit = newValue
+            save()
         }
     }
 
@@ -67,54 +166,80 @@ final class SessionStore {
     }
 
     var frequency: DrinkingFrequency {
-        get { settings.frequency }
+        get { person.frequency }
         set {
-            settings.frequency = newValue
-            session?.applySnapshot(of: settings.profile)
+            person.frequency = newValue   // rewrites beta, leaves uncertainty
+            session?.applySnapshot(of: person.profile)
+            save()
             rebuild()
         }
     }
 
     // MARK: Session lifecycle
 
-    /// Loads the open session and closes it if the rule says it has ended.
+    /// Loads the active person's open session, and closes whatever has ended.
     ///
     /// Called on launch and when returning to the foreground, not only when a
     /// drink is logged — otherwise a forgotten session would stay open for days.
     func refreshFromStore() {
+        closeEndedSessions()
         session = fetchOpenSession()
-        closeSessionIfEnded()
         rebuild()
     }
 
     private func fetchOpenSession() -> DrinkingSession? {
+        let personID = person.id
         var descriptor = FetchDescriptor<DrinkingSession>(
-            predicate: #Predicate { $0.endedAt == nil },
+            predicate: #Predicate { $0.endedAt == nil && $0.personID == personID },
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
         )
         descriptor.fetchLimit = 1
         return try? context.fetch(descriptor).first
     }
 
-    /// Closes the open session when the policy says the occasion is over.
-    private func closeSessionIfEnded() {
-        guard let session, !session.sortedDrinks.isEmpty else { return }
+    /// Runs the closing policy over **every** open session, not just the
+    /// active person's.
+    ///
+    /// With one person this was the same thing. With two it is not: a guest's
+    /// evening would stay open forever, because nothing would ever look at it
+    /// again unless somebody switched back to her — and a session that never
+    /// closes never reaches History and never gets its summary.
+    private func closeEndedSessions() {
+        let descriptor = FetchDescriptor<DrinkingSession>(
+            predicate: #Predicate { $0.endedAt == nil }
+        )
+        let open = (try? context.fetch(descriptor)) ?? []
 
-        let drinks = session.sortedDrinks
-        let computed = engine.simulateBand(profile: session.profile, drinks: drinks)
+        var closedAny = false
+        for candidate in open where close(candidate) { closedAny = true }
+        if closedAny { save() }
+    }
+
+    /// Closes the active person's session if the policy says it has ended.
+    private func closeSessionIfEnded() {
+        guard let session else { return }
+        if close(session) { save() }
+    }
+
+    /// - Returns: whether the session was closed.
+    private func close(_ target: DrinkingSession) -> Bool {
+        let drinks = target.sortedDrinks
+        guard !drinks.isEmpty else { return false }
+
+        let computed = engine.simulateBand(profile: target.profile, drinks: drinks)
         let lastDrinkAt = drinks.last?.consumedAt
 
         guard !SessionPolicy.isStillOpen(band: computed, lastDrinkAt: lastDrinkAt, at: now) else {
-            return
+            return false
         }
 
-        session.endedAt = SessionPolicy.closingDate(
+        target.endedAt = SessionPolicy.closingDate(
             lastDrinkAt: lastDrinkAt,
             soberAt: computed.soberRange()?.upperBound
         )
-        session.store(summary(for: session, band: computed))
-        save()
-        self.session = nil
+        target.store(summary(for: target, band: computed))
+        if target === session { session = nil }
+        return true
     }
 
     /// The session a drink at this time belongs to, if one exists.
@@ -122,22 +247,34 @@ final class SessionStore {
     /// Membership follows the drinking day, the same rule the Live screen uses
     /// to group days — so a drink logged late lands where the user would look
     /// for it, rather than wherever the open session happens to be.
+    ///
+    /// Scoped to the active person: two people out on the same evening have two
+    /// sessions on the same drinking day, and without the filter a backdated
+    /// drink would land in whichever was found first.
     private func sessionCovering(_ date: Date) -> DrinkingSession? {
         let day = DrinkingDay.containing(date)
 
         if let session, day.contains(session.startedAt) { return session }
 
+        return sessionsOfActivePerson().first { day.contains($0.startedAt) }
+    }
+
+    /// Newest first.
+    private func sessionsOfActivePerson() -> [DrinkingSession] {
+        let personID = person.id
         let descriptor = FetchDescriptor<DrinkingSession>(
+            predicate: #Predicate { $0.personID == personID },
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
         )
-        return (try? context.fetch(descriptor))?.first { day.contains($0.startedAt) }
+        return (try? context.fetch(descriptor)) ?? []
     }
 
     private func startSession(at date: Date) -> DrinkingSession {
         let new = DrinkingSession(
             startedAt: date,
+            person: person,
             profile: profileApplicable(at: date),
-            limit: settings.limit
+            limit: person.limit
         )
         context.insert(new)
         return new
@@ -150,17 +287,18 @@ final class SessionStore {
     /// carry a snapshot is that bodies change. The nearest session in time is
     /// the closest thing we have to who you were then; the current profile is
     /// only the fallback when there is nothing to go on.
+    ///
+    /// Only the active person's sessions count. Falling back to somebody
+    /// else's nearest evening would freeze *their* body into *your* session and
+    /// draw a curve for a night that never happened.
     private func profileApplicable(at date: Date) -> BodyProfile {
         let day = DrinkingDay.containing(date)
-        guard !day.isCurrent(at: now) else { return settings.profile }
+        guard !day.isCurrent(at: now) else { return person.profile }
 
-        let descriptor = FetchDescriptor<DrinkingSession>(
-            sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
-        )
-        let nearest = (try? context.fetch(descriptor))?.min {
+        let nearest = sessionsOfActivePerson().min {
             abs($0.startedAt.timeIntervalSince(date)) < abs($1.startedAt.timeIntervalSince(date))
         }
-        return nearest?.profile ?? settings.profile
+        return nearest?.profile ?? person.profile
     }
 
     /// Re-decides whether a session is still running, after it has changed.
@@ -273,6 +411,10 @@ final class SessionStore {
 
         applyPourCut(of: drink, in: target)
 
+        // A drink filled in from before this person's records start is
+        // evidence that we were already keeping records then (5.7).
+        person.backdateTracking(to: drink.consumedAt)
+
         let record = DrinkRecord(drink)
         record.session = target
         context.insert(record)
@@ -301,58 +443,51 @@ final class SessionStore {
     /// detail passes a past one, because a mistake noticed three weeks later is
     /// still a mistake worth fixing.
     func update(_ drink: Drink, in target: DrinkingSession? = nil) {
-        let owner = target ?? session
-        guard let owner, let record = (owner.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
+        // Named `holder`, not `owner`: the store now has an `owner` person,
+        // and a shadowed name in a method that writes to the database is the
+        // kind of thing that reads fine and does the wrong thing.
+        let holder = target ?? session
+        guard let holder, let record = (holder.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
 
         record.apply(drink)
-        if let earliest = owner.sortedDrinks.first?.consumedAt {
-            owner.startedAt = earliest
+        if let earliest = holder.sortedDrinks.first?.consumedAt {
+            holder.startedAt = earliest
         }
-        owner.invalidateSummary()
+        holder.invalidateSummary()
         // Changing a time moves the clearing point too, which can reopen a
         // session that had ended or close one that had not.
-        reconcile(owner)
+        reconcile(holder)
         save()
         rebuild()
     }
 
     func remove(_ drink: Drink, from target: DrinkingSession? = nil) {
-        let owner = target ?? session
-        guard let owner, let record = (owner.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
+        let holder = target ?? session
+        guard let holder, let record = (holder.drinks ?? []).first(where: { $0.id == drink.id }) else { return }
 
         context.delete(record)
-        owner.invalidateSummary()
+        holder.invalidateSummary()
 
         // An empty session is not history worth keeping.
-        if owner.sortedDrinks.isEmpty {
-            context.delete(owner)
-            if owner === session { session = nil }
+        if holder.sortedDrinks.isEmpty {
+            context.delete(holder)
+            if holder === session { session = nil }
         }
 
         save()
         rebuild()
     }
 
-    /// Ends the occasion now, at the user's request.
-    func clearSession() {
-        guard let session else { return }
-        let drinks = session.sortedDrinks
-
-        if drinks.isEmpty {
-            context.delete(session)
-        } else {
-            let computed = engine.simulateBand(profile: session.profile, drinks: drinks)
-            session.endedAt = SessionPolicy.closingDate(
-                lastDrinkAt: drinks.last?.consumedAt,
-                soberAt: computed.soberRange()?.upperBound
-            )
-            session.store(summary(for: session, band: computed))
-        }
-
-        self.session = nil
-        save()
-        rebuild()
-    }
+    // A session is never ended by hand.
+    //
+    // There used to be an "End session" button. It answered a question nobody
+    // asks: a session is over when the alcohol has cleared and a few hours have
+    // passed (`SessionPolicy`), and that is a fact about the evening, not a
+    // decision. Pressing it early would have written a closing time that is
+    // simply wrong, and every drink after it would have opened a second session
+    // on the same night. What the button looked like it was for — "I am done
+    // drinking" — the app does not need to be told, because it is still
+    // simulating the alcohol already in you either way.
 
     /// What would happen if the user had this drink.
     ///
@@ -372,18 +507,18 @@ final class SessionStore {
         excluding excludedID: UUID? = nil,
         in target: DrinkingSession? = nil
     ) -> BandedProjection {
-        let owner = target ?? session
-        let all = owner?.sortedDrinks ?? drinks
+        let holder = target ?? session
+        let all = holder?.sortedDrinks ?? drinks
         // The same cut `add` will make, so the curve previewed above the Add
         // button is the curve you get after pressing it.
         let others = (excludedID.map { id in all.filter { $0.id != id } } ?? all)
             .shorteningPour(for: candidate)
 
         let key = ProjectionKey(
-            profile: owner?.profile ?? settings.profile,
+            profile: holder?.profile ?? person.profile,
             consumed: others,
             candidate: candidate,
-            limit: owner?.limit ?? limit
+            limit: holder?.limit ?? limit
         )
         if let lastProjection, lastProjection.key == key { return lastProjection.value }
 

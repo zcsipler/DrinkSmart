@@ -35,7 +35,7 @@ struct DrinkSmartApp: App {
     /// The fallback is not silent for the developer: it trips an assertion in
     /// debug builds.
     private static func makeContainer() -> ModelContainer {
-        let schema = Schema([DrinkingSession.self, DrinkRecord.self])
+        let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self])
 
         do {
             return try ModelContainer(

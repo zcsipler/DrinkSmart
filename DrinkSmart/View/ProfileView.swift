@@ -21,6 +21,8 @@ struct ProfileView: View {
     let store: SessionStore
     @State private var showsAdvanced = false
 
+    private var flags: FeatureFlags { .shared }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -30,11 +32,23 @@ struct ProfileView: View {
                 unitSection
                 derivedSection
                 advancedSection
+                #if DEBUG
+                developerSection
+                #endif
             }
             .scrollContentBackground(.hidden)
             .background(Theme.background)
             .navigationTitle(Text("Profile"))
             .navigationBarTitleDisplayMode(.inline)
+            // These fields edit the *selected* person's body. Without the chip
+            // there would be nothing on screen saying whose.
+            .toolbar {
+                if flags.multiPerson {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        PersonSwitcher(store: store)
+                    }
+                }
+            }
         }
     }
 
@@ -195,6 +209,33 @@ struct ProfileView: View {
         }
         .listRowBackground(Theme.surface)
     }
+
+    // MARK: Developer
+    //
+    // Debug builds only, and deliberately at the very bottom, below Advanced:
+    // these switches change what the app *is*, not how it calculates. The
+    // strings here are not localized — the only reader is the developer.
+
+    #if DEBUG
+    private var developerSection: some View {
+        Section {
+            ForEach(Feature.allCases) { feature in
+                Toggle(isOn: Binding(
+                    get: { flags.isEnabled(feature) },
+                    set: { flags.setOverride($0, for: feature) }
+                )) {
+                    Text(feature.title)
+                }
+                .tint(Theme.calm)
+            }
+        } header: {
+            Text(verbatim: "Developer")
+        } footer: {
+            Text(verbatim: "Feature flags. Off in release builds until a purchase unlocks them; this switch only exists in debug.")
+        }
+        .listRowBackground(Theme.surface)
+    }
+    #endif
 
     // MARK: Helpers
 
