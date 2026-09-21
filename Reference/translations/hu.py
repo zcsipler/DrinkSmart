@@ -244,6 +244,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Hetek, hónapok és évek egymás mellett – és minden hét napnál régebbi este.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Minden, amit eddig felvittél, már el van mentve. A feloldás csak megmutatja.",
     "Coming soon": "Hamarosan",
+    "No data before %@": "Nincs adat %@ előtt",
+    "vs.": "az előzőhöz:",
     "Grams": "Gramm",
     "Grams of alcohol": "Gramm tiszta alkohol",
     "Standard units": "Standard egység",

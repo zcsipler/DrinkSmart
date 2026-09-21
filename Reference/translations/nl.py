@@ -265,6 +265,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Weken, maanden en jaren naast elkaar – en elke avond ouder dan zeven dagen.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Alles wat je hebt ingevoerd is al opgeslagen. Ontgrendelen laat het alleen zien.",
     "Coming soon": "Binnenkort",
+    "No data before %@": "Geen gegevens vóór %@",
+    "vs.": "t.o.v.",
     "Grams": "Gram",
     "Grams of alcohol": "Gram alcohol",
     "Standard units": "Standaardeenheden",

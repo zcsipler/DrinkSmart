@@ -266,6 +266,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Savaitės, mėnesiai ir metai vienas šalia kito – ir kiekvienas vakaras, senesnis nei septynios dienos.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Viskas, ką įrašėte, jau išsaugota. Atrakinimas tik tai parodo.",
     "Coming soon": "Netrukus",
+    "No data before %@": "Nėra duomenų iki %@",
+    "vs.": "palyginti su",
     "Grams": "Gramai",
     "Grams of alcohol": "Gramai alkoholio",
     "Standard units": "Standartiniai vienetai",

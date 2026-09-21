@@ -264,6 +264,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Settimane, mesi e anni affiancati, e ogni serata più vecchia di sette giorni.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Tutto ciò che hai registrato è già salvato. Sbloccare serve solo a mostrarlo.",
     "Coming soon": "Prossimamente",
+    "No data before %@": "Nessun dato prima del %@",
+    "vs.": "vs.",
     "Grams": "Grammi",
     "Grams of alcohol": "Grammi di alcol",
     "Standard units": "Unità standard",

@@ -265,6 +265,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Săptămâni, luni și ani unul lângă altul – și fiecare seară mai veche de șapte zile.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Tot ce ai înregistrat este deja salvat. Deblocarea doar îl afișează.",
     "Coming soon": "În curând",
+    "No data before %@": "Nicio dată înainte de %@",
+    "vs.": "față de",
     "Grams": "Grame",
     "Grams of alcohol": "Grame de alcool",
     "Standard units": "Unități standard",

@@ -263,6 +263,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Nedēļas, mēneši un gadi blakus – un katrs vakars, vecāks par septiņām dienām.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Viss, ko esi ierakstījis, jau ir saglabāts. Atbloķēšana to tikai parāda.",
     "Coming soon": "Drīzumā",
+    "No data before %@": "Nav datu pirms %@",
+    "vs.": "pret",
     "Grams": "Grami",
     "Grams of alcohol": "Grami alkohola",
     "Standard units": "Standarta vienības",

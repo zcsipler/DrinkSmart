@@ -751,7 +751,20 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   a cache visszatöltése a store háttérmenete lesz (**hátravan**).
 - **„Nem ittál" és „nem tudjuk" itt válik láthatóvá (5.7).** `DayBucket.State`:
   `drank` / `dry` / `unknown`; a `Person.trackingStartedAt` előtti nap
-  `unknown`, és nem számít bele az átlag nevezőjébe (`recordedDays`).
+  `unknown`, és nem számít bele az átlag nevezőjébe (`recordedDays`). A
+  rögzítés kezdete a tárolt dátum és a **legkorábbi alkalom napja** közül a
+  korábbi — egy felvitt este bizonyíték, hogy akkor már rögzítettünk,
+  ugyanaz a szabály, mint a `Person.backdateTracking`. Így az ismeretlen
+  napok mindig egy összefüggő szakasz az ablak elején; volt egy kör, amiben
+  két este közé is esett ismeretlen nap, és a szürke sáv egy oszlopot fedett.
+  A tárolt dátumot a `SessionStore.reconcileTrackingStart` is rendbe teszi
+  minden `refreshFromStore`-nál (a legkorábbi alkalomra tolja, ha az
+  korábbi) — az `add` csak új italra ellenőriz, a migráció, az import és a
+  szinkron nem ment át rajta. A dátum *nem* vezethető le pusztán a
+  bejegyzésekből: aki telepítés után hat napig nem iszik, annak az a hat
+  nap ivásmentes, nem ismeretlen. Szabály: `min(első indítás, legkorábbi
+  bejegyzés)`. A szürke sávban felirat: „No data before <dátum>", ha a sáv
+  az ablak legalább harmada.
 - **A nap a saját dátuma alá kerül, a hét/hónap/év a naptáré.** A hajnali
   5-kor kezdődő ivási nap a `calendarDate`-jével kerül hétbe/hónapba, tehát
   az éjfélen átnyúló este abban a hétben marad, amelyikben kezdődött. A hét
@@ -806,9 +819,13 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   Live charton. Nem váltó és nem kettős tengely: a két mérőszám egymás
   alatt egy pillantással összevethető, és a vonal-oszlopok-mögé-bújás
   problémája (mozgóátlag) nem jön elő. Érvénytelen cache-nél a csúcs-oszlop
-  hiányzik, nem nulla. A mutató-kártyán az ivásmentes napok „Sober days"
-  néven, `ivásmentes / rögzített` alakban — az évben a puszta szám nem mond
-  semmit, a tört igen.
+  hiányzik, nem nulla. A mutató-kártya első sora négy szám:
+  mennyiség, italok, „Sober days" (`ivásmentes / rögzített`, alatta a
+  rögzítés előtti napok száma, amíg van ilyen — az évben a „4 / 9"
+  magyarázat nélkül érthetetlen), és a csúcs. A második sor egyedül a
+  változás az előző ablakhoz, alatta halványan, hogy melyikhez („vs. Sep
+  8–14"): egy „+239 %" magában vádnak hangzik, viszonyítási alappal
+  összehasonlításnak.
 - **Lakat:** a mutatók és a két chart együtt homályosodnak, rajta egy gomb a
   `HistoryPaywallSheet`-re; a 7 napnál régebbi alkalom-sor dátuma látszik,
   a csúcsa nem. A lap három dolgot mond: mi van mögötte, hogy az adat már

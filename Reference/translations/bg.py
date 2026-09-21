@@ -262,6 +262,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Седмици, месеци и години една до друга – и всяка вечер, по-стара от седем дни.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Всичко, което си записал, вече е запазено. Отключването само го показва.",
     "Coming soon": "Очаквайте скоро",
+    "No data before %@": "Няма данни преди %@",
+    "vs.": "спрямо",
     "Grams": "Грамове",
     "Grams of alcohol": "Грамове алкохол",
     "Standard units": "Стандартни единици",

@@ -90,15 +90,30 @@ struct HistoryAggregateTests {
 
     @Test("Days before tracking began are unknown, not dry")
     func unknownIsNotDry() {
-        // A session imported from before records officially began pulls the
-        // range back; the gap between it and the tracking start is unknown.
+        let days = HistoryAggregate.days(
+            from: [occasion(at: date(2026, 9, 4, 20))],
+            trackingStartedAt: date(2026, 9, 3),
+            now: date(2026, 9, 5, 12), calendar: calendar
+        )
+
+        // Sep 3 is recorded and empty; nothing before it is in the list.
+        #expect(days.map(\.state) == [.dry, .drank, .dry])
+    }
+
+    @Test("An evening before the stored tracking start moves the start back")
+    func earlyOccasionBackdatesRecords() {
+        // Logged on Sep 1, tracking officially from Sep 4: the evening proves
+        // records were kept on the 1st, so the 2nd and 3rd are dry, not
+        // unknown — a gap of unknown days between two evenings would be a
+        // grey block with a bar inside it.
         let days = HistoryAggregate.days(
             from: [occasion(at: date(2026, 9, 1, 20))],
             trackingStartedAt: date(2026, 9, 4),
             now: date(2026, 9, 5, 12), calendar: calendar
         )
 
-        #expect(days.map(\.state) == [.drank, .unknown, .unknown, .dry, .dry])
+        #expect(days.map(\.state) == [.drank, .dry, .dry, .dry, .dry])
+        #expect(days.allSatisfy { $0.state != .unknown })
     }
 
     @Test("Two sessions on one day add up")
@@ -218,16 +233,18 @@ struct HistoryAggregateTests {
 
     @Test("Unknown days do not dilute the average")
     func unknownDaysAreNotInTheDenominator() throws {
+        // Records from Sep 3; the window is the whole of Sep 1–5.
         let days = HistoryAggregate.days(
-            from: [occasion(at: date(2026, 9, 1, 20), units: 4)],
-            trackingStartedAt: date(2026, 9, 4),
+            from: [occasion(at: date(2026, 9, 4, 20), units: 4)],
+            trackingStartedAt: date(2026, 9, 3),
             now: date(2026, 9, 5, 12), calendar: calendar
         )
-        let month = try #require(HistoryAggregate.periods(days, by: .month, calendar: calendar).first)
+        let window = HistoryWindow.make(range: .month, offset: 0, days: days, now: date(2026, 9, 5, 12), calendar: calendar)
 
-        // Five days in the range, two of them unknown; three recorded.
-        #expect(month.recordedDays == 3)
-        #expect(month.unitsPerRecordedDay.map { abs($0 - 4.0 / 3) < 1e-9 } == true)
+        // Sep 1–2 unknown, Sep 3–5 recorded.
+        #expect(window.unknownDays == 2)
+        #expect(window.recordedDays == 3)
+        #expect(abs(window.totalUnits / Double(window.recordedDays) - 4.0 / 3) < 1e-9)
     }
 
     @Test("Change against an empty previous period is nil, not infinite")

@@ -45,7 +45,13 @@ enum HistoryAggregate {
                 .append(occasion)
         }
 
+        // A recorded evening is proof that records were being kept that day —
+        // the same rule as `Person.backdateTracking`. So records begin on the
+        // earlier of the stored start and the first occasion, and the days we
+        // were not looking are always one run at the front, never a gap
+        // between two evenings.
         let firstDay = ([trackingDay] + byDay.keys).min { $0.start < $1.start } ?? today
+        let recordsBegan = firstDay
         guard firstDay.start <= today.start else { return [] }
 
         var result: [DayBucket] = []
@@ -54,7 +60,7 @@ enum HistoryAggregate {
             let occasions = (byDay[day] ?? []).sorted { $0.startedAt < $1.startedAt }
             let state: DayBucket.State = if !occasions.isEmpty {
                 .drank
-            } else if day.start < trackingDay.start {
+            } else if day.start < recordsBegan.start {
                 .unknown
             } else {
                 .dry

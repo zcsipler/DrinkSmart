@@ -13,7 +13,9 @@ import Charts
 /// the background and the colour arrives with it.
 ///
 /// Days before records began are shaded, not left blank: blank is what a dry
-/// day looks like, and the two are not the same thing (5.7).
+/// day looks like, and the two are not the same thing (5.7). The shading says
+/// so in words when there is room — a grey block was read as "something is
+/// wrong with the chart", not as "we were not looking yet".
 ///
 /// Tapping a bar shows its exact value above it, and that is all a tap does.
 /// A second tap used to drill into the month or week under the bar; it read
@@ -36,6 +38,10 @@ struct HistoryChartView: View {
     let metric: Metric
     let amountUnit: AmountUnit
     let unit: BACUnit
+
+    /// When this person's records begin. Named in the shaded region, because
+    /// a grey block on its own does not say what it is.
+    let recordsBegan: Date
 
     @State private var selectedBarID: HistoryBar.ID?
 
@@ -102,6 +108,26 @@ struct HistoryChartView: View {
         }
     }
 
+    /// The plot-aligned span of the days before records began, if any. The
+    /// aggregate guarantees these are a run at the front of the window; taking
+    /// the prefix rather than every unknown bar keeps that true here even if
+    /// the guarantee ever slips.
+    private var unknownRegion: DateInterval? {
+        let unknown = window.bars.prefix { $0.state == .unknown }
+        guard let first = unknown.first, let last = unknown.last else { return nil }
+        return DateInterval(
+            start: plotInterval(first.interval).start,
+            end: plotInterval(last.interval).end
+        )
+    }
+
+    /// How much of the window the unknown run covers. Under about a third
+    /// the label would not fit; the legend under the chart still names it.
+    private var unknownShare: Double {
+        guard !window.bars.isEmpty else { return 0 }
+        return Double(window.bars.prefix { $0.state == .unknown }.count) / Double(window.bars.count)
+    }
+
     private var axisTitle: LocalizedStringResource {
         switch metric {
         case .amount: amountUnit.shortLabel
@@ -111,17 +137,30 @@ struct HistoryChartView: View {
 
     var body: some View {
         Chart {
-            ForEach(window.bars) { bar in
-                if bar.state == .unknown {
-                    RectangleMark(
-                        xStart: .value("Period", plotInterval(bar.interval).start),
-                        xEnd: .value("Period", plotInterval(bar.interval).end),
-                        yStart: .value("Units", 0),
-                        yEnd: .value("Units", yMaximum)
-                    )
-                    .foregroundStyle(Theme.surfaceRaised.opacity(0.45))
+            // One block for the whole run of unknown days, not one per day:
+            // the label needs the full width, and the days before records
+            // are always a single run at the start of the window.
+            if let unknown = unknownRegion {
+                RectangleMark(
+                    xStart: .value("Period", unknown.start),
+                    xEnd: .value("Period", unknown.end),
+                    yStart: .value("Units", 0),
+                    yEnd: .value("Units", yMaximum)
+                )
+                .foregroundStyle(Theme.surfaceRaised.opacity(0.45))
+                .annotation(position: .overlay, alignment: .center) {
+                    if unknownShare >= 0.3 {
+                        Text("No data before \(recordsBegan.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.system(size: 10, design: .rounded))
+                            .foregroundStyle(Theme.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(3)
+                            .padding(.horizontal, 6)
+                    }
                 }
+            }
 
+            ForEach(window.bars) { bar in
                 if let height = value(bar) {
                     BarMark(
                         x: .value("Period", bar.interval.start, unit: barUnit),

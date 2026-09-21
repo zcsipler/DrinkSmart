@@ -210,7 +210,28 @@ final class SessionStore {
         closeEndedSessions()
         session = fetchOpenSession()
         rebuild()
+        reconcileTrackingStart()
         backfillStaleSummaries()
+    }
+
+    /// Moves the person's tracking start back to their earliest session if
+    /// one predates it. `add` already does this for a drink being logged;
+    /// this covers sessions that arrived some other way — the migration
+    /// creating the owner with "now" while older sessions already existed,
+    /// an import, a sync — and would otherwise leave "no data before" on a
+    /// date the history plainly contradicts.
+    private func reconcileTrackingStart() {
+        let personID = person.id
+        var descriptor = FetchDescriptor<DrinkingSession>(
+            predicate: #Predicate { $0.personID == personID },
+            sortBy: [SortDescriptor(\.startedAt, order: .forward)]
+        )
+        descriptor.fetchLimit = 1
+        guard let earliest = try? context.fetch(descriptor).first,
+              earliest.startedAt < person.trackingStartedAt
+        else { return }
+        person.backdateTracking(to: earliest.startedAt)
+        save()
     }
 
     // MARK: Summary backfill

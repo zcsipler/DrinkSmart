@@ -264,6 +264,8 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Viikot, kuukaudet ja vuodet rinnakkain – ja jokainen yli seitsemän päivää vanha ilta.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Kaikki kirjaamasi on jo tallennettu. Avaaminen vain näyttää sen.",
     "Coming soon": "Tulossa pian",
+    "No data before %@": "Ei tietoja ennen %@",
+    "vs.": "vrt.",
     "Grams": "Grammaa",
     "Grams of alcohol": "Grammaa alkoholia",
     "Standard units": "Vakioannokset",

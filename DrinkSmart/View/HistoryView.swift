@@ -200,45 +200,83 @@ struct HistoryView: View {
 
     // MARK: Figures
 
+    /// Four figures for the window, then — when there is one — the change
+    /// against the window before it, with that window named underneath — "+239 %" on its own reads as
+    /// an accusation; "vs. Sep 8–14" makes it a comparison.
     private func figures(_ window: HistoryWindow) -> some View {
         VStack(spacing: 12) {
-            HStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 0) {
                 stat(store.amountUnit.shortLabel, store.amountUnit.format(standardUnits: window.totalUnits))
                 divider
                 stat("Drinks", window.drinkCount.formatted())
                 divider
                 soberDays(window)
+                divider
+                peak(window)
             }
 
-            Divider().overlay(Theme.hairline).padding(.horizontal, 14)
+            // No row at all when there is nothing to compare against — the
+            // first recorded window, or one after a quiet one. A "—" would
+            // only raise the question the row is there to answer.
+            if let change = window.unitsChange {
+                Divider().overlay(Theme.hairline).padding(.horizontal, 14)
 
-            HStack(spacing: 0) {
                 VStack(spacing: 4) {
-                    Text("peak")
+                    Text("Change")
                         .font(.system(size: 9, weight: .semibold, design: .rounded))
                         .textCase(.uppercase)
                         .foregroundStyle(Theme.secondaryText)
-                    if let peak = window.peakRange, let limit = window.limit {
-                        Text(verbatim: store.unit.formatRange(peak))
-                            .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
-                            .foregroundStyle(Theme.tint(for: peak.midpoint, limit: limit))
-                    } else {
-                        Text(verbatim: "—")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundStyle(Theme.secondaryText)
-                    }
+                    Text(verbatim: change.formatted(.percent.precision(.fractionLength(0)).sign(strategy: .always())))
+                        .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                        .foregroundStyle(Theme.primaryText)
+                    (Text("vs.") + Text(verbatim: " \(previousTitle(for: window))"))
+                        .font(.system(size: 9, design: .rounded))
+                        .foregroundStyle(Theme.secondaryText.opacity(0.8))
                 }
                 .frame(maxWidth: .infinity)
-
-                divider
-
-                stat("Change", window.unitsChange.map {
-                    $0.formatted(.percent.precision(.fractionLength(0)).sign(strategy: .always()))
-                } ?? "—")
             }
         }
         .padding(.vertical, 14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// The highest level in the window, coloured against the limit that day.
+    /// The peak chart below shows the same thing bar by bar; this is the one
+    /// number you can read without tapping anything.
+    private func peak(_ window: HistoryWindow) -> some View {
+        VStack(spacing: 4) {
+            Text("peak")
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .foregroundStyle(Theme.secondaryText)
+            if let peak = window.peakRange, let limit = window.limit {
+                Text(verbatim: store.unit.formatRange(peak))
+                    .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Theme.tint(for: peak.midpoint, limit: limit))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            } else {
+                Text(verbatim: "—")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// The window before this one, named the way the header names this one.
+    private func previousTitle(for window: HistoryWindow) -> String {
+        let previous = HistoryWindow.interval(for: window.range, offset: window.offset + 1, now: store.now)
+        switch window.range {
+        case .week:
+            let calendar = Calendar.current
+            let lastDay = calendar.date(byAdding: .day, value: -1, to: previous.end) ?? previous.end
+            return (previous.start..<lastDay).formatted(date: .abbreviated, time: .omitted)
+        case .month:
+            return previous.start.formatted(.dateTime.month(.wide).year())
+        case .year:
+            return previous.start.formatted(.dateTime.year())
+        }
     }
 
     /// Sober days out of the days we were keeping records. When the window
@@ -294,7 +332,12 @@ struct HistoryView: View {
                 window: snapshot.window,
                 metric: metric,
                 amountUnit: store.amountUnit,
-                unit: store.unit
+                unit: store.unit,
+                // The aggregate's own start, not the stored date: an evening
+                // logged before the stored date moves the start back (5.7),
+                // and the label must say the same thing the shading shows.
+                recordsBegan: snapshot.days.first { $0.state != .unknown }?.day.calendarDate
+                    ?? store.person.trackingStartedAt
             )
 
             if metric == .peak {
