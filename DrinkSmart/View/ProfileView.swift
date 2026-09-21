@@ -32,6 +32,7 @@ struct ProfileView: View {
                 limitSection
                 FavouriteDrinkSection(store: store)
                 unitSection
+                LanguageSection()
                 derivedSection
                 advancedSection
                 DataTransferSection(store: store)

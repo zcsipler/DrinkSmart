@@ -70,7 +70,7 @@ DrinkSmart/
 │   └── Tests/BACKitTests/      56 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   146 kulcs, en + hu
+│   ├── Localizable.xcstrings   183 kulcs, a 24 hivatalos EU-nyelven
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
@@ -562,11 +562,20 @@ utána minden kör végén lefuttatható.
 
 ## 7. Lokalizáció
 
-**Forrásnyelv angol, a magyar fordítás String Catalogban.** Az app annyit tud,
-amennyit az iOS nyelvi beállítása kér: magyar rendszeren magyar, minden más
-esetben angol.
+**Forrásnyelv angol, a fordítások String Catalogban.** Az app a 24 hivatalos
+EU-nyelvet ismeri. Alapból azt választja, amit az iOS nyelvi beállítása kér; a
+felhasználó ettől eltérhet a Profil fül Nyelv sorával, ami a Beállításokban az
+app saját „Előnyben részesített nyelv" sorára visz (`LanguageSection`).
 
-- `DrinkSmart/Localizable.xcstrings` — 146 kulcs, `en` és `hu`.
+- `DrinkSmart/Localizable.xcstrings` — 183 kulcs, 24 nyelven. Generált fájl,
+  kézzel nem szerkesztjük.
+- `Reference/translations/<kód>.py` — nyelvenként egy modul, mindegyikben egy
+  `TRANSLATIONS` szótár az angol forrásszövegtől az adott nyelvig.
+- **A magyar a referencia**: azt olvasta végig ember, és az ő kulcskészletéhez
+  méri a szkript a többit. A magyar és az angol `translated` állapotban kerül a
+  katalógusba, a többi `needs_review`-ban — az Xcode ezt jelöli. Egy nyelvet a
+  `make_catalog.py` `REVIEWED` halmazába átemelni annyit tesz, hogy valaki
+  vállalja érte a felelősséget.
 - A kulcs maga az **angol forrásszöveg**. Interpolációnál `%@`.
 - A nézetekben `LocalizedStringKey` (sima `Text("...")`), a modellrétegben
   `LocalizedStringResource` (enum `label` / `detail` / `explanation`).
@@ -586,9 +595,11 @@ esetben angol.
 
 A katalógust a `Reference/make_catalog.py` állítja elő és **ellenőrzi**: minden
 kulcsnak szerepelnie kell a forrásban, minden lokalizált forrásszövegnek kell
-hogy legyen magyar párja, és a `%@` specifikátorok számának egyeznie kell.
-Új szöveg felvitele: beírod a Swift forrásba angolul, felveszed a
-`TRANSLATIONS` szótárba, és lefuttatod a szkriptet.
+hogy legyen fordítása, minden nyelvnek ugyanazt a kulcskészletet kell vinnie,
+és a `%@` specifikátorok számának nyelvenként egyeznie kell.
+Új szöveg felvitele: beírod a Swift forrásba angolul, felveszed **minden**
+nyelvi modul `TRANSLATIONS` szótárába, és lefuttatod a szkriptet — a hiányzó
+kulcsot nyelvenként kiírja.
 
 ```bash
 cd Reference && python3 make_catalog.py
@@ -1047,6 +1058,16 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
   tartomány kétszer olyan széles, a `minimumScaleFactor` 0,5-re megy le
 - Az angol locale 12 órás AM/PM időformátuma szélesebb címkéket ad a charton;
   a `strideHours` már ritkít, de élőben ellenőrizni kell
+- **A rövid címkék helyét az angol és a magyar szabta meg, de most 24 nyelv
+  fér beléjük.** A generálás után kilógónak látszik a litván „Išplėstiniai
+  nustatymai" (`Advanced`) és „Atšaukti veiksmą" (`Undo`), a holland „Ongedaan
+  maken" (`Undo`), valamint a román „Eliminare completă" (`Clears`) — ez
+  utóbbi egy szűk stat-sorban ül. Kettő közül kell választani: vagy rövidebb
+  fordítás kell, vagy a sornak kell engednie. Amíg egy nyelv `needs_review`,
+  a fordítás szabadon rövidíthető; ha a sor a szűk keresztmetszet, az minden
+  nyelvre kihat, tehát a felület a rendes megoldás. Élőben kell végignézni,
+  és nem csak ezt a négyet — a generálás csak azt méri, hány karakter, nem
+  azt, hova fér
 
 ## 13. Megjegyzés a hangnemhez
 
