@@ -259,7 +259,7 @@ TRANSLATIONS = {
     "Week": "Savaitė",
     "Month": "Mėnuo",
     "Year": "Metai",
-    "Dry days": "Dienos be alkoholio",
+    "Sober days": "Dienos be alkoholio",
     "Change": "Pokytis",
     "before records": "prieš įrašų pradžią",
     "See further back": "Pažvelkite toliau atgal",

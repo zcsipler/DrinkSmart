@@ -1,11 +1,14 @@
 import SwiftUI
 import Charts
 
-/// Units per day (or per month, in the year view) as bars.
+/// One bar per day (or per month, in the year view), for one of two metrics.
 ///
-/// The bar says how much; its colour says how high it went, read against the
-/// limit in force that day (5.14) — so a long quiet evening and a short sharp
-/// one look different even at the same height. A bar with no valid cached
+/// **Amount**: the bar says how much; its colour says how high it went, read
+/// against the limit in force that day (5.14) — so a long quiet evening and a
+/// short sharp one look different even at the same height. **Peak**: the bar
+/// is the day's highest level, with the limit drawn across as a dashed line,
+/// the same way the live chart draws it. Two cards rather than a toggle, so
+/// the two can be read against each other without switching. A bar with no valid cached
 /// peak is drawn neutral rather than guessed at; the store fills the cache in
 /// the background and the colour arrives with it.
 ///
@@ -21,8 +24,18 @@ import Charts
 /// width. A month's bars are a few points wide, and asking anyone to land on
 /// one exactly is asking them to miss.
 struct HistoryChartView: View {
+
+    enum Metric {
+        /// Alcohol consumed, in the user's amount unit.
+        case amount
+        /// The highest estimated level of the day, in the user's BAC unit.
+        case peak
+    }
+
     let window: HistoryWindow
+    let metric: Metric
     let amountUnit: AmountUnit
+    let unit: BACUnit
 
     @State private var selectedBarID: HistoryBar.ID?
 
@@ -49,18 +62,51 @@ struct HistoryChartView: View {
         return plot.start...plot.end
     }
 
-    /// Room above the tallest bar for its value label, and never so low that
-    /// a single beer fills the chart. Three units is a modest evening; a scale
-    /// that tops out below it would make every bar shout.
+    /// Room above the tallest bar for its value label, and a floor so a quiet
+    /// window does not blow one small bar up to fill the chart. For amounts
+    /// the floor is three units, a modest evening; for peaks it is the limit
+    /// with headroom, so the limit line always has bars to be measured against.
     private var yMaximum: Double {
-        let tallest = window.bars.map { amount($0) }.max() ?? 0
-        let floor = amountUnit.convert(standardUnits: 3)
-        return max(floor, (tallest * 1.25).rounded(.up))
+        let tallest = window.bars.compactMap { value($0) }.max() ?? 0
+        switch metric {
+        case .amount:
+            let floor = amountUnit.convert(standardUnits: 3)
+            return max(floor, (tallest * 1.25).rounded(.up))
+        case .peak:
+            let limit = window.limit ?? 0.8
+            return max(limit * 1.3, tallest * 1.25)
+        }
     }
 
-    /// The bar's height in the unit on screen.
-    private func amount(_ bar: HistoryBar) -> Double {
-        amountUnit.convert(standardUnits: bar.totalUnits)
+    /// The bar's height in the unit on screen. Nil when there is nothing to
+    /// draw: a peak whose cache has not been refilled yet is not zero, it is
+    /// not known, and a bar of zero would say otherwise.
+    private func value(_ bar: HistoryBar) -> Double? {
+        guard bar.state == .drank else { return nil }
+        switch metric {
+        case .amount:
+            return amountUnit.convert(standardUnits: bar.totalUnits)
+        case .peak:
+            return bar.peakRange.map { unit.convert($0.midpoint) }
+        }
+    }
+
+    /// What the value bubble says. The peak is printed as a range where the
+    /// band is wide (5.8) — the bar can only stand at its midpoint.
+    private func label(_ bar: HistoryBar) -> String {
+        switch metric {
+        case .amount:
+            return amountUnit.formatted(standardUnits: bar.totalUnits)
+        case .peak:
+            return bar.peakRange.map { unit.formattedRange($0) } ?? ""
+        }
+    }
+
+    private var axisTitle: LocalizedStringResource {
+        switch metric {
+        case .amount: amountUnit.shortLabel
+        case .peak: "peak"
+        }
     }
 
     var body: some View {
@@ -76,16 +122,16 @@ struct HistoryChartView: View {
                     .foregroundStyle(Theme.surfaceRaised.opacity(0.45))
                 }
 
-                if bar.state == .drank {
+                if let height = value(bar) {
                     BarMark(
                         x: .value("Period", bar.interval.start, unit: barUnit),
-                        y: .value("Units", amount(bar))
+                        y: .value("Units", height)
                     )
                     .foregroundStyle(tint(for: bar).opacity(selectedBarID == nil || selectedBarID == bar.id ? 1 : 0.45))
                     .cornerRadius(3)
                     .annotation(position: .top, spacing: 4) {
                         if selectedBarID == bar.id {
-                            Text(verbatim: amountUnit.formatted(standardUnits: bar.totalUnits))
+                            Text(verbatim: label(bar))
                                 .font(.system(size: 11, weight: .semibold, design: .rounded).monospacedDigit())
                                 .foregroundStyle(Theme.primaryText)
                                 .padding(.horizontal, 6)
@@ -95,13 +141,21 @@ struct HistoryChartView: View {
                     }
                 }
             }
+
+            // The same line the live chart draws (5.14): the user's own
+            // number, the strictest in force during the window.
+            if metric == .peak, let limit = window.limit {
+                RuleMark(y: .value("Personal limit", unit.convert(limit)))
+                    .foregroundStyle(Theme.alarm.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
+            }
         }
         .chartXScale(domain: xDomain)
         .chartYScale(domain: 0...yMaximum)
         .chartXAxis { xAxis }
         .chartYAxis { yAxis }
         .chartYAxisLabel(position: .topLeading, alignment: .leading) {
-            Text(amountUnit.shortLabel)
+            Text(axisTitle)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
                 .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)
@@ -128,7 +182,7 @@ struct HistoryChartView: View {
     /// Only bars with something drawn count — a dry day has nothing to read.
     private func tapped(atPlotX x: CGFloat, proxy: ChartProxy) {
         let nearest = window.bars
-            .filter { $0.state == .drank }
+            .filter { value($0) != nil }
             .compactMap { bar -> (bar: HistoryBar, distance: CGFloat)? in
                 let plot = plotInterval(bar.interval)
                 let centre = plot.start.addingTimeInterval(plot.duration / 2)
@@ -206,12 +260,21 @@ struct HistoryChartView: View {
         AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
             AxisGridLine().foregroundStyle(Theme.hairline)
             AxisValueLabel {
-                if let units = value.as(Double.self) {
-                    Text(verbatim: units.formatted(.number.precision(.fractionLength(0))))
+                if let level = value.as(Double.self) {
+                    Text(verbatim: yLabel(level))
                         .font(.system(size: 10, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.secondaryText)
                 }
             }
+        }
+    }
+
+    /// The amount axis in whole numbers; the peak axis in the BAC unit's own
+    /// precision, already converted — `BACUnit.format` expects g/L.
+    private func yLabel(_ level: Double) -> String {
+        switch metric {
+        case .amount: level.formatted(.number.precision(.fractionLength(0)))
+        case .peak: level.formatted(.number.precision(.fractionLength(unit == .perMille ? 1 : 2)))
         }
     }
 }

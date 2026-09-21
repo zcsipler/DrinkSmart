@@ -262,7 +262,7 @@ TRANSLATIONS = {
     "Week": "Woche",
     "Month": "Monat",
     "Year": "Jahr",
-    "Dry days": "Trockene Tage",
+    "Sober days": "Trockene Tage",
     "Change": "Veränderung",
     "before records": "vor Beginn der Aufzeichnung",
     "See further back": "Weiter zurückblicken",

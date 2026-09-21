@@ -800,7 +800,16 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   jönnek, három betűre vágva, ha hosszabb — egy betű nem volt olvasható. Érvényes cache nélkül semleges türkiz; a rögzítés előtti
   napok halvány sávot kapnak, mert az üres az „ivásmentes" jele (5.7).
   Az x-tengely éjfélhez igazított, különben a hét első oszlopát 5 óra levágná.
-- **Lakat:** a mutatók és a chart együtt homályosodnak, rajta egy gomb a
+- **Két chart-kártya egymás alatt: mennyiség, majd csúcs.** A csúcs-chart
+  oszlopa a nap legmagasabb szintje (a sáv közepe; a buborék tartományt ír,
+  ha a sáv széles, 5.8), rajta a saját határ szaggatott vonala, ahogy a
+  Live charton. Nem váltó és nem kettős tengely: a két mérőszám egymás
+  alatt egy pillantással összevethető, és a vonal-oszlopok-mögé-bújás
+  problémája (mozgóátlag) nem jön elő. Érvénytelen cache-nél a csúcs-oszlop
+  hiányzik, nem nulla. A mutató-kártyán az ivásmentes napok „Sober days"
+  néven, `ivásmentes / rögzített` alakban — az évben a puszta szám nem mond
+  semmit, a tört igen.
+- **Lakat:** a mutatók és a két chart együtt homályosodnak, rajta egy gomb a
   `HistoryPaywallSheet`-re; a 7 napnál régebbi alkalom-sor dátuma látszik,
   a csúcsa nem. A lap három dolgot mond: mi van mögötte, hogy az adat már
   megvan, és hogy hogyan nyílik. StoreKit nélkül a gomb debugban a flag

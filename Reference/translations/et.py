@@ -255,7 +255,7 @@ TRANSLATIONS = {
     "Week": "Nädal",
     "Month": "Kuu",
     "Year": "Aasta",
-    "Dry days": "Alkoholivabad päevad",
+    "Sober days": "Alkoholivabad päevad",
     "Change": "Muutus",
     "before records": "enne kirjete algust",
     "See further back": "Vaata kaugemale tagasi",

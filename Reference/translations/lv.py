@@ -256,7 +256,7 @@ TRANSLATIONS = {
     "Week": "Nedēļa",
     "Month": "Mēnesis",
     "Year": "Gads",
-    "Dry days": "Dienas bez alkohola",
+    "Sober days": "Dienas bez alkohola",
     "Change": "Izmaiņas",
     "before records": "pirms ierakstu sākuma",
     "See further back": "Skatīt tālāk atpakaļ",

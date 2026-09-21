@@ -237,7 +237,7 @@ TRANSLATIONS = {
     "Week": "Hét",
     "Month": "Hónap",
     "Year": "Év",
-    "Dry days": "Ivásmentes napok",
+    "Sober days": "Ivásmentes napok",
     "Change": "Változás",
     "before records": "a rögzítés előtt",
     "See further back": "Nézz vissza messzebbre",

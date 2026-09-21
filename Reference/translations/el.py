@@ -260,7 +260,7 @@ TRANSLATIONS = {
     "Week": "Εβδομάδα",
     "Month": "Μήνας",
     "Year": "Έτος",
-    "Dry days": "Ημέρες χωρίς αλκοόλ",
+    "Sober days": "Ημέρες χωρίς αλκοόλ",
     "Change": "Μεταβολή",
     "before records": "πριν από την έναρξη καταγραφής",
     "See further back": "Δείτε πιο πίσω",

@@ -260,7 +260,7 @@ TRANSLATIONS = {
     "Week": "Ġimgħa",
     "Month": "Xahar",
     "Year": "Sena",
-    "Dry days": "Jiem bla alkoħol",
+    "Sober days": "Jiem bla alkoħol",
     "Change": "Bidla",
     "before records": "qabel bdew ir-rekords",
     "See further back": "Ara iktar lura",

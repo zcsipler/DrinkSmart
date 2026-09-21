@@ -261,7 +261,7 @@ TRANSLATIONS = {
     "Week": "Semaine",
     "Month": "Mois",
     "Year": "Année",
-    "Dry days": "Jours sans alcool",
+    "Sober days": "Jours sans alcool",
     "Change": "Évolution",
     "before records": "avant le début du suivi",
     "See further back": "Voir plus loin en arrière",

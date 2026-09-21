@@ -252,7 +252,7 @@ TRANSLATIONS = {
     "Week": "Tjedan",
     "Month": "Mjesec",
     "Year": "Godina",
-    "Dry days": "Dani bez alkohola",
+    "Sober days": "Dani bez alkohola",
     "Change": "Promjena",
     "before records": "prije početka bilježenja",
     "See further back": "Pogledaj dalje unatrag",

@@ -95,7 +95,8 @@ struct HistoryView: View {
 
                             VStack(spacing: 14) {
                                 figures(snapshot.window)
-                                chartCard(snapshot)
+                                chartCard(snapshot, metric: .amount)
+                                chartCard(snapshot, metric: .peak)
                             }
                             .blur(radius: snapshot.isLocked ? 6 : 0)
                             .allowsHitTesting(!snapshot.isLocked)
@@ -206,7 +207,7 @@ struct HistoryView: View {
                 divider
                 stat("Drinks", window.drinkCount.formatted())
                 divider
-                stat("Dry days", "\(window.dryDays.formatted()) / \(window.recordedDays.formatted())")
+                soberDays(window)
             }
 
             Divider().overlay(Theme.hairline).padding(.horizontal, 14)
@@ -240,6 +241,31 @@ struct HistoryView: View {
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Sober days out of the days we were keeping records. When the window
+    /// reaches back before records began, the denominator is smaller than
+    /// the calendar — "4 / 9" in a year view needs a reason, and the reason
+    /// is printed under it. It disappears on its own once a full window has
+    /// been recorded.
+    private func soberDays(_ window: HistoryWindow) -> some View {
+        VStack(spacing: 4) {
+            Text("Sober days")
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .foregroundStyle(Theme.secondaryText)
+            Text(verbatim: "\(window.dryDays.formatted()) / \(window.recordedDays.formatted())")
+                .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.primaryText)
+            if window.unknownDays > 0 {
+                (Text(verbatim: "\(window.unknownDays.formatted()) ") + Text("before records"))
+                    .font(.system(size: 9, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText.opacity(0.8))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private var divider: some View {
         Rectangle().fill(Theme.hairline).frame(width: 1, height: 26)
     }
@@ -259,11 +285,21 @@ struct HistoryView: View {
 
     // MARK: Chart
 
-    private func chartCard(_ snapshot: Snapshot) -> some View {
+    /// Two of these, one under the other: how much, then how high. The legend
+    /// for the shaded pre-record days sits under the second only — it applies
+    /// to both, and saying it twice would read as two different things.
+    private func chartCard(_ snapshot: Snapshot, metric: HistoryChartView.Metric) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HistoryChartView(window: snapshot.window, amountUnit: store.amountUnit)
+            HistoryChartView(
+                window: snapshot.window,
+                metric: metric,
+                amountUnit: store.amountUnit,
+                unit: store.unit
+            )
 
-            legend(snapshot.window)
+            if metric == .peak {
+                legend(snapshot.window)
+            }
         }
         .padding(14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))

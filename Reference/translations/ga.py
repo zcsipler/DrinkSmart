@@ -260,7 +260,7 @@ TRANSLATIONS = {
     "Week": "Seachtain",
     "Month": "Mí",
     "Year": "Bliain",
-    "Dry days": "Laethanta gan alcól",
+    "Sober days": "Laethanta gan alcól",
     "Change": "Athrú",
     "before records": "roimh thús na dtaifead",
     "See further back": "Féach níos faide siar",

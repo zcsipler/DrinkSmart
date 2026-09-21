@@ -257,7 +257,7 @@ TRANSLATIONS = {
     "Week": "Viikko",
     "Month": "Kuukausi",
     "Year": "Vuosi",
-    "Dry days": "Alkoholittomat päivät",
+    "Sober days": "Alkoholittomat päivät",
     "Change": "Muutos",
     "before records": "ennen kirjausten alkua",
     "See further back": "Katso kauemmas taakse",

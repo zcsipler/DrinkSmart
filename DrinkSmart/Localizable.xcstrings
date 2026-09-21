@@ -8644,155 +8644,6 @@
         }
       }
     },
-    "Dry days": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dry days"
-          }
-        },
-        "bg": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Дни без алкохол"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dny bez alkoholu"
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dage uden alkohol"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Trockene Tage"
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Ημέρες χωρίς αλκοόλ"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Días sin beber"
-          }
-        },
-        "et": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Alkoholivabad päevad"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Alkoholittomat päivät"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Jours sans alcool"
-          }
-        },
-        "ga": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Laethanta gan alcól"
-          }
-        },
-        "hr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dani bez alkohola"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ivásmentes napok"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Giorni senza alcol"
-          }
-        },
-        "lt": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dienos be alkoholio"
-          }
-        },
-        "lv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dienas bez alkohola"
-          }
-        },
-        "mt": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Jiem bla alkoħol"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Droge dagen"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dni bez alkoholu"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dias sem beber"
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zile fără alcool"
-          }
-        },
-        "sk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dni bez alkoholu"
-          }
-        },
-        "sl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dnevi brez alkohola"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Dagar utan alkohol"
-          }
-        }
-      }
-    },
     "Edit drink": {
       "extractionState": "manual",
       "localizations": {
@@ -20113,6 +19964,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Långsamt upptag, lägre och senare topp."
+          }
+        }
+      }
+    },
+    "Sober days": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sober days"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Дни без алкохол"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dny bez alkoholu"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dage uden alkohol"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trockene Tage"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ημέρες χωρίς αλκοόλ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Días sin beber"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alkoholivabad päevad"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alkoholittomat päivät"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jours sans alcool"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Laethanta gan alcól"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dani bez alkohola"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ivásmentes napok"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Giorni senza alcol"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dienos be alkoholio"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dienas bez alkohola"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jiem bla alkoħol"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Droge dagen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dni bez alkoholu"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dias sem beber"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Zile fără alcool"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dni bez alkoholu"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dnevi brez alkohola"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dagar utan alkohol"
           }
         }
       }

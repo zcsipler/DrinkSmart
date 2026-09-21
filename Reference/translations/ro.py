@@ -258,7 +258,7 @@ TRANSLATIONS = {
     "Week": "Săptămână",
     "Month": "Lună",
     "Year": "An",
-    "Dry days": "Zile fără alcool",
+    "Sober days": "Zile fără alcool",
     "Change": "Schimbare",
     "before records": "înainte de începerea înregistrărilor",
     "See further back": "Privește mai departe în urmă",

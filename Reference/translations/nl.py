@@ -258,7 +258,7 @@ TRANSLATIONS = {
     "Week": "Week",
     "Month": "Maand",
     "Year": "Jaar",
-    "Dry days": "Droge dagen",
+    "Sober days": "Droge dagen",
     "Change": "Verandering",
     "before records": "vóór de registratie",
     "See further back": "Verder terugkijken",
