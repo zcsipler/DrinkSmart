@@ -22,6 +22,13 @@ final class AppSettings {
         didSet { persist() }
     }
 
+    /// Grams or standard units for every amount on screen. Device-level for
+    /// the same reason `unit` is: how a number is written is a habit of the
+    /// reader, not a fact about the person being recorded.
+    var amountUnit: AmountUnit = .grams {
+        didSet { persist() }
+    }
+
     // MARK: Who is being recorded
     //
     // Two values, not one: the id, and when it was chosen. Switching to
@@ -77,6 +84,9 @@ final class AppSettings {
 
     private struct Snapshot: Codable {
         var unit: BACUnit
+        /// Optional so a snapshot written before this existed still decodes;
+        /// missing means the default.
+        var amountUnit: AmountUnit?
         var activePersonID: UUID?
         var activePersonChosenAt: Date?
     }
@@ -86,6 +96,7 @@ final class AppSettings {
     private func persist() {
         let snapshot = Snapshot(
             unit: unit,
+            amountUnit: amountUnit,
             activePersonID: activePersonID,
             activePersonChosenAt: activePersonChosenAt
         )
@@ -97,6 +108,7 @@ final class AppSettings {
         if let data = defaults.data(forKey: Self.storageKey),
            let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) {
             unit = snapshot.unit
+            amountUnit = snapshot.amountUnit ?? .grams
             activePersonID = snapshot.activePersonID
             activePersonChosenAt = snapshot.activePersonChosenAt
             return

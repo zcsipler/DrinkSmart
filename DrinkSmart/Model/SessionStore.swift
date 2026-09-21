@@ -173,6 +173,11 @@ final class SessionStore {
         set { settings.unit = newValue }
     }
 
+    var amountUnit: AmountUnit {
+        get { settings.amountUnit }
+        set { settings.amountUnit = newValue }
+    }
+
     /// The quick-add favourite. Nil means there is none, and the quick-add
     /// button does not appear.
     ///
@@ -205,6 +210,56 @@ final class SessionStore {
         closeEndedSessions()
         session = fetchOpenSession()
         rebuild()
+        backfillStaleSummaries()
+    }
+
+    // MARK: Summary backfill
+
+    @ObservationIgnored
+    private var backfill: Task<Void, Never>?
+
+    /// Recomputes the cached summary of every closed session whose cache
+    /// predates the current engine, a few at a time, yielding in between.
+    ///
+    /// After a `BACEngine.version` bump every session's cache is stale at
+    /// once. History reads quantity straight from the drinks and treats the
+    /// peak as missing until this has caught up (11.3) — so a year of history
+    /// opens instantly and gets its colours a moment later, instead of running
+    /// a few hundred simulations on the way to the screen. A batch of five is
+    /// ~30 ms release, ~370 ms debug (6.): visible in debug, and still better
+    /// than one long stall.
+    ///
+    /// Sessions, not `SessionSummary` values, are what SwiftData observes, so
+    /// each `store(_:)` invalidates exactly the rows that read it.
+    private func backfillStaleSummaries() {
+        guard backfill == nil else { return }
+
+        backfill = Task { @MainActor [weak self] in
+            defer { self?.backfill = nil }
+            guard let self else { return }
+
+            // Fetched inside the task, so nothing that is not `Sendable`
+            // crosses into it.
+            let descriptor = FetchDescriptor<DrinkingSession>(
+                predicate: #Predicate { $0.endedAt != nil }
+            )
+            let stale = ((try? context.fetch(descriptor)) ?? [])
+                .filter { $0.summary == nil && !($0.drinks ?? []).isEmpty }
+            guard !stale.isEmpty else { return }
+
+            for (index, target) in stale.enumerated() {
+                guard !Task.isCancelled else { return }
+                let drinks = target.sortedDrinks
+                let computed = engine.simulateBand(profile: target.profile, drinks: drinks)
+                target.store(summary(for: target, band: computed))
+
+                if index % 5 == 4 {
+                    save()
+                    await Task.yield()
+                }
+            }
+            save()
+        }
     }
 
     private func fetchOpenSession() -> DrinkingSession? {

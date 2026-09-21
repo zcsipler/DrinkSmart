@@ -226,7 +226,7 @@ struct LiveView: View {
                 divider
                 stat("Drinks", store.drinks.count.formatted())
                 divider
-                stat("Units", store.totalUnits.formatted(.number.precision(.fractionLength(1))))
+                stat(store.amountUnit.shortLabel, store.amountUnit.format(standardUnits: store.totalUnits))
             }
 
             if let sober = store.soberRange {
@@ -251,7 +251,7 @@ struct LiveView: View {
         Rectangle().fill(Theme.hairline).frame(width: 1, height: 26)
     }
 
-    private func stat(_ title: LocalizedStringKey, _ value: String) -> some View {
+    private func stat(_ title: LocalizedStringResource, _ value: String) -> some View {
         VStack(spacing: 4) {
             Text(title)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))

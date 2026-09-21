@@ -73,7 +73,7 @@ struct SessionContentView: View {
             divider
             stat("Drinks", drinks.count.formatted())
             divider
-            stat("Units", session.totalUnits.formatted(.number.precision(.fractionLength(1))))
+            stat(store.amountUnit.shortLabel, store.amountUnit.format(standardUnits: session.totalUnits))
         }
         .padding(.vertical, 14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
@@ -90,7 +90,7 @@ struct SessionContentView: View {
             .frame(width: 1, height: 26)
     }
 
-    private func stat(_ title: LocalizedStringKey, _ value: String) -> some View {
+    private func stat(_ title: LocalizedStringResource, _ value: String) -> some View {
         VStack(spacing: 4) {
             Text(title)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))

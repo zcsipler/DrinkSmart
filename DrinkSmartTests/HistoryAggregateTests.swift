@@ -134,6 +134,21 @@ struct HistoryAggregateTests {
         #expect(!bucket.peakIsComplete)
     }
 
+    @Test("A session with no drinks does not make a drinking day")
+    func emptySessionIsNotDrinking() {
+        // Left behind by an undone quick add. Its day must read as dry, and
+        // nothing about it may reach the chart.
+        let days = HistoryAggregate.days(
+            from: [occasion(at: date(2026, 9, 12, 20), units: 0, drinks: 0, peak: nil)],
+            trackingStartedAt: date(2026, 9, 12),
+            now: date(2026, 9, 12, 22), calendar: calendar
+        )
+
+        #expect(days.count == 1)
+        #expect(days.first?.state == .dry)
+        #expect(days.first?.occasions.isEmpty == true)
+    }
+
     @Test("Nothing before tracking and no sessions gives today alone")
     func freshInstall() {
         let now = date(2026, 9, 14, 20)

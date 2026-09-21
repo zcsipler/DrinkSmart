@@ -99,7 +99,7 @@ final class FeatureFlags {
     /// without `historyTrends`. Seven: long enough to feel what the history is
     /// worth, short enough that after a few weeks there is visibly something
     /// behind the lock.
-    static let freeHistoryWindowDays = 7
+    nonisolated static let freeHistoryWindowDays = 7
 
     /// Whether this day's history may be shown in full.
     ///
@@ -110,8 +110,10 @@ final class FeatureFlags {
     }
 
     /// The window rule on its own, without the entitlement, so it can be
-    /// tested without touching the shared flags.
-    static func isWithinFreeWindow(
+    /// tested without touching the shared flags. `nonisolated` because it is
+    /// pure arithmetic on dates and `HistoryWindow`, a plain value type,
+    /// calls it from wherever it happens to be built.
+    nonisolated static func isWithinFreeWindow(
         _ day: DrinkingDay,
         at now: Date = .now,
         calendar: Calendar = .current

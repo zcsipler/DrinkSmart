@@ -76,6 +76,8 @@ DrinkSmart/
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
 │   │   ├── DrinkingDay.swift        ivási nap hajnali 5-ös határral
 │   │   ├── DrinkingFrequency.swift  a béta proxyja
+│   │   ├── HistoryAggregate.swift   alkalmak → napok → periódusok, memóriában
+│   │   ├── HistoryWindow.swift      a History képernyő ablaka: hét / hónap / év, oszlopok
 │   │   ├── SessionStore.swift       @Observable, SwiftData-alapú, a nyitott alkalom
 │   │   └── Persistence/
 │   │       ├── Person.swift              @Model, kinek a fogyasztása — test, béta, határ
@@ -90,11 +92,15 @@ DrinkSmart/
 │   ├── Support/
 │   │   ├── Theme.swift         színek, a görbe színe a határhoz viszonyítva változik
 │   │   ├── FeatureFlags.swift  egy hely, ami eldönti, mi van bekapcsolva
-│   │   └── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
+│   │   ├── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
+│   │   └── AmountUnit.swift    gramm / standard egység megjelenítés, alapból gramm
 │   └── View/
 │       ├── MainTabView.swift        History / Live / Profil, Live középen
 │       ├── LiveView.swift           élő alkalom, csak a mai nap — három nap-állapot
-│       ├── HistoryView.swift        lezárt alkalmak listája
+│       ├── HistoryView.swift        hét / hónap / év, lapozás, chart, alkalom-lista, lakat
+│       ├── HistoryChartView.swift   oszlopok egységre, színük a csúcs a határhoz képest
+│       ├── HistoryPaywallSheet.swift  mi van a lakat mögött, és hogy az adat már megvan
+│       ├── SessionRow.swift         egy alkalom sora, lakatolt változattal
 │       ├── SessionDetailView.swift  navigációs keret egy múltbeli alkalomhoz
 │       ├── SessionContentView.swift a tartalom — LiveView és Detail is ezt használja
 │       ├── BACChartView.swift       a sáv, BACChartModel bemenettel
@@ -359,8 +365,8 @@ ne lehessen visszanézni.
 
 **Amit ez maga után vont:** a `MainTabView.liveHomeToken` elveszett (nem maradt
 elnavigált állapot, amit vissza kellene hozni), a `DayState` háromállapotú lett
-(5.7), és a `DrinkingDay.offset(by:)` / `daysAgo(from:)` egyelőre hívó nélkül
-maradt — bent hagytuk, mert az Előzmény tartományválasztójának kelleni fog.
+(5.7), és a `DrinkingDay.offset(by:)` / `daysAgo(from:)` egy időre hívó nélkül
+maradt — azóta a History ablakai (11.3) használják.
 
 ### 5.12 Az italok saját sávot kaptak a görbe alatt
 
@@ -761,11 +767,56 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   Foundation-only, ezért egy ideiglenes csomagban Linuxon is lefutottak; az
   app teszt-targetje (12.) továbbra is hiányzik.
 
-**Hátravan:** a képernyő (szegmensek, oszlopdiagram mozgóátlaggal, külön
-csúcs-vonal, KPI-sor: ivásmentes napok, átlag/hét, változás az előző
-időszakhoz), a lakat és a paywall-lap, a cache háttér-visszatöltése a
-`SessionStore`-ban, és a `DrinkingDay.offset(by:)` / `daysAgo` most már
-hívóval — a 12. pont erre vonatkozó sorai ezzel elévülnek.
+**A képernyő megépítve (2026. szeptember), készüléken kipróbálva.**
+
+- **Ablak + finomabb oszlopok, Apple Health-minta.** Szegmens Hét / Hónap /
+  Év (`HistoryRange`); a Hét az utolsó hét ivási nap (nem naptári hét), a
+  Hónap és az Év naptári egység. Oszlop = nap (Hét, Hónap) vagy hónap (Év).
+  Chevronokkal lapozás az `oldestOffset`-ig; szegmensváltás a legújabb
+  oldalra ugrik. Nincs külön Nap szegmens: a nap szintje az alkalom-sor a
+  chart alatt (`SessionRow`), onnan `SessionDetailView`. **Oszlopról nem
+  fúrunk le**: volt (Év-oszlop → hónap, hónap-oszlop → hét, második
+  koppintásra), de a képernyő „magától" váltott tőle — a szegmens csak a
+  szegmens-váltóról változzon.
+- **`HistoryWindow` a modell**, `HistoryAggregate.days` kimenetéből épül:
+  oszlopok `drank / dry / unknown / future` állapottal, összegek, változás az
+  előző ablakhoz. Volt rajta mozgóátlag-vonal; kivettük, mert a magas
+  oszlopok mögé bújt és egy hét hét pontjából nem olvasható ki trend — ha
+  egyszer visszajön, az Év nézetbe való, nem a napi bontásba. Az `isWithinFreeWindow` a napokból
+  következik, nem állítjuk — így a Hét 0. oldala az egyetlen ingyenes ablak,
+  konstrukció szerint.
+- **A mennyiség grammban vagy standard egységben, a felhasználó választása
+  szerint** (`AmountUnit`, az `AppSettings`-ben a ‰ / % mellett, a Profil
+  Display szekciójában). Alapból gramm: egy gramm mindenhol ugyanaz, az
+  „egység" országonként más (8 g UK, 10 g HU, 12 g FR). A modell továbbra is
+  standard egységben számol (`Drink.standardUnits`), a kettő ×10 — ezért
+  nem mutatjuk mindkettőt egymás mellett. Egy helyen érvényes mindenhol:
+  History chart, mutató-kártya, Live és alkalom stat-sor.
+- **Az oszlop magassága a mennyiség (a tengely felírja, miben), a színe a
+  csúcs** a nap saját határához képest (5.14). Koppintásra
+  az oszlop fölött megjelenik a pontos érték; a találat a legközelebbi ivós
+  oszlopra pattan 16 pont tűréssel, mert a hónap oszlopai pár pont
+  szélesek. Az Év hónapcímkéi a locale rövidítéséből
+  jönnek, három betűre vágva, ha hosszabb — egy betű nem volt olvasható. Érvényes cache nélkül semleges türkiz; a rögzítés előtti
+  napok halvány sávot kapnak, mert az üres az „ivásmentes" jele (5.7).
+  Az x-tengely éjfélhez igazított, különben a hét első oszlopát 5 óra levágná.
+- **Lakat:** a mutatók és a chart együtt homályosodnak, rajta egy gomb a
+  `HistoryPaywallSheet`-re; a 7 napnál régebbi alkalom-sor dátuma látszik,
+  a csúcsa nem. A lap három dolgot mond: mi van mögötte, hogy az adat már
+  megvan, és hogy hogyan nyílik. StoreKit nélkül a gomb debugban a flag
+  override-ját állítja, release-ben „Coming soon".
+- **A cache háttérben töltődik vissza:** `SessionStore.backfillStaleSummaries`
+  a `refreshFromStore` végén, ötösével, `Task.yield`-del.
+- Tesztek: `HistoryWindowTests` (11) a `HistoryAggregateTests` (16) mellett;
+  Linuxon futtatva egy ideiglenes csomagban, Swift 6 módban, figyelmeztetés
+  nélkül.
+
+**Hátravan:** az Év → hónap, hónap → hét ugrás visszahozása *látható*
+vezérlővel (pl. az érték-buborékban egy „Megnyitás" gomb), nem rejtett
+gesztussal; hogy a szegmensváltás megtartsa-e az ablak helyét a nulladik
+oldalra ugrás helyett; és hogy az ital nélkül maradt alkalmat (visszavont
+gyors felvitel, utolsó ital törlése) a `SessionStore` törölje-e — ma az
+aggregátor szűri ki (`drinkCount > 0`), az adatbázisban ott marad.
 
 ### 11.4 Adatmentés és készülékváltás
 
@@ -1079,9 +1130,6 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
   A kód, amit védenek, az, ami **adatot tud veszíteni** — nem crashel és nem
   logol, csak rossz emberhez tesz egy italt vagy elérhetetlenné tesz egy
   alkalmat. A `SessionPolicy` és a `DrinkingDay` ugyanide tartozik.
-- Tartományválasztó az Előzmény tabon (a 11.3 előfeltétele) — ide tartozik a
-  „nem ittál" kontra „nincs adat" megkülönböztetés is (5.7), aminek a Live-ból
-  már nincs hol látszódnia
 - A Live és az Előzmény összekötése: kell-e egyáltalán, és ha igen, gesztus
   helyett mivel (5.11)
 - Az `AddDrinkSheet` élő előrejelzése minden lépésköznél `projectBand`-et hív

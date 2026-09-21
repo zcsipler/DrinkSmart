@@ -35,8 +35,12 @@ enum HistoryAggregate {
         let today = DrinkingDay.containing(now, calendar: calendar)
         let trackingDay = DrinkingDay.containing(trackingStartedAt, calendar: calendar)
 
+        // A session with no drinks is not an evening out. One can exist —
+        // a quick add undone, the last drink deleted from an open session —
+        // and it must not turn a dry day into a drinking day with a
+        // zero-height bar that answers a tap with "0 g".
         var byDay: [DrinkingDay: [HistoryOccasion]] = [:]
-        for occasion in occasions where occasion.startedAt <= today.end {
+        for occasion in occasions where occasion.drinkCount > 0 && occasion.startedAt <= today.end {
             byDay[DrinkingDay.containing(occasion.startedAt, calendar: calendar), default: []]
                 .append(occasion)
         }

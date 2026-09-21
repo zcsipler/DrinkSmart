@@ -166,6 +166,24 @@ struct ProfileView: View {
             }
             .pickerStyle(.inline)
             .labelsHidden()
+
+            Picker(selection: Binding(
+                get: { store.amountUnit },
+                set: { store.amountUnit = $0 }
+            )) {
+                ForEach(AmountUnit.allCases) { unit in
+                    HStack(spacing: 5) {
+                        Text(unit.label)
+                        Text(verbatim: "(\(unit.suffix))")
+                            .foregroundStyle(Theme.secondaryText)
+                    }
+                    .tag(unit)
+                }
+            } label: {
+                Text("Amount")
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
         } header: {
             Text("Display")
         }
