@@ -254,6 +254,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Mai multe persoane",
+    "History trends": "Tendințe ale istoricului",
     "Switch person": "Schimbă persoana",
     "Add person": "Adaugă persoană",
     "New person": "Persoană nouă",

@@ -3,8 +3,9 @@ import BACKit
 
 /// One past evening, reached from the history list.
 ///
-/// The content is shared with the Live screen's paged-back days — see
-/// `SessionContentView`. This is only the navigation wrapper around it.
+/// The content is shared with the Live screen — see `SessionContentView`.
+/// This is only the navigation wrapper around it, and it stays the bottom of
+/// the history drill-down: year → month → week → day → this.
 struct SessionDetailView: View {
     let session: DrinkingSession
     let store: SessionStore

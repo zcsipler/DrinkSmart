@@ -255,6 +255,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Keli žmonės",
+    "History trends": "Istorijos tendencijos",
     "Switch person": "Keisti žmogų",
     "Add person": "Pridėti žmogų",
     "New person": "Naujas žmogus",

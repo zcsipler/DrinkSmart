@@ -252,6 +252,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Vairākas personas",
+    "History trends": "Vēstures tendences",
     "Switch person": "Mainīt personu",
     "Add person": "Pievienot personu",
     "New person": "Jauna persona",

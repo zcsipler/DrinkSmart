@@ -251,6 +251,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Mitu inimest",
+    "History trends": "Ajaloo suundumused",
     "Switch person": "Vaheta inimest",
     "Add person": "Lisa inimene",
     "New person": "Uus inimene",

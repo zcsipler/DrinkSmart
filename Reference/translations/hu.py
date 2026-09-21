@@ -233,6 +233,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Több személy",
+    "History trends": "Előzmény-trendek",
     "Switch person": "Személyváltás",
     "Add person": "Személy hozzáadása",
     "New person": "Új személy",

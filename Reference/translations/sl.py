@@ -249,6 +249,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Več oseb",
+    "History trends": "Trendi zgodovine",
     "Switch person": "Zamenjaj osebo",
     "Add person": "Dodaj osebo",
     "New person": "Nova oseba",

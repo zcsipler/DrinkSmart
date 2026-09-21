@@ -256,6 +256,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Diversi persuni",
+    "History trends": "Xejriet tal-istorja",
     "Switch person": "Ibdel il-persuna",
     "Add person": "Żid persuna",
     "New person": "Persuna ġdida",

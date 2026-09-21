@@ -38,11 +38,20 @@ enum Feature: String, CaseIterable, Identifiable {
     /// Recording drinks for more than one person, and switching between them.
     case multiPerson
 
+    /// History beyond the free window: the week / month / year views, and
+    /// the detail of any day older than `FeatureFlags.freeHistoryWindowDays`.
+    ///
+    /// Gates the *view*, never the record. Every session is stored for
+    /// everyone regardless of this flag, so buying it later reveals the whole
+    /// past, not only what was logged from that day on.
+    case historyTrends
+
     var id: String { rawValue }
 
     var title: LocalizedStringResource {
         switch self {
         case .multiPerson: "Multiple people"
+        case .historyTrends: "History trends"
         }
     }
 }
@@ -82,6 +91,33 @@ final class FeatureFlags {
     /// Named accessors, because `flags.multiPerson` reads better at a call
     /// site inside a view body than a lookup does.
     var multiPerson: Bool { isEnabled(.multiPerson) }
+    var historyTrends: Bool { isEnabled(.historyTrends) }
+
+    // MARK: The free history window
+
+    /// How many drinking days back, today included, history stays open
+    /// without `historyTrends`. Seven: long enough to feel what the history is
+    /// worth, short enough that after a few weeks there is visibly something
+    /// behind the lock.
+    static let freeHistoryWindowDays = 7
+
+    /// Whether this day's history may be shown in full.
+    ///
+    /// The one question a history view asks. Today is always inside the window
+    /// — the current day is the Live screen's territory and is never gated.
+    func canShowHistory(for day: DrinkingDay, at now: Date = .now) -> Bool {
+        historyTrends || Self.isWithinFreeWindow(day, at: now)
+    }
+
+    /// The window rule on its own, without the entitlement, so it can be
+    /// tested without touching the shared flags.
+    static func isWithinFreeWindow(
+        _ day: DrinkingDay,
+        at now: Date = .now,
+        calendar: Calendar = .current
+    ) -> Bool {
+        day.daysAgo(from: now, calendar: calendar) < freeHistoryWindowDays
+    }
 
     // MARK: Entitlements
     //

@@ -726,6 +726,47 @@ Az adat már megvan hozzá: a `DrinkingSession` tárol összesítőt
 (`SessionSummary`), és a `DrinkingDay` (5.6) adja a napi bontást. Aggregálásnál
 figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van kötve.
 
+**Megtervezve és az alapja megépítve (2026. szeptember).** A döntések:
+
+- **Egy History képernyő, nem két menüpont.** Szegmens-váltó Nap / Hét /
+  Hónap / Év; a drill-down évtől hónapon és héten át a napig megy, a napból a
+  mostani alkalom-részletbe (`SessionDetailView`), ami így a hierarchia alja
+  marad, hozzányúlás nélkül.
+- **Nincs új tárolt entitás.** A `Model/HistoryAggregate.swift` memóriában
+  hajtja az alkalmakat napokra (`DayBucket`) és periódusokra
+  (`PeriodBucket`), a cache-elt `SessionSummary`-ból. Egy év az néhány száz
+  alkalom; egy második @Model CloudKit-kompatibilis, exportált és migrált
+  kellene legyen, semmiért. Ebből következik, hogy az export/import (11.4)
+  változatlan, és a history egy importált archívumból azonnal előáll.
+- **A mennyiség nem vár a motorra, a csúcs igen.** Egység és italszám az
+  italokból összeadható; a csúcs csak érvényes cache-ből jön, különben
+  `nil` (`HistoryOccasion.peakRange`), és a bucket `peakIsComplete`-je hamis.
+  Verzióbump után így az Év nézet nem futtat 365 szimulációt megnyitáskor —
+  a cache visszatöltése a store háttérmenete lesz (**hátravan**).
+- **„Nem ittál" és „nem tudjuk" itt válik láthatóvá (5.7).** `DayBucket.State`:
+  `drank` / `dry` / `unknown`; a `Person.trackingStartedAt` előtti nap
+  `unknown`, és nem számít bele az átlag nevezőjébe (`recordedDays`).
+- **A nap a saját dátuma alá kerül, a hét/hónap/év a naptáré.** A hajnali
+  5-kor kezdődő ivási nap a `calendarDate`-jével kerül hétbe/hónapba, tehát
+  az éjfélen átnyúló este abban a hétben marad, amelyikben kezdődött. A hét
+  kezdőnapja a `Calendar`-ból jön (magyarul hétfő).
+- **Flag: `Feature.historyTrends`, ingyenes ablakkal.** Az utolsó
+  `FeatureFlags.freeHistoryWindowDays` (7) ivási nap — a mai is beleértve —
+  ingyenes, ami régebbi, lakat mögé kerül, az alkalom-sorokra is. A nézet
+  egy kérdést tesz fel: `flags.canShowHistory(for: DrinkingDay)`. A flag a
+  UI-t takarja, az adat mindenkinél íródik (11.5 mintájára): aki fél év után
+  fizet, a teljes fél évet látja. A paywall mondja is ki.
+- **Tesztek:** `DrinkSmartTests/HistoryAggregateTests.swift`, 15 teszt, két
+  suite (aggregátum és ingyenes ablak). Az aggregátor és a `DrinkingDay`
+  Foundation-only, ezért egy ideiglenes csomagban Linuxon is lefutottak; az
+  app teszt-targetje (12.) továbbra is hiányzik.
+
+**Hátravan:** a képernyő (szegmensek, oszlopdiagram mozgóátlaggal, külön
+csúcs-vonal, KPI-sor: ivásmentes napok, átlag/hét, változás az előző
+időszakhoz), a lakat és a paywall-lap, a cache háttér-visszatöltése a
+`SessionStore`-ban, és a `DrinkingDay.offset(by:)` / `daysAgo` most már
+hívóval — a 12. pont erre vonatkozó sorai ezzel elévülnek.
+
 ### 11.4 Adatmentés és készülékváltás
 
 **A követelmény:** ha Zoltán készüléket vált ugyanazzal az Apple ID-val, az

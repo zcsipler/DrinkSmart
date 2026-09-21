@@ -256,6 +256,7 @@ TRANSLATIONS = {
 
     # --- PersonSwitcher / FeatureFlags: more than one person (11.5) ---
     "Multiple people": "Roinnt daoine",
+    "History trends": "Treochtaí staire",
     "Switch person": "Athraigh duine",
     "Add person": "Cuir duine leis",
     "New person": "Duine nua",
