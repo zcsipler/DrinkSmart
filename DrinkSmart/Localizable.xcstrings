@@ -449,6 +449,155 @@
         }
       }
     },
+    "%@ sessions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sessions"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ случая"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ příležitostí"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ lejligheder"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ Anlässe"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ περιστάσεις"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ ocasiones"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ korda"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ kertaa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ occasions"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ ócáid"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ prilika"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ alkalom"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ occasioni"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ progos"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ reizes"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ okkażjonijiet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ gelegenheden"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ okazji"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ ocasiões"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ ocazii"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ príležitostí"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ priložnosti"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ tillfällen"
+          }
+        }
+      }
+    },
     "%@ units": {
       "extractionState": "manual",
       "localizations": {
@@ -20117,6 +20266,155 @@
         }
       }
     },
+    "Smoothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoothing"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Изглаждане"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vyhlazení"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Udjævning"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Glättung"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Εξομάλυνση"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suavizado"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Silumine"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tasoitus"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lissage"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Smúdáil"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Izglađivanje"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simítás"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Livellamento"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Glodinimas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Izlīdzināšana"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tlaħliħ"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Afvlakking"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wygładzanie"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suavização"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Netezire"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vyhladenie"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Glajenje"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Utjämning"
+          }
+        }
+      }
+    },
     "Sober days": {
       "extractionState": "manual",
       "localizations": {
@@ -24140,6 +24438,155 @@
         }
       }
     },
+    "Trend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trend"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Тенденция"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendens"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Τάση"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendencia"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trendi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendance"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Treocht"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trend"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendenza"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendencija"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendence"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Xejra"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendência"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tendință"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trend"
+          }
+        }
+      }
+    },
     "Type": {
       "extractionState": "manual",
       "localizations": {
@@ -28159,6 +28606,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "cm"
+          }
+        }
+      }
+    },
+    "day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "day"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ден"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "den"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dag"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tag"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ημέρα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "día"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "päev"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "päivä"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "jour"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "lá"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dan"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nap"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "giorno"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "diena"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "diena"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "jum"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dag"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dzień"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dia"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "zi"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "deň"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dan"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "dag"
           }
         }
       }

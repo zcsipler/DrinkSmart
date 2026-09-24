@@ -2,14 +2,19 @@ import SwiftUI
 import SwiftData
 import BACKit
 
-/// The past, at three distances: the last seven days, a month, a year.
+/// The past, at three distances — the last seven days, a month, a year —
+/// and as a whole, on the trend.
 ///
-/// One screen, not a list and a separate statistics page. A range picker sets
-/// how much calendar is on screen, chevrons page it back and forth, the chart
-/// shows one bar per day (or per month), and the sessions of that span sit
-/// underneath as rows — tapping one opens its curve, drawn with that
+/// One screen, not a list and a separate statistics page. A segment picker
+/// sets how much calendar is on screen, chevrons page it back and forth, the
+/// chart shows one bar per day (or per month), and the sessions of that span
+/// sit underneath as rows — tapping one opens its curve, drawn with that
 /// session's own profile snapshot (5.5). Tapping a bar shows its value; the
-/// range only ever changes from the picker.
+/// segment only ever changes from the picker.
+///
+/// The trend segment is different in kind: no pages, no rows, the whole
+/// recorded span on two scrolling, pinch-zoomable curves (`HistoryTrend`),
+/// with the figures card covering everything ever recorded.
 ///
 /// The free window is the first page of the week view: the last seven
 /// drinking days, today included. Everything behind it — older pages, the
@@ -26,8 +31,12 @@ struct HistoryView: View {
     @Query(sort: \DrinkingSession.startedAt, order: .reverse)
     private var allSessions: [DrinkingSession]
 
-    @State private var range: HistoryRange = .week
+    @State private var segment: HistorySegment = .week
     @State private var offset = 0
+
+    /// The trend's zoom and scroll, shared by its two cards.
+    @State private var visibleDays = 90
+    @State private var scrollX: Date = .distantPast
     @State private var showsPaywall = false
     @State private var showsJump = false
 
@@ -46,10 +55,20 @@ struct HistoryView: View {
     /// to redo in each subview that needs a number from it.
     private struct Snapshot {
         let days: [DayBucket]
-        let window: HistoryWindow
+        /// The paged window, or nil on the trend segment.
+        let window: HistoryWindow?
+        let trend: HistoryTrend?
         let oldestOffset: Int
         let sessionsInWindow: [DrinkingSession]
         let isLocked: Bool
+
+        /// The first day we were keeping records — the aggregate's own
+        /// start, not the stored date: an evening logged before the stored
+        /// date moves the start back (5.7), and every label must say the
+        /// same thing the shading shows.
+        let recordsBegan: Date?
+
+        var figures: HistoryFigures { window?.figures ?? HistoryFigures(days: days) }
     }
 
     private var snapshot: Snapshot {
@@ -60,6 +79,22 @@ struct HistoryView: View {
             trackingStartedAt: store.person.trackingStartedAt,
             now: now
         )
+        let recordsBegan = days.first { $0.state != .unknown }?.day.calendarDate
+
+        guard let range = segment.range else {
+            // The trend spans everything, so it is never inside the free
+            // window; the one rule (`canShowHistory`) says so on its own.
+            return Snapshot(
+                days: days,
+                window: nil,
+                trend: HistoryTrend.make(days: days, halfLife: HistoryTrend.halfLife(forVisibleDays: visibleDays)),
+                oldestOffset: 0,
+                sessionsInWindow: [],
+                isLocked: !flags.historyTrends,
+                recordsBegan: recordsBegan
+            )
+        }
+
         let window = HistoryWindow.make(range: range, offset: offset, days: days, now: now)
         let inWindow = sessions.filter { session in
             guard session.endedAt != nil else { return false }
@@ -69,9 +104,11 @@ struct HistoryView: View {
         return Snapshot(
             days: days,
             window: window,
+            trend: nil,
             oldestOffset: HistoryWindow.oldestOffset(for: range, days: days, now: now),
             sessionsInWindow: inWindow,
-            isLocked: !flags.historyTrends && !window.isWithinFreeWindow(at: now)
+            isLocked: !flags.historyTrends && !window.isWithinFreeWindow(at: now),
+            recordsBegan: recordsBegan
         )
     }
 
@@ -85,19 +122,24 @@ struct HistoryView: View {
                 Theme.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    rangePicker
+                    segmentPicker
                         .padding(.horizontal, 20)
                         .padding(.top, 6)
                         .padding(.bottom, 10)
 
                     ScrollView {
                         VStack(spacing: 14) {
-                            windowHeader(snapshot)
+                            header(snapshot)
 
                             VStack(spacing: 14) {
-                                figures(snapshot.window)
-                                chartCard(snapshot, metric: .amount)
-                                chartCard(snapshot, metric: .peak)
+                                figures(snapshot)
+                                if let trend = snapshot.trend {
+                                    trendCard(trend, metric: .amount)
+                                    trendCard(trend, metric: .peak)
+                                } else {
+                                    chartCard(snapshot, metric: .amount)
+                                    chartCard(snapshot, metric: .peak)
+                                }
                             }
                             .blur(radius: snapshot.isLocked ? 6 : 0)
                             .allowsHitTesting(!snapshot.isLocked)
@@ -126,33 +168,38 @@ struct HistoryView: View {
             }
             .sheet(isPresented: $showsPaywall) { HistoryPaywallSheet() }
             .sheet(isPresented: $showsJump) {
-                HistoryJumpSheet(
-                    range: range,
-                    current: snapshot.window.interval.start,
-                    recordsBegan: snapshot.days.first?.day.calendarDate ?? store.person.trackingStartedAt,
-                    now: store.now
-                ) { date in
-                    offset = HistoryWindow.offset(containing: date, range: range, now: store.now)
+                if let range = segment.range, let window = snapshot.window {
+                    HistoryJumpSheet(
+                        range: range,
+                        current: window.interval.start,
+                        recordsBegan: snapshot.days.first?.day.calendarDate ?? store.person.trackingStartedAt,
+                        now: store.now
+                    ) { date in
+                        offset = HistoryWindow.offset(containing: date, range: range, now: store.now)
+                    }
                 }
             }
+            .onAppear { resetTrendZoom(days: snapshot.days) }
         }
     }
 
-    // MARK: Range and paging
+    // MARK: Segments and paging
 
-    /// Changing the range goes back to the newest page: the offsets of the
+    /// Changing the segment goes back to the newest page: the offsets of the
     /// three ranges do not mean the same thing, so a week offset carried into
-    /// the month view would land on an arbitrary month.
-    private var rangePicker: some View {
+    /// the month view would land on an arbitrary month. Entering the trend
+    /// starts it at the newest end, at the zoom that fits what is recorded.
+    private var segmentPicker: some View {
         Picker(selection: Binding(
-            get: { range },
-            set: { newRange in
-                range = newRange
+            get: { segment },
+            set: { newSegment in
+                segment = newSegment
                 offset = 0
+                if newSegment == .trend { resetTrendZoom(days: snapshot.days) }
             }
         )) {
-            ForEach(HistoryRange.allCases) { range in
-                Text(range.title).tag(range)
+            ForEach(HistorySegment.offered) { segment in
+                Text(segment.title).tag(segment)
             }
         } label: {
             Text("History")
@@ -160,9 +207,36 @@ struct HistoryView: View {
         .pickerStyle(.segmented)
     }
 
-    private func windowHeader(_ snapshot: Snapshot) -> some View {
+    /// The whole span if it fits a quarter, else the last quarter — enough
+    /// to see a shape, not so much that a week is a pixel.
+    private func resetTrendZoom(days: [DayBucket]) {
+        let recorded = days.filter { $0.state != .unknown }.count
+        visibleDays = min(90, max(HistoryTrendChartView.minimumVisibleDays, recorded))
+        scrollX = Calendar.current.startOfDay(for: store.now)
+            .addingTimeInterval(Double(1 - visibleDays) * 86_400)
+    }
+
+    @ViewBuilder
+    private func header(_ snapshot: Snapshot) -> some View {
+        if let window = snapshot.window {
+            windowHeader(window, oldestOffset: snapshot.oldestOffset)
+        } else {
+            // No pages to step through: the span is simply named.
+            Text(verbatim: spanTitle(recordsBegan: snapshot.recordsBegan))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundStyle(Theme.primaryText)
+                .frame(height: 30)
+        }
+    }
+
+    private func spanTitle(recordsBegan: Date?) -> String {
+        guard let recordsBegan else { return "" }
+        return (recordsBegan..<store.now).formatted(date: .abbreviated, time: .omitted)
+    }
+
+    private func windowHeader(_ window: HistoryWindow, oldestOffset: Int) -> some View {
         HStack {
-            pageButton(systemName: "chevron.left", enabled: offset < snapshot.oldestOffset) {
+            pageButton(systemName: "chevron.left", enabled: offset < oldestOffset) {
                 offset += 1
             }
 
@@ -175,7 +249,7 @@ struct HistoryView: View {
                 showsJump = true
             } label: {
                 HStack(spacing: 5) {
-                    Text(verbatim: title(for: snapshot.window))
+                    Text(verbatim: title(for: window))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundStyle(Theme.primaryText)
                     Image(systemName: "chevron.down")
@@ -224,11 +298,13 @@ struct HistoryView: View {
 
     // MARK: Figures
 
-    /// Four figures for the window, then — when there is one — the change
-    /// against the window before it, with that window named underneath — "+239 %" on its own reads as
-    /// an accusation; "vs. Sep 8–14" makes it a comparison.
-    private func figures(_ window: HistoryWindow) -> some View {
-        VStack(spacing: 12) {
+    /// Four figures for the window — or for everything, on the trend — then,
+    /// when there is one, the change against the window before it, with that
+    /// window named underneath: "+239 %" on its own reads as an accusation;
+    /// "vs. Sep 8–14" makes it a comparison.
+    private func figures(_ snapshot: Snapshot) -> some View {
+        let window = snapshot.figures
+        return VStack(spacing: 12) {
             HStack(alignment: .top, spacing: 0) {
                 stat(store.amountUnit.shortLabel, store.amountUnit.format(standardUnits: window.totalUnits))
                 divider
@@ -242,7 +318,7 @@ struct HistoryView: View {
             // No row at all when there is nothing to compare against — the
             // first recorded window, or one after a quiet one. A "—" would
             // only raise the question the row is there to answer.
-            if let change = window.unitsChange {
+            if let change = window.unitsChange, let paged = snapshot.window {
                 Divider().overlay(Theme.hairline).padding(.horizontal, 14)
 
                 VStack(spacing: 4) {
@@ -253,7 +329,7 @@ struct HistoryView: View {
                     Text(verbatim: change.formatted(.percent.precision(.fractionLength(0)).sign(strategy: .always())))
                         .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
                         .foregroundStyle(Theme.primaryText)
-                    (Text("vs.") + Text(verbatim: " \(previousTitle(for: window))"))
+                    (Text("vs.") + Text(verbatim: " \(previousTitle(for: paged))"))
                         .font(.system(size: 9, design: .rounded))
                         .foregroundStyle(Theme.secondaryText.opacity(0.8))
                 }
@@ -267,7 +343,7 @@ struct HistoryView: View {
     /// The highest level in the window, coloured against the limit that day.
     /// The peak chart below shows the same thing bar by bar; this is the one
     /// number you can read without tapping anything.
-    private func peak(_ window: HistoryWindow) -> some View {
+    private func peak(_ window: HistoryFigures) -> some View {
         VStack(spacing: 4) {
             Text("peak")
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
@@ -308,7 +384,7 @@ struct HistoryView: View {
     /// the calendar — "4 / 9" in a year view needs a reason, and the reason
     /// is printed under it. It disappears on its own once a full window has
     /// been recorded.
-    private func soberDays(_ window: HistoryWindow) -> some View {
+    private func soberDays(_ window: HistoryFigures) -> some View {
         VStack(spacing: 4) {
             Text("Sober days")
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
@@ -350,23 +426,59 @@ struct HistoryView: View {
     /// Two of these, one under the other: how much, then how high. The legend
     /// for the shaded pre-record days sits under the second only — it applies
     /// to both, and saying it twice would read as two different things.
+    @ViewBuilder
     private func chartCard(_ snapshot: Snapshot, metric: HistoryChartView.Metric) -> some View {
+        if let window = snapshot.window {
+            VStack(alignment: .leading, spacing: 10) {
+                HistoryChartView(
+                    window: window,
+                    metric: metric,
+                    amountUnit: store.amountUnit,
+                    unit: store.unit,
+                    recordsBegan: snapshot.recordsBegan ?? store.person.trackingStartedAt
+                )
+
+                if metric == .peak {
+                    legend(window)
+                }
+            }
+            .padding(14)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+        }
+    }
+
+    // MARK: Trend
+
+    /// The caption names the smoothing, because a curve that changes shape
+    /// when you pinch needs to say why: the amount is averaged over days,
+    /// the peak over evenings out — the same number, counted in what each
+    /// curve knows about (`HistoryTrend`).
+    private func trendCard(_ trend: HistoryTrend, metric: HistoryTrendChartView.Metric) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HistoryChartView(
-                window: snapshot.window,
+            HistoryTrendChartView(
+                trend: trend,
                 metric: metric,
                 amountUnit: store.amountUnit,
                 unit: store.unit,
-                // The aggregate's own start, not the stored date: an evening
-                // logged before the stored date moves the start back (5.7),
-                // and the label must say the same thing the shading shows.
-                recordsBegan: snapshot.days.first { $0.state != .unknown }?.day.calendarDate
-                    ?? store.person.trackingStartedAt
+                limit: store.limit,
+                now: store.now,
+                visibleDays: $visibleDays,
+                scrollX: $scrollX
             )
 
-            if metric == .peak {
-                legend(snapshot.window)
+            HStack(spacing: 4) {
+                Text("Smoothing")
+                Text(verbatim: "·")
+                switch metric {
+                case .amount:
+                    Text(verbatim: Duration.seconds(trend.halfLife * 86_400)
+                        .formatted(.units(allowed: [.days], width: .wide)))
+                case .peak:
+                    Text("\(trend.halfLife.formatted()) sessions")
+                }
             }
+            .font(.system(size: 10, design: .rounded))
+            .foregroundStyle(Theme.secondaryText)
         }
         .padding(14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))

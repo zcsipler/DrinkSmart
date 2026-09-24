@@ -27,6 +27,43 @@ enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// What the History screen's segmented picker offers: the three paged
+/// windows, and the trend — the whole recorded span on one scrolling curve.
+/// A separate type rather than a fourth `HistoryRange`, because a range has
+/// pages, a title per page and a bar per period, and the trend has none of
+/// those; folding it in would leave every switch over the ranges with a case
+/// that means nothing.
+enum HistorySegment: String, CaseIterable, Identifiable, Sendable {
+    case week, month, year, trend
+
+    var id: String { rawValue }
+
+    /// What the picker shows. The trend is built but off the menu: on the
+    /// device the scrollable chart bounced, the axis title only appeared
+    /// mid-drag, and the curves did not read — the concept needs another
+    /// pass before it is offered. The code stays for that pass.
+    static let offered: [HistorySegment] = [.week, .month, .year]
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .week: "Week"
+        case .month: "Month"
+        case .year: "Year"
+        case .trend: "Trend"
+        }
+    }
+
+    /// The paged window this segment shows; nil for the trend.
+    var range: HistoryRange? {
+        switch self {
+        case .week: .week
+        case .month: .month
+        case .year: .year
+        case .trend: nil
+        }
+    }
+}
+
 /// One bar of the history chart: a day in the week and month views, a month
 /// in the year view.
 struct HistoryBar: Identifiable, Hashable, Sendable {
@@ -56,6 +93,40 @@ struct HistoryBar: Identifiable, Hashable, Sendable {
     var limit: Double? { days.compactMap(\.limit).min() }
 
     var recordedDays: Int { days.filter { $0.state != .unknown }.count }
+}
+
+/// The numbers on the figures card, for any run of days — a paged window or
+/// the whole recorded span. One type, so the card does not need to know
+/// which it is showing.
+struct HistoryFigures: Hashable, Sendable {
+    let totalUnits: Double
+    let drinkCount: Int
+    let drinkingDays: Int
+    let dryDays: Int
+    let unknownDays: Int
+    let peakRange: ClosedRange<Double>?
+    /// The strictest limit in force, for colouring the peak.
+    let limit: Double?
+    /// Change in units against the comparable span before, as a fraction.
+    /// Nil when there is nothing to compare against.
+    let unitsChange: Double?
+
+    var recordedDays: Int { drinkingDays + dryDays }
+
+    init(days: [DayBucket], previousUnits: Double? = nil) {
+        totalUnits = days.reduce(0) { $0 + $1.totalUnits }
+        drinkCount = days.reduce(0) { $0 + $1.drinkCount }
+        drinkingDays = days.filter { $0.state == .drank }.count
+        dryDays = days.filter { $0.state == .dry }.count
+        unknownDays = days.filter { $0.state == .unknown }.count
+        peakRange = days.compactMap(\.peakRange).max { $0.upperBound < $1.upperBound }
+        limit = days.compactMap(\.limit).min()
+        if let previousUnits, previousUnits > 0 {
+            unitsChange = (totalUnits - previousUnits) / previousUnits
+        } else {
+            unitsChange = nil
+        }
+    }
 }
 
 /// What the History screen shows for one range at one offset from today.
@@ -101,6 +172,8 @@ struct HistoryWindow: Hashable, Sendable {
         guard let previousUnits, previousUnits > 0 else { return nil }
         return (totalUnits - previousUnits) / previousUnits
     }
+
+    var figures: HistoryFigures { HistoryFigures(days: days, previousUnits: previousUnits) }
 
     /// Whether every recorded day on screen is inside the free window. True
     /// only for the week view at offset 0, by construction — but derived from

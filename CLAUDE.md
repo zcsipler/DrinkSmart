@@ -70,14 +70,15 @@ DrinkSmart/
 │   └── Tests/BACKitTests/      56 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   183 kulcs, a 24 hivatalos EU-nyelven
+│   ├── Localizable.xcstrings   205 kulcs, a 24 hivatalos EU-nyelven
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
 │   │   ├── DrinkingDay.swift        ivási nap hajnali 5-ös határral
 │   │   ├── DrinkingFrequency.swift  a béta proxyja
 │   │   ├── HistoryAggregate.swift   alkalmak → napok → periódusok, memóriában
-│   │   ├── HistoryWindow.swift      a History képernyő ablaka: hét / hónap / év, oszlopok
+│   │   ├── HistoryWindow.swift      a History képernyő ablaka: hét / hónap / év, oszlopok, mutatók
+│   │   ├── HistoryTrend.swift       a teljes időszak két EMA-görbéje: mennyiség / nap, csúcs
 │   │   ├── SessionStore.swift       @Observable, SwiftData-alapú, a nyitott alkalom
 │   │   └── Persistence/
 │   │       ├── Person.swift              @Model, kinek a fogyasztása — test, béta, határ
@@ -99,6 +100,7 @@ DrinkSmart/
 │       ├── LiveView.swift           élő alkalom, csak a mai nap — három nap-állapot
 │       ├── HistoryView.swift        hét / hónap / év, lapozás, chart, alkalom-lista, lakat
 │       ├── HistoryChartView.swift   oszlopok egységre, színük a csúcs a határhoz képest
+│       ├── HistoryTrendChartView.swift  görgethető, csippenthető trendgörbe, közös zoom
 │       ├── HistoryPaywallSheet.swift  mi van a lakat mögött, és hogy az adat már megvan
 │       ├── HistoryJumpSheet.swift   ugrás tetszőleges hétre / hónapra / évre a fejlécről
 │       ├── SessionRow.swift         egy alkalom sora, lakatolt változattal
@@ -574,7 +576,7 @@ EU-nyelvet ismeri. Alapból azt választja, amit az iOS nyelvi beállítása ké
 felhasználó ettől eltérhet a Profil fül Nyelv sorával, ami a Beállításokban az
 app saját „Előnyben részesített nyelv" sorára visz (`LanguageSection`).
 
-- `DrinkSmart/Localizable.xcstrings` — 183 kulcs, 24 nyelven. Generált fájl,
+- `DrinkSmart/Localizable.xcstrings` — 205 kulcs, 24 nyelven. Generált fájl,
   kézzel nem szerkesztjük.
 - `Reference/translations/<kód>.py` — nyelvenként egy modul, mindegyikben egy
   `TRANSLATIONS` szótár az angol forrásszövegtől az adott nyelvig.
@@ -850,12 +852,26 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   Külön „ettől eddig" szűrő nincs; ha egyszer kell, a `HistoryRange` kap egy
   `.custom(DateInterval)` esetet, és ugyanez a képernyő szolgálja ki.
 
-**Eldöntve, még nincs megépítve — Trend szegmens (negyedik).** A teljes
-rögzített időszak egy görbén, lapozás nélkül, vízszintes görgetéssel és
-csippentés-zoommal (`chartScrollableAxes` + `chartXVisibleDomain`, a
-csippentés `MagnifyGesture`-rel a látható tartomány hosszát állítja). Nem
-oszlopok: a hónapok összemosnak, és a zoom értelmét vesztené. Két kártya,
-közös zoommal:
+**Trend szegmens (negyedik) — megépítve (2026. szeptember), de LEVÉVE a
+menüről.** Készüléken kipróbálva nem volt az igazi: a görgethető chart
+pattogott (bounce), a bal felső tengelycím („Grams / day") csak húzás
+közben látszott és elengedéskor eltűnt, és a görbék furán olvastak. Zoltán
+a koncepciót újra akarja gondolni; addig a `HistorySegment.offered` lista
+csak a három ablakot adja a pickernek, a kód (`HistoryTrend`,
+`HistoryTrendChartView`, a `HistoryView` trend-ága, a tesztek és a kulcsok)
+megmarad. Ami alább áll, az a megépített, de rejtett viselkedés.
+
+A teljes rögzített időszak egy görbén, lapozás nélkül,
+vízszintes görgetéssel és csippentés-zoommal (`chartScrollableAxes` +
+`chartXVisibleDomain`, a csippentés `MagnifyGesture`-rel a látható
+tartomány hosszát állítja, a középpont körül, 14 nap és 10 év között). Nem
+oszlopok: a hónapok összemosnak, és a zoom értelmét vesztené. A szegmens
+külön típus (`HistorySegment`), nem negyedik `HistoryRange`: a range-nek
+oldalai, oldalcíme és periódusonként oszlopa van, a trendnek egyik sem —
+egy közös enum minden `switch`-ben hagyott volna egy semmit nem jelentő
+esetet. Belépéskor a zoom az utolsó negyedév (vagy a teljes időszak, ha
+rövidebb), a jobb szélre görgetve. Két kártya, közös zoommal és
+görgetéssel (két `@Binding` a `HistoryView` state-jére):
 
 - **Mennyiség:** a napi gramm exponenciális mozgóátlaga (EMA), y = gramm/nap.
   Egyszerű mozgóátlag helyett, mert annál egy nagy este N nap múlva egy
@@ -864,17 +880,29 @@ közös zoommal:
   jövő napjait is használná, és a görbe vége utólag mozogna. A felezési idő
   a zoomhoz kötött: < 3 hónap látható → 7 nap, < 2 év → 30 nap, fölötte 90.
   Ivásmentes napon a görbe süllyed, nem zuhan nullára — ezt jelenti a
-  szokás.
+  szokás. Kitöltött terület, türkiz: itt nincs határ, amihez színezni.
 - **Csúcs:** csak az ivós napokra, alkalomról alkalomra lépő EMA, két este
   között vízszintes; a határ szaggatott vonala rajta. Zoltán döntése: a
   csúcs-trend azt mutassa, „amikor iszol, milyen magasra mész" — hogy
   romlik-e vagy javul-e a kontroll —, és ebbe nem számít bele, hány
   ivásmentes nap volt két este között. Ha minden napra átlagolnánk, a
-  gyakoriságot és az intenzitást összekevernénk.
-- Alkalom-lista ebben a nézetben nincs; a mutató-kártya a teljes időszakra.
-  A lakat automatikusan érvényes rá, mert kilóg a 7 napból.
+  gyakoriságot és az intenzitást összekevernénk. Ugyanaz a felezési szám,
+  csak alkalomban számolva (7 / 30 / 90 alkalom) — egy szám, két görbe, és
+  a kártya alatti felirat mondja, melyik miben („Simítás · 7 nap" /
+  „Simítás · 7 alkalom"). A lépcső az utolsó estétől máig kitart: a trend
+  az, amit a következő estébe viszel. A nyers csúcsok halvány pontok a
+  görbe alatt, a határhoz színezve; a görbe függőleges gradienst kap az
+  5.14-es öt megállóval, a **mai** határhoz mérve — a kérdés az, hogy a
+  múlt hogyan áll a most tartott vonalhoz. Elavult cache-ű nap nincs a
+  görbén (nem nulla, nem tudjuk).
+- Alkalom-lista ebben a nézetben nincs; a mutató-kártya a teljes időszakra
+  (`HistoryFigures`, ugyanaz a típus, amit az ablak is ad), Change sor
+  nélkül. A lakat automatikusan érvényes rá, mert kilóg a 7 napból.
+- Tesztek: `HistoryTrendTests` (6) — EMA felezési idő és konstans bemenet,
+  a mennyiség minden rögzített napra, a csúcs csak ismert csúcsú ivós
+  napokra, a rögzítés előtti napok kimaradnak, a zoom-sávok.
 
-**Hátravan:** a Trend szegmens (fent); az Év → hónap, hónap → hét ugrás
+**Hátravan:** a Trend szegmens újragondolása és visszatétele a menüre (fent); az Év → hónap, hónap → hét ugrás
 visszahozása *látható* vezérlővel (pl. az érték-buborékban egy „Megnyitás"
 gomb), nem rejtett gesztussal; hogy a szegmensváltás megtartsa-e az ablak
 helyét a nulladik oldalra ugrás helyett; és hogy az ital nélkül maradt
