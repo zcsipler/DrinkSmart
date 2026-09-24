@@ -79,6 +79,30 @@ struct HistoryTrendChartView: View {
         return start...end
     }
 
+    private var visibleLength: TimeInterval { Double(visibleDays) * 86_400 }
+
+    /// Whether there is more recorded than fits on screen. A chart that
+    /// scrolls when everything is already visible only rubber-bands back
+    /// on every drag — with a few weeks of records that was the first thing
+    /// the screen did, and it read as broken.
+    private var isScrollable: Bool {
+        domain.upperBound.timeIntervalSince(domain.lowerBound) > visibleLength + 3600
+    }
+
+    /// The scroll position, kept inside the domain. Two charts share the
+    /// binding, and an over-scrolled value from one would be handed to the
+    /// other as a position to jump to — and then bounce back from.
+    private var clampedScrollX: Binding<Date> {
+        Binding(
+            get: { scrollX },
+            set: { newValue in
+                let latest = domain.upperBound.addingTimeInterval(-visibleLength)
+                let clamped = min(max(newValue, domain.lowerBound), max(latest, domain.lowerBound))
+                if abs(clamped.timeIntervalSince(scrollX)) > 1 { scrollX = clamped }
+            }
+        )
+    }
+
     private var yMaximum: Double {
         switch metric {
         case .amount:
@@ -93,27 +117,43 @@ struct HistoryTrendChartView: View {
     // MARK: Body
 
     var body: some View {
-        Chart {
-            switch metric {
-            case .amount: amountMarks
-            case .peak: peakMarks
-            }
-        }
-        .chartXScale(domain: domain)
-        .chartYScale(domain: 0...yMaximum)
-        .chartScrollableAxes(.horizontal)
-        .chartXVisibleDomain(length: Double(visibleDays) * 86_400)
-        .chartScrollPosition(x: $scrollX)
-        .chartXAxis { xAxis }
-        .chartYAxis { yAxis }
-        .chartYAxisLabel(position: .topLeading, alignment: .leading) {
+        // The axis title is a plain view above the plot, not a
+        // `chartYAxisLabel`: inside a scrollable chart that label lived in
+        // the scrolling content and was only on screen mid-drag.
+        VStack(alignment: .leading, spacing: 6) {
             axisTitle
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
                 .textCase(.uppercase)
                 .foregroundStyle(Theme.secondaryText)
+
+            scrolling(
+                Chart {
+                    switch metric {
+                    case .amount: amountMarks
+                    case .peak: peakMarks
+                    }
+                }
+                .chartXScale(domain: domain)
+                .chartYScale(domain: 0...yMaximum)
+                .chartXAxis { xAxis }
+                .chartYAxis { yAxis }
+            )
+            .simultaneousGesture(pinch)
+            .frame(height: 180)
         }
-        .simultaneousGesture(pinch)
-        .frame(height: 190)
+    }
+
+    /// Scrolling only when there is somewhere to scroll to.
+    @ViewBuilder
+    private func scrolling(_ chart: some View) -> some View {
+        if isScrollable {
+            chart
+                .chartScrollableAxes(.horizontal)
+                .chartXVisibleDomain(length: visibleLength)
+                .chartScrollPosition(x: clampedScrollX)
+        } else {
+            chart
+        }
     }
 
     @ChartContentBuilder

@@ -852,14 +852,23 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   Külön „ettől eddig" szűrő nincs; ha egyszer kell, a `HistoryRange` kap egy
   `.custom(DateInterval)` esetet, és ugyanez a képernyő szolgálja ki.
 
-**Trend szegmens (negyedik) — megépítve (2026. szeptember), de LEVÉVE a
-menüről.** Készüléken kipróbálva nem volt az igazi: a görgethető chart
-pattogott (bounce), a bal felső tengelycím („Grams / day") csak húzás
-közben látszott és elengedéskor eltűnt, és a görbék furán olvastak. Zoltán
-a koncepciót újra akarja gondolni; addig a `HistorySegment.offered` lista
-csak a három ablakot adja a pickernek, a kód (`HistoryTrend`,
-`HistoryTrendChartView`, a `HistoryView` trend-ága, a tesztek és a kulcsok)
-megmarad. Ami alább áll, az a megépített, de rejtett viselkedés.
+**Trend szegmens (negyedik) — megépítve (2026. szeptember), de csak
+kísérletként, debugban kapcsolható.** Készüléken kipróbálva nem volt az
+igazi: a görgethető chart pattogott (bounce), a bal felső tengelycím
+(„Grams / day") csak húzás közben látszott és elengedéskor eltűnt, és a
+görbék furán olvastak. Zoltán a koncepciót újra akarja gondolni; addig az
+`Experiment.trendSegment` kapcsoló (Profil alja, „Experiments" szekció,
+csak debug) teszi a pickerre — `HistorySegment.offered(trend:)`. Az
+`Experiment` szándékosan nem `Feature`: az `isPurchased`-re esne, és a
+StoreKit megérkezésekor eladóvá válna; egy kísérlet release-ben nem
+létezik. Két hiba javítva a kipróbálás után: a pattogás oka az volt, hogy
+a chart akkor is görgethető volt, amikor az egész rögzített időszak kifért
+(pár hét adatnál minden húzás gumiszalagként visszaugrott) — most csak
+akkor görgethető, ha van hova (`isScrollable`), és a megosztott
+görgetési pozíció a tartományba van szorítva, hogy az egyik kártya
+túlhúzása ne ugrassa a másikat; a tengelycím pedig a `chartYAxisLabel`-ből
+(ami görgethető chartban a görgetett tartalomban ült) sima nézetként a
+plot fölé került. A görbék olvashatósága nyitott kérdés.
 
 A teljes rögzített időszak egy görbén, lapozás nélkül,
 vízszintes görgetéssel és csippentés-zoommal (`chartScrollableAxes` +
@@ -902,7 +911,7 @@ görgetéssel (két `@Binding` a `HistoryView` state-jére):
   a mennyiség minden rögzített napra, a csúcs csak ismert csúcsú ivós
   napokra, a rögzítés előtti napok kimaradnak, a zoom-sávok.
 
-**Hátravan:** a Trend szegmens újragondolása és visszatétele a menüre (fent); az Év → hónap, hónap → hét ugrás
+**Hátravan:** a Trend szegmens újragondolása és élesítése (fent); az Év → hónap, hónap → hét ugrás
 visszahozása *látható* vezérlővel (pl. az érték-buborékban egy „Megnyitás"
 gomb), nem rejtett gesztussal; hogy a szegmensváltás megtartsa-e az ablak
 helyét a nulladik oldalra ugrás helyett; és hogy az ital nélkül maradt

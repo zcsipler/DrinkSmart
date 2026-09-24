@@ -239,6 +239,7 @@ struct ProfileView: View {
     // strings here are not localized — the only reader is the developer.
 
     #if DEBUG
+    @ViewBuilder
     private var developerSection: some View {
         Section {
             ForEach(Feature.allCases) { feature in
@@ -254,6 +255,23 @@ struct ProfileView: View {
             Text(verbatim: "Developer")
         } footer: {
             Text(verbatim: "Feature flags. Off in release builds until a purchase unlocks them; this switch only exists in debug.")
+        }
+        .listRowBackground(Theme.surface)
+
+        Section {
+            ForEach(Experiment.allCases) { experiment in
+                Toggle(isOn: Binding(
+                    get: { flags.isEnabled(experiment) },
+                    set: { flags.setEnabled($0, for: experiment) }
+                )) {
+                    Text(verbatim: experiment.title)
+                }
+                .tint(Theme.calm)
+            }
+        } header: {
+            Text(verbatim: "Experiments")
+        } footer: {
+            Text(verbatim: "Built, but not yet good enough for the menu. Debug only; a release build has no such switch.")
         }
         .listRowBackground(Theme.surface)
     }

@@ -180,6 +180,11 @@ struct HistoryView: View {
                 }
             }
             .onAppear { resetTrendZoom(days: snapshot.days) }
+            // Switching the experiment off while on the trend would leave
+            // the picker with nothing selected.
+            .onChange(of: flags.trendSegment) { _, offered in
+                if !offered && segment == .trend { segment = .week }
+            }
         }
     }
 
@@ -198,7 +203,7 @@ struct HistoryView: View {
                 if newSegment == .trend { resetTrendZoom(days: snapshot.days) }
             }
         )) {
-            ForEach(HistorySegment.offered) { segment in
+            ForEach(HistorySegment.offered(trend: flags.trendSegment)) { segment in
                 Text(segment.title).tag(segment)
             }
         } label: {

@@ -56,6 +56,27 @@ enum Feature: String, CaseIterable, Identifiable {
     }
 }
 
+/// Something built but not yet believed in: on the device it did not read
+/// well, and it is kept off the menu until the concept has had another pass.
+///
+/// Not a `Feature`, because a feature falls through to `isPurchased` and
+/// would go on sale the day StoreKit lands. An experiment can only be
+/// switched on by hand, in a debug build; in release it does not exist.
+enum Experiment: String, CaseIterable, Identifiable {
+
+    /// The Trend segment of the History screen: the whole recorded span on
+    /// two scrolling, pinch-zoomable curves (`HistoryTrend`).
+    case trendSegment
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .trendSegment: "Trend segment"
+        }
+    }
+}
+
 /// The one place that decides what is switched on.
 ///
 /// The views ask, they never decide — `if flags.multiPerson`. That is the
@@ -76,6 +97,7 @@ final class FeatureFlags {
     private init() {
         #if DEBUG
         overrides = Self.loadOverrides()
+        experiments = Self.loadExperiments()
         #endif
     }
 
@@ -92,6 +114,20 @@ final class FeatureFlags {
     /// site inside a view body than a lookup does.
     var multiPerson: Bool { isEnabled(.multiPerson) }
     var historyTrends: Bool { isEnabled(.historyTrends) }
+
+    // MARK: Experiments
+
+    /// Off unless switched on by hand in a debug build. There is no
+    /// entitlement to fall through to: an experiment is not for sale.
+    func isEnabled(_ experiment: Experiment) -> Bool {
+        #if DEBUG
+        return experiments[experiment] ?? false
+        #else
+        return false
+        #endif
+    }
+
+    var trendSegment: Bool { isEnabled(.trendSegment) }
 
     // MARK: The free history window
 
@@ -146,6 +182,24 @@ final class FeatureFlags {
     }
 
     func override(for feature: Feature) -> Bool? { overrides[feature] }
+
+    private static let experimentsKey = "drinksmart.experiments.debug.v1"
+
+    private var experiments: [Experiment: Bool] = [:]
+
+    func setEnabled(_ value: Bool, for experiment: Experiment) {
+        experiments[experiment] = value
+        let raw = Dictionary(uniqueKeysWithValues: experiments.map { ($0.key.rawValue, $0.value) })
+        UserDefaults.standard.set(raw, forKey: Self.experimentsKey)
+    }
+
+    private static func loadExperiments() -> [Experiment: Bool] {
+        let raw = UserDefaults.standard.dictionary(forKey: experimentsKey) as? [String: Bool] ?? [:]
+        return raw.reduce(into: [:]) { result, pair in
+            guard let experiment = Experiment(rawValue: pair.key) else { return }
+            result[experiment] = pair.value
+        }
+    }
 
     private func persistOverrides() {
         let raw = Dictionary(uniqueKeysWithValues: overrides.map { ($0.key.rawValue, $0.value) })

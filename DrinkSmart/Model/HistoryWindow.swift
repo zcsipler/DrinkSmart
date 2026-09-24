@@ -38,11 +38,12 @@ enum HistorySegment: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
-    /// What the picker shows. The trend is built but off the menu: on the
-    /// device the scrollable chart bounced, the axis title only appeared
-    /// mid-drag, and the curves did not read — the concept needs another
-    /// pass before it is offered. The code stays for that pass.
-    static let offered: [HistorySegment] = [.week, .month, .year]
+    /// What the picker shows. The trend is built but off the menu until the
+    /// concept has had another pass (`Experiment.trendSegment`): on the
+    /// device the curves did not read, and the chart misbehaved.
+    static func offered(trend: Bool) -> [HistorySegment] {
+        trend ? allCases : [.week, .month, .year]
+    }
 
     var title: LocalizedStringResource {
         switch self {
