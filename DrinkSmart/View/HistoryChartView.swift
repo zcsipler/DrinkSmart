@@ -273,7 +273,7 @@ struct HistoryChartView: View {
 
     private var xTicks: AxisMarkValues {
         switch window.range {
-        case .week: .stride(by: .day)
+        case .day, .week: .stride(by: .day)
         case .month: .stride(by: .day, count: 7)
         case .year: .stride(by: .month)
         }
@@ -281,7 +281,7 @@ struct HistoryChartView: View {
 
     private func xLabel(for date: Date) -> String {
         switch window.range {
-        case .week:
+        case .day, .week:
             return date.formatted(.dateTime.weekday(.abbreviated))
         case .month:
             return date.formatted(.dateTime.day())

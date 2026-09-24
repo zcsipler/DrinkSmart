@@ -31,6 +31,21 @@ struct HistoryWindowTests {
 
     // MARK: Intervals
 
+    @Test("The day window is one drinking day, today at offset 0")
+    func dayIsOneDrinkingDay() {
+        let today = HistoryWindow.make(range: .day, offset: 0, days: days, now: now, calendar: calendar)
+        #expect(today.bars.count == 1)
+        #expect(today.days.first?.day == DrinkingDay.containing(now, calendar: calendar))
+        #expect(today.interval.start == DrinkingDay.containing(now, calendar: calendar).calendarDate)
+        #expect(today.isWithinFreeWindow(at: now, calendar: calendar))
+
+        let sep12 = HistoryWindow.make(range: .day, offset: 2, days: days, now: now, calendar: calendar)
+        #expect(sep12.drinkingDays == 1)
+        #expect(sep12.totalUnits == 4)
+        #expect(HistoryWindow.offset(containing: date(2026, 9, 12), range: .day, now: now, calendar: calendar) == 2)
+        #expect(HistoryWindow.oldestOffset(for: .day, days: days, now: now, calendar: calendar) == 42)
+    }
+
     @Test("The week window is the last seven drinking days, today included")
     func weekIsRollingSevenDays() {
         let window = HistoryWindow.make(range: .week, offset: 0, days: days, now: now, calendar: calendar)

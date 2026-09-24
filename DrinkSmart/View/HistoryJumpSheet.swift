@@ -7,7 +7,7 @@ import SwiftUI
 /// Opened from the window title, the way the Calendar app's title opens a
 /// picker. The chevrons stay for the next page over; this is for the far
 /// ones. What the sheet offers depends on the range: a calendar for the week
-/// view (the page holding the day you pick), a grid of months for the month
+/// and day views (the page holding the day you pick), a grid of months for the month
 /// view, a list of years for the year view. Nothing before records began and
 /// nothing after today is offered — there is no page there to land on.
 struct HistoryJumpSheet: View {
@@ -43,7 +43,7 @@ struct HistoryJumpSheet: View {
                 Theme.background.ignoresSafeArea()
 
                 switch range {
-                case .week: weekPicker
+                case .day, .week: weekPicker
                 case .month: monthPicker
                 case .year: yearPicker
                 }
@@ -77,7 +77,7 @@ struct HistoryJumpSheet: View {
             in: min(recordsBegan, now)...now,
             displayedComponents: .date
         ) {
-            Text("Week")
+            Text(range.title)
         }
         .datePickerStyle(.graphical)
         .labelsHidden()

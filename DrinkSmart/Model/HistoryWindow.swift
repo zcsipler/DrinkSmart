@@ -1,17 +1,22 @@
 import Foundation
 
-/// The three windows the History screen can show. Not `HistoryPeriod`: a
+/// The paged windows the History screen can show. Not `HistoryPeriod`: a
 /// period is how days are *grouped*, a range is how much of the calendar is
 /// *on screen* — and the week on screen is the last seven drinking days, not
 /// a calendar week, so that the free window (seven days, today included) is
 /// exactly the first page of the week view and nothing behind it.
+///
+/// The day is a window of one drinking day: no chart, the day's sessions
+/// drawn in full instead. It is a range all the same, so paging, the jump
+/// sheet and the free-window rule are the same code as for the others.
 enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
-    case week, month, year
+    case day, week, month, year
 
     var id: String { rawValue }
 
     var title: LocalizedStringResource {
         switch self {
+        case .day: "Day"
         case .week: "Week"
         case .month: "Month"
         case .year: "Year"
@@ -21,7 +26,7 @@ enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
     /// What one bar stands for.
     var barPeriod: HistoryPeriod {
         switch self {
-        case .week, .month: .day
+        case .day, .week, .month: .day
         case .year: .month
         }
     }
@@ -34,7 +39,7 @@ enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
 /// those; folding it in would leave every switch over the ranges with a case
 /// that means nothing.
 enum HistorySegment: String, CaseIterable, Identifiable, Sendable {
-    case week, month, year, trend
+    case day, week, month, year, trend
 
     var id: String { rawValue }
 
@@ -42,11 +47,12 @@ enum HistorySegment: String, CaseIterable, Identifiable, Sendable {
     /// concept has had another pass (`Experiment.trendSegment`): on the
     /// device the curves did not read, and the chart misbehaved.
     static func offered(trend: Bool) -> [HistorySegment] {
-        trend ? allCases : [.week, .month, .year]
+        trend ? allCases : [.day, .week, .month, .year]
     }
 
     var title: LocalizedStringResource {
         switch self {
+        case .day: "Day"
         case .week: "Week"
         case .month: "Month"
         case .year: "Year"
@@ -57,6 +63,7 @@ enum HistorySegment: String, CaseIterable, Identifiable, Sendable {
     /// The paged window this segment shows; nil for the trend.
     var range: HistoryRange? {
         switch self {
+        case .day: .day
         case .week: .week
         case .month: .month
         case .year: .year
@@ -244,9 +251,10 @@ struct HistoryWindow: Hashable, Sendable {
         )
     }
 
-    /// The calendar span on screen. Week: seven drinking days ending today
-    /// (offset 0) or seven days earlier per step. Month and year: the calendar
-    /// unit containing today, stepped back whole units.
+    /// The calendar span on screen. Day: one drinking day, today at offset 0.
+    /// Week: seven drinking days ending today (offset 0) or seven days
+    /// earlier per step. Month and year: the calendar unit containing today,
+    /// stepped back whole units.
     static func interval(
         for range: HistoryRange,
         offset: Int,
@@ -255,6 +263,9 @@ struct HistoryWindow: Hashable, Sendable {
     ) -> DateInterval {
         let today = DrinkingDay.containing(now, calendar: calendar)
         switch range {
+        case .day:
+            let day = today.offset(by: -offset, calendar: calendar)
+            return DateInterval(start: day.calendarDate, end: day.end)
         case .week:
             let last = today.offset(by: -7 * offset, calendar: calendar)
             let first = last.offset(by: -6, calendar: calendar)
@@ -280,6 +291,8 @@ struct HistoryWindow: Hashable, Sendable {
         let today = DrinkingDay.containing(now, calendar: calendar)
         let target = DrinkingDay.containing(date, calendar: calendar)
         switch range {
+        case .day:
+            return max(0, target.daysAgo(from: now, calendar: calendar))
         case .week:
             return max(0, target.daysAgo(from: now, calendar: calendar) / 7)
         case .month, .year:

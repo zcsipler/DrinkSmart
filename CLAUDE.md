@@ -70,7 +70,7 @@ DrinkSmart/
 │   └── Tests/BACKitTests/      56 teszt, Python referenciaértékekkel
 ├── DrinkSmart/                 az app target
 │   ├── DrinkSmartApp.swift     ModelContainer, CloudKit visszaeséssel, store létrehozás
-│   ├── Localizable.xcstrings   205 kulcs, a 24 hivatalos EU-nyelven
+│   ├── Localizable.xcstrings   208 kulcs, a 24 hivatalos EU-nyelven
 │   ├── Model/
 │   │   ├── BACChartModel.swift      a chart bemenete — élő store vagy tárolt alkalom
 │   │   ├── DrinkCatalog.swift       italtípusok, StomachState UI-réteg
@@ -96,9 +96,9 @@ DrinkSmart/
 │   │   ├── BACUnit.swift       ‰ / % megjelenítés, tartomány-formázás
 │   │   └── AmountUnit.swift    gramm / standard egység megjelenítés, alapból gramm
 │   └── View/
-│       ├── MainTabView.swift        History / Live / Profil, Live középen
-│       ├── LiveView.swift           élő alkalom, csak a mai nap — három nap-állapot
-│       ├── HistoryView.swift        hét / hónap / év, lapozás, chart, alkalom-lista, lakat
+│       ├── MainTabView.swift        History / Live / Profil, Live középen; HistoryRequest a tabok közt
+│       ├── LiveView.swift           élő alkalom, csak a mai nap — három nap-állapot, „Tegnap" gomb
+│       ├── HistoryView.swift        nap / hét / hónap / év, lapozás, chart, alkalom-lista, lakat
 │       ├── HistoryChartView.swift   oszlopok egységre, színük a csúcs a határhoz képest
 │       ├── HistoryTrendChartView.swift  görgethető, csippenthető trendgörbe, közös zoom
 │       ├── HistoryPaywallSheet.swift  mi van a lakat mögött, és hogy az adat már megvan
@@ -362,9 +362,15 @@ harmadszorra lehetett eltalálni — ez rosszabb, mint ha nem is lenne. Egy els�
 kör (a lista kivétele a lapozásból, és az irány megfordítása a szokásos
 balról-jobbra-a-múltba konvencióra) javított rajta, de nem eleget.
 
-Visszalapozni így az **Előzmény** tabon lehet. Hogy a kettőt érdemes-e
-összekötni, és hogyan, az nyitott kérdés — nem elvi döntés, hogy a Live-ból
-ne lehessen visszanézni.
+Visszalapozni így az **Előzmény** tabon lehet, a Nap szegmensen (11.3), és
+a Live tetején egy **„‹ Tegnap" gomb** visz oda egy érintéssel. Ez az
+egyetlen hely az appban, ahol egy tab a másikat állítja (`HistoryRequest` a
+`MainTabView`-ban), és nem sérti a szabályt, ami a gesztust és a lefúrást
+kivitte: az nem az volt, hogy „ne váltsunk tabot", hanem hogy ne történjen
+olyan, amit nem kértél. Egy gomb, amin az áll, hova visz, és amitől a tabsáv
+láthatóan átvált, pontosan azt csinálja, amit ígér. A fordítottját — hogy a
+Nap szegmensen a máig előrelapozva az app magától a Live-ra ugorjon —
+elvetettük, mert az egy „következő oldal" chevron, ami képernyőt váltana.
 
 **Amit ez maga után vont:** a `MainTabView.liveHomeToken` elveszett (nem maradt
 elnavigált állapot, amit vissza kellene hozni), a `DayState` háromállapotú lett
@@ -576,7 +582,7 @@ EU-nyelvet ismeri. Alapból azt választja, amit az iOS nyelvi beállítása ké
 felhasználó ettől eltérhet a Profil fül Nyelv sorával, ami a Beállításokban az
 app saját „Előnyben részesített nyelv" sorára visz (`LanguageSection`).
 
-- `DrinkSmart/Localizable.xcstrings` — 205 kulcs, 24 nyelven. Generált fájl,
+- `DrinkSmart/Localizable.xcstrings` — 208 kulcs, 24 nyelven. Generált fájl,
   kézzel nem szerkesztjük.
 - `Reference/translations/<kód>.py` — nyelvenként egy modul, mindegyikben egy
   `TRANSLATIONS` szótár az angol forrásszövegtől az adott nyelvig.
@@ -911,6 +917,25 @@ görgetéssel (két `@Binding` a `HistoryView` state-jére):
   a mennyiség minden rögzített napra, a csúcs csak ismert csúcsú ivós
   napokra, a rögzítés előtti napok kimaradnak, a zoom-sávok.
 
+**Nap szegmens — megépítve (2026. szeptember).** A picker eleje: Nap / Hét
+/ Hónap / Év. Egy oldal egy ivási nap, a mai a 0. oldal; az előre chevron
+ott letiltva. Tartalom: a nap lezárt alkalmai `SessionContentView`-val
+(ahogy a Live is rajzolja a már lezárt mai estét), a mai oldalon fölöttük a
+futó alkalom görbéje és itallistája — a Live-val azonos módon szerkeszthető
+(`AddDrinkSheet`, a lezárt alkalomé a saját alkalmával). Nincs mutató-kártya
+és nincs chart: a nap maga a tartalom. Üres napon a három eset a 5.7 szerint
+szétválik: „Nothing logged today", „No drinks on this day", vagy „No data
+before <dátum>" a rögzítés előtt. A `HistoryRange` kapott egy `.day`
+esetet, ezért a lapozás, az `oldestOffset`, a naptáras ugró lap és az
+ingyenes-ablak szabály (a mai és az előző hat nap szabad) mind ugyanaz a
+kód, mint a többi ablaknál — külön naplapozó nincs. A fejléc címe „Today" /
+„Yesterday", régebben a dátum. A History megjegyzi az utolsó szegmenst; a
+Live „‹ Tegnap" gombja (5.11) a Nap / 1-es oldalra kéri, `HistoryRequest`
+értékkel, amit a `HistoryView` `onAppear`-kor és a kérés változásakor
+alkalmaz, aztán töröl — az első tabváltáskor a nézet még nem is létezik,
+ezért kell mindkettő. A `SessionRow` → `SessionDetailView` út a Hét listából
+megmaradt. Teszt: `dayIsOneDrinkingDay` a `HistoryWindowTests`-ben (14).
+
 **Hátravan:** a Trend szegmens újragondolása és élesítése (fent); az Év → hónap, hónap → hét ugrás
 visszahozása *látható* vezérlővel (pl. az érték-buborékban egy „Megnyitás"
 gomb), nem rejtett gesztussal; hogy a szegmensváltás megtartsa-e az ablak
@@ -1231,8 +1256,6 @@ Nem termékfunkciók, hanem amit rendbe kell tenni:
   A kód, amit védenek, az, ami **adatot tud veszíteni** — nem crashel és nem
   logol, csak rossz emberhez tesz egy italt vagy elérhetetlenné tesz egy
   alkalmat. A `SessionPolicy` és a `DrinkingDay` ugyanide tartozik.
-- A Live és az Előzmény összekötése: kell-e egyáltalán, és ha igen, gesztus
-  helyett mivel (5.11)
 - Az `AddDrinkSheet` élő előrejelzése minden lépésköznél `projectBand`-et hív
   (egy hosszú estén 12 ms release, 167 ms debug; 6 szimuláció). Itt a
   késleltetés nem járható út, mert pont az élő előreszimuláció a termék tézise

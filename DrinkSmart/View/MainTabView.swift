@@ -12,13 +12,19 @@ struct MainTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection: Tab = .live
 
+    /// The one place a tab steers another: the Live screen's "Yesterday"
+    /// button opens History on the day page before today. A labelled button
+    /// that says where it goes, and the tab bar moves with it — not a screen
+    /// changing on its own.
+    @State private var historyRequest: HistoryRequest?
+
     enum Tab: Hashable {
         case history, live, profile
     }
 
     var body: some View {
         TabView(selection: $selection) {
-            HistoryView(store: store)
+            HistoryView(store: store, request: $historyRequest)
                 .tabItem {
                     Label {
                         Text("History")
@@ -28,7 +34,10 @@ struct MainTabView: View {
                 }
                 .tag(Tab.history)
 
-            LiveView(store: store)
+            LiveView(store: store) {
+                historyRequest = HistoryRequest(segment: .day, offset: 1)
+                selection = .history
+            }
                 .tabItem {
                     Label {
                         Text("Live")
@@ -56,6 +65,14 @@ struct MainTabView: View {
             if phase == .active { store.refreshFromStore() }
         }
     }
+}
+
+/// A page of History asked for from another tab. Identified, so that asking
+/// for the same page twice is two requests.
+struct HistoryRequest: Equatable {
+    let segment: HistorySegment
+    let offset: Int
+    let id = UUID()
 }
 
 #Preview {

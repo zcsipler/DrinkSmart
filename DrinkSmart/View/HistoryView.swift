@@ -2,8 +2,13 @@ import SwiftUI
 import SwiftData
 import BACKit
 
-/// The past, at three distances — the last seven days, a month, a year —
-/// and as a whole, on the trend.
+/// The past, at four distances — a day, the last seven days, a month, a
+/// year — and as a whole, on the trend.
+///
+/// The day segment has no chart: it is the day itself, drawn the way the Live
+/// screen draws it, one page per drinking day with today at offset 0. It is
+/// where the Live screen's "Yesterday" button lands (`HistoryRequest`), and
+/// the bottom of the hierarchy you can page through.
 ///
 /// One screen, not a list and a separate statistics page. A segment picker
 /// sets how much calendar is on screen, chevrons page it back and forth, the
@@ -25,6 +30,10 @@ import BACKit
 struct HistoryView: View {
     let store: SessionStore
 
+    /// A page another tab asked for. Set by `MainTabView` when the Live
+    /// screen's "Yesterday" button is tapped, consumed here and cleared.
+    @Binding var request: HistoryRequest?
+
     /// Every session, the running one included: today's bar should count the
     /// drinks in your hand, not only the evenings that have already closed.
     /// The list below keeps to finished ones — the open session is Live's.
@@ -39,6 +48,10 @@ struct HistoryView: View {
     @State private var scrollX: Date = .distantPast
     @State private var showsPaywall = false
     @State private var showsJump = false
+
+    /// For the day page, which shows drinks the way Live does — editable.
+    @State private var editingDrink: Drink?
+    @State private var openRowID: UUID?
 
     private var flags: FeatureFlags { .shared }
 
@@ -132,13 +145,17 @@ struct HistoryView: View {
                             header(snapshot)
 
                             VStack(spacing: 14) {
-                                figures(snapshot)
-                                if let trend = snapshot.trend {
-                                    trendCard(trend, metric: .amount)
-                                    trendCard(trend, metric: .peak)
+                                if let window = snapshot.window, window.range == .day {
+                                    dayPage(snapshot, window: window)
                                 } else {
-                                    chartCard(snapshot, metric: .amount)
-                                    chartCard(snapshot, metric: .peak)
+                                    figures(snapshot)
+                                    if let trend = snapshot.trend {
+                                        trendCard(trend, metric: .amount)
+                                        trendCard(trend, metric: .peak)
+                                    } else {
+                                        chartCard(snapshot, metric: .amount)
+                                        chartCard(snapshot, metric: .peak)
+                                    }
                                 }
                             }
                             .blur(radius: snapshot.isLocked ? 6 : 0)
@@ -147,7 +164,9 @@ struct HistoryView: View {
                                 if snapshot.isLocked { lockOverlay }
                             }
 
-                            list(snapshot)
+                            if segment != .day {
+                                list(snapshot)
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.bottom, 24)
@@ -167,6 +186,14 @@ struct HistoryView: View {
                 }
             }
             .sheet(isPresented: $showsPaywall) { HistoryPaywallSheet() }
+            .sheet(item: $editingDrink) { drink in
+                AddDrinkSheet(store: store, editing: drink, session: sessionOwning(drink))
+            }
+            .onChange(of: editingDrink?.id) { openRowID = nil }
+            // The request may arrive before this view exists (the first
+            // visit to the tab) or while it is already on screen.
+            .onAppear { applyRequest() }
+            .onChange(of: request?.id) { applyRequest() }
             .sheet(isPresented: $showsJump) {
                 if let range = segment.range, let window = snapshot.window {
                     HistoryJumpSheet(
@@ -186,6 +213,15 @@ struct HistoryView: View {
                 if !offered && segment == .trend { segment = .week }
             }
         }
+    }
+
+    // MARK: Requests from other tabs
+
+    private func applyRequest() {
+        guard let request else { return }
+        segment = request.segment
+        offset = request.offset
+        self.request = nil
     }
 
     // MARK: Segments and paging
@@ -285,9 +321,17 @@ struct HistoryView: View {
     }
 
     /// The span on screen, in the user's calendar. The week's end is its last
-    /// day, not the 05:00 boundary after it — that would print tomorrow.
+    /// day, not the 05:00 boundary after it — that would print tomorrow. The
+    /// day is named the way people name it: today and yesterday by those
+    /// words, anything earlier by its date.
     private func title(for window: HistoryWindow) -> String {
         switch window.range {
+        case .day:
+            switch window.offset {
+            case 0: return String(localized: "Today")
+            case 1: return String(localized: "Yesterday")
+            default: return window.interval.start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+            }
         case .week:
             guard
                 let first = window.bars.first?.interval.start,
@@ -373,6 +417,8 @@ struct HistoryView: View {
     private func previousTitle(for window: HistoryWindow) -> String {
         let previous = HistoryWindow.interval(for: window.range, offset: window.offset + 1, now: store.now)
         switch window.range {
+        case .day:
+            return previous.start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
         case .week:
             let calendar = Calendar.current
             let lastDay = calendar.date(byAdding: .day, value: -1, to: previous.end) ?? previous.end
@@ -505,6 +551,81 @@ struct HistoryView: View {
         }
     }
 
+    // MARK: Day
+
+    /// One drinking day, drawn the way the Live screen draws today: the
+    /// finished sessions in full, and — on today's page — the running one on
+    /// top. Drinks are editable here as they are on Live; the page is the
+    /// same evening, reached from the other side.
+    @ViewBuilder
+    private func dayPage(_ snapshot: Snapshot, window: HistoryWindow) -> some View {
+        let sessions = snapshot.sessionsInWindow.sorted { $0.startedAt < $1.startedAt }
+        let hasLive = window.offset == 0 && !store.drinks.isEmpty
+
+        VStack(spacing: 26) {
+            if hasLive {
+                BACChartView(model: store.chartModel)
+                DrinkListSection(
+                    drinks: store.drinks,
+                    openRowID: $openRowID,
+                    onEdit: { editingDrink = $0 },
+                    onDelete: { drink in withAnimation { store.remove(drink) } }
+                )
+            }
+
+            ForEach(sessions) { session in
+                SessionContentView(
+                    session: session,
+                    store: store,
+                    editingDrink: $editingDrink,
+                    openRowID: $openRowID,
+                    showsProfileNote: false
+                )
+            }
+
+            if sessions.isEmpty && !hasLive {
+                dayEmptyState(window, recordsBegan: snapshot.recordsBegan)
+            }
+        }
+    }
+
+    /// A day with nothing on it says which kind of nothing (5.7): not
+    /// recorded yet, or recorded and dry.
+    private func dayEmptyState(_ window: HistoryWindow, recordsBegan: Date?) -> some View {
+        let unknown = window.days.first?.state == .unknown
+        return VStack(spacing: 12) {
+            Image(systemName: unknown ? "calendar.badge.minus" : "face.smiling")
+                .font(.system(size: 42, weight: .thin))
+                .foregroundStyle(unknown ? Theme.secondaryText.opacity(0.6) : Theme.calm.opacity(0.75))
+
+            if unknown {
+                Text("No data before \((recordsBegan ?? store.now).formatted(date: .abbreviated, time: .omitted))")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.primaryText)
+                    .multilineTextAlignment(.center)
+            } else if window.offset == 0 {
+                Text("Nothing logged today")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.primaryText)
+            } else {
+                Text("No drinks on this day")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.primaryText)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 54)
+        .background(Theme.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 18))
+        .padding(.top, 20)
+    }
+
+    /// Which session a drink belongs to — nil means the running one.
+    private func sessionOwning(_ drink: Drink) -> DrinkingSession? {
+        sessions.first { session in
+            session.endedAt != nil && (session.drinks ?? []).contains { $0.id == drink.id }
+        }
+    }
+
     // MARK: Lock
 
     private var lockOverlay: some View {
@@ -576,5 +697,5 @@ struct HistoryView: View {
 }
 
 #Preview {
-    HistoryView(store: .preview)
+    HistoryView(store: .preview, request: .constant(nil))
 }

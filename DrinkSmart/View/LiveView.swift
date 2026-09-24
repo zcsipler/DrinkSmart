@@ -7,10 +7,14 @@ import BACKit
 /// Looking back used to live here as a swipe between days, but a horizontal
 /// drag had to share the screen with the chart's own drag and with the drink
 /// rows' delete swipe, and it lost to both — it was there, it just took three
-/// attempts to hit. Reaching a past evening is what History is for. Whether the
-/// two get joined up again, and how, is an open question.
+/// attempts to hit. Reaching a past evening is what History is for, and the
+/// "Yesterday" button at the top is the one-tap way there: it opens History
+/// on the day page before today, from where the chevrons page further back.
 struct LiveView: View {
     let store: SessionStore
+
+    /// Opens History on yesterday. The tab switch is the parent's to make.
+    var onShowYesterday: () -> Void = {}
 
     @State private var showsAddDrink = false
     @State private var editingDrink: Drink?
@@ -157,10 +161,12 @@ struct LiveView: View {
                 // Above the day, not inside it: the most likely moment to add
                 // someone is a day with nothing on it yet, and a switcher that
                 // only appears once a session is running would be missing
-                // exactly then.
-                if FeatureFlags.shared.multiPerson {
-                    HStack {
-                        Spacer()
+                // exactly then. The way back sits on the same row, for the
+                // same reason — a dry day is exactly when you look back.
+                HStack {
+                    yesterdayButton
+                    Spacer()
+                    if FeatureFlags.shared.multiPerson {
                         PersonSwitcher(store: store)
                     }
                 }
@@ -204,6 +210,22 @@ struct LiveView: View {
             onEdit: { editingDrink = $0 },
             onDelete: { drink in withAnimation { store.remove(drink) } }
         )
+    }
+
+    private var yesterdayButton: some View {
+        Button(action: onShowYesterday) {
+            HStack(spacing: 4) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Yesterday")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+            }
+            .foregroundStyle(Theme.secondaryText)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Theme.surface, in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Hero
