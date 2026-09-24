@@ -194,6 +194,32 @@ struct HistoryWindow: Hashable, Sendable {
         }
     }
 
+    /// The offset whose window contains `date` — how the header's date picker
+    /// turns a chosen day into a page. Never negative: a future date lands on
+    /// the current window.
+    static func offset(
+        containing date: Date,
+        range: HistoryRange,
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) -> Int {
+        let today = DrinkingDay.containing(now, calendar: calendar)
+        let target = DrinkingDay.containing(date, calendar: calendar)
+        switch range {
+        case .week:
+            return max(0, target.daysAgo(from: now, calendar: calendar) / 7)
+        case .month, .year:
+            // Whole calendar units apart, not elapsed time: Aug 15 is one
+            // month-page before Sep 14 even though thirty days have not passed.
+            let component: Calendar.Component = range == .month ? .month : .year
+            let from = calendar.dateInterval(of: component, for: target.calendarDate)?.start ?? target.calendarDate
+            let to = calendar.dateInterval(of: component, for: today.calendarDate)?.start ?? today.calendarDate
+            let distance = calendar.dateComponents([component], from: from, to: to)
+            let steps = range == .month ? distance.month : distance.year
+            return max(0, steps ?? 0)
+        }
+    }
+
     /// The earliest offset with anything recorded — how far back the user can
     /// page. Zero when there is no history at all.
     static func oldestOffset(

@@ -100,6 +100,7 @@ DrinkSmart/
 │       ├── HistoryView.swift        hét / hónap / év, lapozás, chart, alkalom-lista, lakat
 │       ├── HistoryChartView.swift   oszlopok egységre, színük a csúcs a határhoz képest
 │       ├── HistoryPaywallSheet.swift  mi van a lakat mögött, és hogy az adat már megvan
+│       ├── HistoryJumpSheet.swift   ugrás tetszőleges hétre / hónapra / évre a fejlécről
 │       ├── SessionRow.swift         egy alkalom sora, lakatolt változattal
 │       ├── SessionDetailView.swift  navigációs keret egy múltbeli alkalomhoz
 │       ├── SessionContentView.swift a tartalom — LiveView és Detail is ezt használja
@@ -837,12 +838,49 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   Linuxon futtatva egy ideiglenes csomagban, Swift 6 módban, figyelmeztetés
   nélkül.
 
-**Hátravan:** az Év → hónap, hónap → hét ugrás visszahozása *látható*
-vezérlővel (pl. az érték-buborékban egy „Megnyitás" gomb), nem rejtett
-gesztussal; hogy a szegmensváltás megtartsa-e az ablak helyét a nulladik
-oldalra ugrás helyett; és hogy az ital nélkül maradt alkalmat (visszavont
-gyors felvitel, utolsó ital törlése) a `SessionStore` törölje-e — ma az
-aggregátor szűri ki (`drinkCount > 0`), az adatbázisban ott marad.
+- **Ugrás tetszőleges időszakra: a fejléc dátuma gomb** (`HistoryJumpSheet`),
+  a Naptár app mintájára. A chevronok maradnak a szomszédos oldalra — a
+  kettő nem versenyez, más a szándék mögöttük. A lap a szegmenshez illő
+  választót ad: Hét → grafikus naptár (a kiválasztott napot tartalmazó
+  oldalra ugrik, a koppintás maga a választás), Hónap → év-léptető és 3×4
+  hónaprács, Év → évlista; mindegyiken „Today" gomb a visszaútra. Csak a
+  rögzített időszak van felkínálva. A dátum → oldal leképezés a
+  `HistoryWindow.offset(containing:)`, naptári egységben számolva (Aug 15
+  egy hónap-oldallal Sep 14 előtt van, pedig nem telt el harminc nap).
+  Külön „ettől eddig" szűrő nincs; ha egyszer kell, a `HistoryRange` kap egy
+  `.custom(DateInterval)` esetet, és ugyanez a képernyő szolgálja ki.
+
+**Eldöntve, még nincs megépítve — Trend szegmens (negyedik).** A teljes
+rögzített időszak egy görbén, lapozás nélkül, vízszintes görgetéssel és
+csippentés-zoommal (`chartScrollableAxes` + `chartXVisibleDomain`, a
+csippentés `MagnifyGesture`-rel a látható tartomány hosszát állítja). Nem
+oszlopok: a hónapok összemosnak, és a zoom értelmét vesztené. Két kártya,
+közös zoommal:
+
+- **Mennyiség:** a napi gramm exponenciális mozgóátlaga (EMA), y = gramm/nap.
+  Egyszerű mozgóátlag helyett, mert annál egy nagy este N nap múlva egy
+  „lépcsővel" esik ki a görbéből, amikor semmi nem történt; az EMA-nál
+  simán lecseng. Szimmetrikus simítás (Gauss, LOESS) helyett, mert az a
+  jövő napjait is használná, és a görbe vége utólag mozogna. A felezési idő
+  a zoomhoz kötött: < 3 hónap látható → 7 nap, < 2 év → 30 nap, fölötte 90.
+  Ivásmentes napon a görbe süllyed, nem zuhan nullára — ezt jelenti a
+  szokás.
+- **Csúcs:** csak az ivós napokra, alkalomról alkalomra lépő EMA, két este
+  között vízszintes; a határ szaggatott vonala rajta. Zoltán döntése: a
+  csúcs-trend azt mutassa, „amikor iszol, milyen magasra mész" — hogy
+  romlik-e vagy javul-e a kontroll —, és ebbe nem számít bele, hány
+  ivásmentes nap volt két este között. Ha minden napra átlagolnánk, a
+  gyakoriságot és az intenzitást összekevernénk.
+- Alkalom-lista ebben a nézetben nincs; a mutató-kártya a teljes időszakra.
+  A lakat automatikusan érvényes rá, mert kilóg a 7 napból.
+
+**Hátravan:** a Trend szegmens (fent); az Év → hónap, hónap → hét ugrás
+visszahozása *látható* vezérlővel (pl. az érték-buborékban egy „Megnyitás"
+gomb), nem rejtett gesztussal; hogy a szegmensváltás megtartsa-e az ablak
+helyét a nulladik oldalra ugrás helyett; és hogy az ital nélkül maradt
+alkalmat (visszavont gyors felvitel, utolsó ital törlése) a `SessionStore`
+törölje-e — ma az aggregátor szűri ki (`drinkCount > 0`), az adatbázisban
+ott marad.
 
 ### 11.4 Adatmentés és készülékváltás
 

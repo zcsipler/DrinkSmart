@@ -29,6 +29,7 @@ struct HistoryView: View {
     @State private var range: HistoryRange = .week
     @State private var offset = 0
     @State private var showsPaywall = false
+    @State private var showsJump = false
 
     private var flags: FeatureFlags { .shared }
 
@@ -124,6 +125,16 @@ struct HistoryView: View {
                 }
             }
             .sheet(isPresented: $showsPaywall) { HistoryPaywallSheet() }
+            .sheet(isPresented: $showsJump) {
+                HistoryJumpSheet(
+                    range: range,
+                    current: snapshot.window.interval.start,
+                    recordsBegan: snapshot.days.first?.day.calendarDate ?? store.person.trackingStartedAt,
+                    now: store.now
+                ) { date in
+                    offset = HistoryWindow.offset(containing: date, range: range, now: store.now)
+                }
+            }
         }
     }
 
@@ -157,9 +168,22 @@ struct HistoryView: View {
 
             Spacer()
 
-            Text(verbatim: title(for: snapshot.window))
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundStyle(Theme.primaryText)
+            // The title is a button: tap to jump anywhere. The chevrons stay
+            // for the page next door — both, because reaching for a picker to
+            // go back one week is as wrong as paging thirty-six months.
+            Button {
+                showsJump = true
+            } label: {
+                HStack(spacing: 5) {
+                    Text(verbatim: title(for: snapshot.window))
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.primaryText)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Theme.secondaryText)
+                }
+            }
+            .buttonStyle(.plain)
 
             Spacer()
 

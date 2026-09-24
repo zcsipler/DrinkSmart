@@ -267,6 +267,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Seachtainí, míonna agus blianta taobh le taobh – agus gach oíche níos sine ná seacht lá.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Tá gach rud a logáil tú sábháilte cheana féin. Ní dhéanann an díghlasáil ach é a thaispeáint.",
     "Coming soon": "Ag teacht go luath",
+    "Today": "Inniu",
     "No data before %@": "Gan sonraí roimh %@",
     "vs.": "i gcomparáid le",
     "Grams": "Graim",

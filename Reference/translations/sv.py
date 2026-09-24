@@ -263,6 +263,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Veckor, månader och år sida vid sida – och varje kväll äldre än sju dagar.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Allt du har loggat är redan sparat. Att låsa upp visar det bara.",
     "Coming soon": "Kommer snart",
+    "Today": "Idag",
     "No data before %@": "Inga data före %@",
     "vs.": "jfr",
     "Grams": "Gram",

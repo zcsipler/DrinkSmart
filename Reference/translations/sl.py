@@ -260,6 +260,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Tedni, meseci in leta drug ob drugem – in vsak večer, starejši od sedmih dni.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Vse, kar si zabeležil, je že shranjeno. Odklep to le pokaže.",
     "Coming soon": "Kmalu",
+    "Today": "Danes",
     "No data before %@": "Ni podatkov pred %@",
     "vs.": "glede na",
     "Grams": "Grami",

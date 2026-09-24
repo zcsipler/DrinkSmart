@@ -267,6 +267,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Εβδομάδες, μήνες και χρόνια το ένα δίπλα στο άλλο – και κάθε βραδιά παλαιότερη από επτά ημέρες.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Όλα όσα έχετε καταγράψει είναι ήδη αποθηκευμένα. Το ξεκλείδωμα απλώς τα εμφανίζει.",
     "Coming soon": "Σύντομα",
+    "Today": "Σήμερα",
     "No data before %@": "Δεν υπάρχουν δεδομένα πριν από %@",
     "vs.": "έναντι",
     "Grams": "Γραμμάρια",

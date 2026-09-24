@@ -269,6 +269,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Wochen, Monate und Jahre nebeneinander – und jeder Abend, der älter als sieben Tage ist.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Alles, was du bisher eingetragen hast, ist bereits gespeichert. Das Freischalten zeigt es nur an.",
     "Coming soon": "Bald verfügbar",
+    "Today": "Heute",
     "No data before %@": "Keine Daten vor dem %@",
     "vs.": "vs.",
     "Grams": "Gramm",

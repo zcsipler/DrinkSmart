@@ -267,6 +267,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Ġimgħat, xhur u snin ħdejn xulxin – u kull lejla eqdem minn sebat ijiem.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Kulma rreġistrajt huwa diġà salvat. L-iftuħ juri biss dan.",
     "Coming soon": "Dalwaqt",
+    "Today": "Illum",
     "No data before %@": "L-ebda data qabel %@",
     "vs.": "kontra",
     "Grams": "Grammi",

@@ -137,6 +137,30 @@ struct HistoryWindowTests {
             .isWithinFreeWindow(at: now, calendar: calendar))
     }
 
+    // MARK: Jumping
+
+    @Test("A chosen date maps to the page that contains it")
+    func offsetForDate() {
+        // Today is Mon Sep 14. Sep 8 is in this week's page; Sep 7 in the one before.
+        #expect(HistoryWindow.offset(containing: date(2026, 9, 8), range: .week, now: now, calendar: calendar) == 0)
+        #expect(HistoryWindow.offset(containing: date(2026, 9, 7), range: .week, now: now, calendar: calendar) == 1)
+        #expect(HistoryWindow.offset(containing: date(2026, 8, 15), range: .month, now: now, calendar: calendar) == 1)
+        #expect(HistoryWindow.offset(containing: date(2023, 9, 1), range: .month, now: now, calendar: calendar) == 36)
+        #expect(HistoryWindow.offset(containing: date(2023, 9, 1), range: .year, now: now, calendar: calendar) == 3)
+        // Never into the future.
+        #expect(HistoryWindow.offset(containing: date(2027, 1, 1), range: .month, now: now, calendar: calendar) == 0)
+    }
+
+    @Test("Jumping to a date and reading the window back round-trips")
+    func offsetRoundTrips() {
+        let target = date(2023, 9, 1)
+        for range in HistoryRange.allCases {
+            let offset = HistoryWindow.offset(containing: target, range: range, now: now, calendar: calendar)
+            let interval = HistoryWindow.interval(for: range, offset: offset, now: now, calendar: calendar)
+            #expect(interval.start <= target && target < interval.end)
+        }
+    }
+
     // MARK: Paging limits
 
     @Test("The oldest offset reaches the first recorded day and no further")

@@ -262,6 +262,7 @@ TRANSLATIONS = {
     "Weeks, months and years side by side — and every evening older than seven days.": "Nädalad, kuud ja aastad kõrvuti – ja iga üle seitsme päeva vanune õhtu.",
     "Everything you have logged is already saved. Unlocking only shows it.": "Kõik, mille oled kirja pannud, on juba salvestatud. Avamine ainult näitab seda.",
     "Coming soon": "Peagi",
+    "Today": "Täna",
     "No data before %@": "Andmed puuduvad enne %@",
     "vs.": "võrreldes",
     "Grams": "Grammi",
