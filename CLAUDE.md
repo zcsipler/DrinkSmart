@@ -677,13 +677,24 @@ TestFlight (100 eszköz, Beta App Review nélkül).
 
 **Kész:** a motor sávval és ivási tempóval; SwiftData-perzisztencia alkalmanként
 befagyasztott profillal; migráció a régi UserDefaults-blobból; három tab;
-Live képernyő a mai napra, három nap-állapottal; előzmény-lista és
-alkalom-részletek; ital felvitele, szerkesztése és törlése — visszamenőlegesen
-is; egyszámos kijelzés opcionális tartománnyal; lebontási sebesség magyarázata
-és tippek a saját érték kiderítéséhez; 56 teszt; angol/magyar lokalizáció
-154 kulccsal. Több személy (11.5) a `FeatureFlags.multiPerson` mögött: a séma
-és a migráció mindenkinél fut, a váltó és a személy-felvitel csak bekapcsolva
-látszik — debug buildben a Profil alján, a „Developer" szekcióban.
+Live képernyő a mai napra, három nap-állapottal és a „‹ Tegnap" gombbal;
+ital felvitele, szerkesztése és törlése — visszamenőlegesen is; egyszámos
+kijelzés opcionális tartománnyal; lebontási sebesség magyarázata és tippek a
+saját érték kiderítéséhez; export / import JSON-ba; 24 nyelvű lokalizáció
+208 kulccsal (magyar és angol átnézve). **Előzmény (11.3):** Nap / Hét /
+Hónap / Év szegmens, chevronos lapozás, ugrás a fejléc dátumáról, mennyiség-
+és csúcs-chart, mutató-kártya, alkalom-lista, ingyenes ablak lakattal a
+`Feature.historyTrends` mögött; a Trend szegmens megépítve, de csak debug
+kísérletként kapcsolható (`Experiment.trendSegment`). Több személy (11.5) a
+`FeatureFlags.multiPerson` mögött: a séma és a migráció mindenkinél fut, a
+váltó és a személy-felvitel csak bekapcsolva látszik — debug buildben a
+Profil alján, a „Developer" szekcióban.
+
+**Tesztek:** 56 a `BACKit`-ben (Linuxon is futtatható, 6.); 37 a History
+modellre (`HistoryAggregateTests`, `HistoryWindowTests`,
+`HistoryTrendTests` — Foundation-only, ideiglenes csomagban Linuxon
+futtatva); 18 a perzisztenciára, ami **nem fut**, mert nincs app teszt
+target (12.).
 
 A CloudKit szinkron kódja megvan, de **ki van kapcsolva**
 (`BuildCapabilities.cloudSync = false`), mert az iCloud capability fizetős
@@ -692,12 +703,14 @@ Kikapcsolva az app pontosan úgy viselkedik, mint a szinkron-munka előtt.
 
 Az app **fordul és fut** szimulátoron, iPhone-ra telepítve van kipróbálva.
 
-Utolsó commit: `d0ef5aa` — „Add drinking pace, and show one number unless you
-ask for the range".
+Utolsó commit: `70353a5` — „Add a Day segment to History, and a Yesterday
+button on Live that opens it". A frissebb állást a `git log` mondja meg; ez
+a sor csak akkor frissül, ha a fejezetet is átírjuk.
 
 ## 11. Roadmap
 
-Zoltán tervei, prioritási sorrend nélkül. Egyik sincs elkezdve. Mielőtt
+Zoltán tervei, prioritási sorrend nélkül. Ami megépült, annak a fejezete
+azt mondja (11.3, 11.4 export/import, 11.5); a többi nincs elkezdve. Mielőtt
 bármelyikbe belevágnánk, kérdezzük meg, tényleg most jön-e — a sorrend
 változhat.
 
