@@ -949,7 +949,37 @@ alkalmaz, aztán töröl — az első tabváltáskor a nézet még nem is létez
 ezért kell mindkettő. A `SessionRow` → `SessionDetailView` út a Hét listából
 megmaradt. Teszt: `dayIsOneDrinkingDay` a `HistoryWindowTests`-ben (14).
 
-**Hátravan:** a Trend szegmens újragondolása és élesítése (fent); az Év → hónap, hónap → hét ugrás
+**Utólagos felvitel a Nap oldalon (2026. szeptember).** A kihagyott nap
+ezen az oldalon látszik meg — egy héttel később, üres napként —, ezért a
+pótlás is itt van, nem a Live dátumválasztóján italonként visszatekerve.
+Ugyanaz a lebegő „Add drink" kapszula, mint a Live-on, ugyanott
+(`AddDrinkCapsule`, közös nézet a `QuickAddBar`-ral), csak a Nap
+szegmensen, lakatolt napon nem. Üres napon a kapszula sincs: ott az
+üres-állapot kártya gombja az egyetlen felvitel (a rögzítés előtti napon
+is: az oda felvitt ital bizonyíték, hogy akkor már rögzítettünk, a
+`backdateTracking` viszi vissza a kezdetet) — két azonos gomb egy
+képernyőn zaj volt. Volt egy
+kör, amiben a gomb az itallista alatt ült, egy sornak rajzolva — egy valós
+estén a chart, a stat-sor és a lista a fold alá tolta, pont ott, ahol a
+legtöbb ital van. A mai oldalon ugyanúgy viselkedik, mint a Live-on. Múltbeli napon az `AddDrinkSheet` kapja a
+napot (`day`) és a nap legutóbb indult alkalmát: a lap rögtön az
+időválasztón nyílik, a chipek („15 min ago") nélkül, a választható
+tartomány az ivási nap (a dátum csak a benne lévő éjfélen léphet át), és
+az idő az utolsó ital végénél kezd, üres napon 20:00-kor. A mentés a
+sima `add`, ami eddig is dátum szerint irányított. **Ami emiatt
+változott a store-ban:** a `project` cél nélkül nem a nyitott alkalomhoz,
+hanem — az `add`-dal azonos szabállyal — az ital napját fedő alkalomhoz
+vetít, ha nincs, üres estéhez a `profileApplicable` profiljával; a
+napra szóló irányítást a `lastRouting` tartja meg a következő írásig
+(`rebuild` törli), mert a lap body-ja csúszkahúzás közben kilencszer
+kérdez, és a fetch nem fér bele egy frame-be. Ez a Live-on „Set exact
+time"-mal tegnapra állított italt is kijavítja: eddig a mai este tetejére
+vetített, a gomb viszont a tegnapi alkalomba tette.
+
+**Hátravan:** tömeges felvitel — nem csak pótlásra, a Live-on is: „20:00-tól
+fél óránként 8 sör" jellegű, előre megadott sorozat egy lépésben. Külön
+szerkesztő képernyő helyett az itteni felvitel bővítéseként, ha a
+használat igazolja; a Trend szegmens újragondolása és élesítése (fent); az Év → hónap, hónap → hét ugrás
 visszahozása *látható* vezérlővel (pl. az érték-buborékban egy „Megnyitás"
 gomb), nem rejtett gesztussal; hogy a szegmensváltás megtartsa-e az ablak
 helyét a nulladik oldalra ugrás helyett; és hogy az ital nélkül maradt

@@ -53,6 +53,9 @@ struct HistoryView: View {
     @State private var editingDrink: Drink?
     @State private var openRowID: UUID?
 
+    /// The day a drink is being filled in for, while the add sheet is up.
+    @State private var addingOn: DrinkingDay?
+
     private var flags: FeatureFlags { .shared }
 
     /// Filtered in memory for the same reason as in `LiveView`: a `@Query`
@@ -169,10 +172,14 @@ struct HistoryView: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 24)
+                        // Room for the floating capsule on the day page, so
+                        // the last drink row can scroll out from under it.
+                        .padding(.bottom, showsFloatingAdd(snapshot) ? 100 : 24)
                     }
                     .scrollIndicators(.hidden)
                 }
+
+                addDrinkBar(snapshot)
             }
             .navigationTitle(Text("History"))
             .navigationBarTitleDisplayMode(.inline)
@@ -190,6 +197,17 @@ struct HistoryView: View {
                 AddDrinkSheet(store: store, editing: drink, session: sessionOwning(drink))
             }
             .onChange(of: editingDrink?.id) { openRowID = nil }
+            // Today's page adds the way Live does — a drink being had now.
+            // A past day is filled in: the sheet gets the day, and the
+            // evening already on it, so the projection is drawn on top of
+            // those drinks with that evening's profile.
+            .sheet(item: $addingOn) { day in
+                if day.isCurrent(at: store.now) {
+                    AddDrinkSheet(store: store)
+                } else {
+                    AddDrinkSheet(store: store, session: latestSession(on: day), day: day)
+                }
+            }
             // The request may arrive before this view exists (the first
             // visit to the tab) or while it is already on screen.
             .onAppear { applyRequest() }
@@ -557,10 +575,16 @@ struct HistoryView: View {
     /// finished sessions in full, and — on today's page — the running one on
     /// top. Drinks are editable here as they are on Live; the page is the
     /// same evening, reached from the other side.
+    ///
+    /// Adding is here too, not only deleting and correcting. The day one
+    /// forgets to log is noticed on this page, a week later, as a gap — and
+    /// the fix belongs where the gap is seen, not on Live with the date
+    /// picker wound back one drink at a time.
     @ViewBuilder
     private func dayPage(_ snapshot: Snapshot, window: HistoryWindow) -> some View {
         let sessions = snapshot.sessionsInWindow.sorted { $0.startedAt < $1.startedAt }
         let hasLive = window.offset == 0 && !store.drinks.isEmpty
+        let day = shownDay
 
         VStack(spacing: 26) {
             if hasLive {
@@ -584,14 +608,58 @@ struct HistoryView: View {
             }
 
             if sessions.isEmpty && !hasLive {
-                dayEmptyState(window, recordsBegan: snapshot.recordsBegan)
+                dayEmptyState(window, recordsBegan: snapshot.recordsBegan, day: day)
+            }
+        }
+    }
+
+    /// The drinking day the current day page shows.
+    private var shownDay: DrinkingDay {
+        DrinkingDay.containing(store.now).offset(by: -offset)
+    }
+
+    /// Whether the day page has drinks on it — finished sessions, or the
+    /// running one on today's page. The same test `dayPage` uses to choose
+    /// between content and the empty state.
+    private func dayHasDrinks(_ snapshot: Snapshot) -> Bool {
+        !snapshot.sessionsInWindow.isEmpty || (offset == 0 && !store.drinks.isEmpty)
+    }
+
+    private func showsFloatingAdd(_ snapshot: Snapshot) -> Bool {
+        segment == .day && !snapshot.isLocked && dayHasDrinks(snapshot)
+    }
+
+    /// The same capsule as on Live, in the same place: at thumb height, over
+    /// the content, so it is on screen whether the evening above it is one
+    /// beer or twelve. It sat under the drink list first, drawn as one more
+    /// row — and on any real evening the chart, the figures and the list
+    /// pushed it below the fold, exactly where nobody scrolls to look for a
+    /// button they do not know is there.
+    ///
+    /// Day segment only, and not on a locked day: the lock blurs the content
+    /// and takes its hit testing away, but this floats outside the content,
+    /// so it has to step aside on its own. Not on an empty day either — the
+    /// empty-state card carries its own button, and there is nothing on the
+    /// page for this one to be pushed off screen by.
+    @ViewBuilder
+    private func addDrinkBar(_ snapshot: Snapshot) -> some View {
+        if showsFloatingAdd(snapshot) {
+            VStack(spacing: 0) {
+                Spacer()
+                AddDrinkCapsule { addingOn = shownDay }
+                    .fixedSize()
+                    .shadow(color: Theme.background.opacity(0.7), radius: 16, y: 6)
+                    .padding(.bottom, 12)
             }
         }
     }
 
     /// A day with nothing on it says which kind of nothing (5.7): not
-    /// recorded yet, or recorded and dry.
-    private func dayEmptyState(_ window: HistoryWindow, recordsBegan: Date?) -> some View {
+    /// recorded yet, or recorded and dry — and offers to fill it in, since
+    /// an empty day is exactly what a forgotten evening looks like. Before
+    /// records too: a drink filled in there is evidence we were already
+    /// keeping records, and the store moves the start back for it.
+    private func dayEmptyState(_ window: HistoryWindow, recordsBegan: Date?, day: DrinkingDay) -> some View {
         let unknown = window.days.first?.state == .unknown
         return VStack(spacing: 12) {
             Image(systemName: unknown ? "calendar.badge.minus" : "face.smiling")
@@ -612,9 +680,26 @@ struct HistoryView: View {
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.primaryText)
             }
+
+            Button {
+                addingOn = day
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .bold))
+                    Text("Add drink")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(Theme.background)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 11)
+                .background(Theme.calm, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 54)
+        .padding(.vertical, 44)
         .background(Theme.surface.opacity(0.5), in: RoundedRectangle(cornerRadius: 18))
         .padding(.top, 20)
     }
@@ -624,6 +709,13 @@ struct HistoryView: View {
         sessions.first { session in
             session.endedAt != nil && (session.drinks ?? []).contains { $0.id == drink.id }
         }
+    }
+
+    /// The session a drink filled in for this day would join — the same one
+    /// `SessionStore.add` routes to: the latest to start on that drinking
+    /// day. `sessions` is newest first, so the first match is it.
+    private func latestSession(on day: DrinkingDay) -> DrinkingSession? {
+        sessions.first { day.contains($0.startedAt) }
     }
 
     // MARK: Lock

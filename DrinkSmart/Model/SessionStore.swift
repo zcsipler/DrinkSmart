@@ -744,6 +744,13 @@ final class SessionStore {
     /// today's — otherwise the projection would describe a night that never
     /// happened.
     ///
+    /// Without `in`, the comparison is made against the session `add` would
+    /// route the drink to — the one covering its drinking day, not the one
+    /// that happens to be open. A beer filled in for last Friday is previewed
+    /// on top of last Friday's drinks and with the profile that evening would
+    /// freeze; previewing it on top of tonight's would show a curve the Add
+    /// button then does not produce.
+    ///
     /// The answer to the last question asked is kept, because a projection is
     /// six simulations and a SwiftUI body reads it several times per pass. See
     /// `ProjectionKey`.
@@ -752,18 +759,19 @@ final class SessionStore {
         excluding excludedID: UUID? = nil,
         in target: DrinkingSession? = nil
     ) -> BandedProjection {
-        let holder = target ?? session
-        let all = holder?.sortedDrinks ?? drinks
+        let setting = target.map { ProjectionSetting(holder: $0) }
+            ?? projectionSetting(for: candidate.consumedAt)
+        let all = setting.consumed
         // The same cut `add` will make, so the curve previewed above the Add
         // button is the curve you get after pressing it.
         let others = (excludedID.map { id in all.filter { $0.id != id } } ?? all)
             .shorteningPour(for: candidate)
 
         let key = ProjectionKey(
-            profile: holder?.profile ?? person.profile,
+            profile: setting.profile,
             consumed: others,
             candidate: candidate,
-            limit: holder?.limit ?? limit
+            limit: setting.limit
         )
         if let lastProjection, lastProjection.key == key { return lastProjection.value }
 
@@ -795,6 +803,55 @@ final class SessionStore {
     /// that asked.
     @ObservationIgnored
     private var lastProjection: (key: ProjectionKey, value: BandedProjection)?
+
+    /// What a candidate is projected on top of: the drinks already there, and
+    /// the profile and limit they are judged with.
+    private struct ProjectionSetting {
+        let consumed: [Drink]
+        let profile: BodyProfile
+        let limit: Double
+
+        init(holder: DrinkingSession) {
+            consumed = holder.sortedDrinks
+            profile = holder.profile
+            limit = holder.limit
+        }
+
+        init(consumed: [Drink], profile: BodyProfile, limit: Double) {
+            self.consumed = consumed
+            self.profile = profile
+            self.limit = limit
+        }
+    }
+
+    /// The setting `add` would put a drink at this time into — the session
+    /// covering its drinking day, or, when there is none, an empty evening
+    /// with the profile `startSession` would freeze for it.
+    ///
+    /// Routing a day means a fetch whenever the open session does not cover
+    /// it, and a sheet's body asks for the projection nine times per pass
+    /// while a slider is dragged. The answer for one drinking day is kept
+    /// until the store next writes; `rebuild` clears it.
+    private func projectionSetting(for date: Date) -> ProjectionSetting {
+        let day = DrinkingDay.containing(date)
+        if let routing = lastRouting, routing.day == day { return routing.setting }
+
+        let setting: ProjectionSetting
+        if let holder = sessionCovering(date) {
+            setting = ProjectionSetting(holder: holder)
+        } else {
+            setting = ProjectionSetting(
+                consumed: [],
+                profile: profileApplicable(at: date),
+                limit: person.limit
+            )
+        }
+        lastRouting = (day, setting)
+        return setting
+    }
+
+    @ObservationIgnored
+    private var lastRouting: (day: DrinkingDay, setting: ProjectionSetting)?
 
     func tick() {
         now = .now
@@ -895,6 +952,9 @@ final class SessionStore {
     // MARK: Plumbing
 
     private func rebuild() {
+        // Every write ends here, and a write can move a drink between days.
+        lastRouting = nil
+
         let drinks = session?.sortedDrinks ?? []
         guard let session, !drinks.isEmpty else {
             band = .empty

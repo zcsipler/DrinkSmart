@@ -95,22 +95,7 @@ struct QuickAddBar: View {
     // MARK: The button that was always here
 
     private var addDrinkButton: some View {
-        Button(action: onOpenSheet) {
-            HStack(spacing: 9) {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .bold))
-                Text("Add drink")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundStyle(Theme.background)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 13)
-            .frame(maxHeight: .infinity)
-            .background(Theme.calm, in: Capsule())
-        }
-        .buttonStyle(.plain)
+        AddDrinkCapsule(action: onOpenSheet)
     }
 
     // MARK: The shortcut
@@ -164,6 +149,34 @@ struct QuickAddBar: View {
 
     private func volumeLabel(_ drink: Drink) -> String {
         "\(drink.volumeMl.formatted(.number.precision(.fractionLength(0)))) ml"
+    }
+}
+
+/// The "Add drink" capsule itself.
+///
+/// One view for both screens that open the sheet — Live and the History day
+/// page — so that adding a drink looks and sits the same wherever the day is
+/// being looked at. A second drawing would drift.
+struct AddDrinkCapsule: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .bold))
+                Text("Add drink")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(Theme.background)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 13)
+            .frame(maxHeight: .infinity)
+            .background(Theme.calm, in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 

@@ -21,6 +21,14 @@ struct AddDrinkSheet: View {
     /// that evening's own profile snapshot.
     let session: DrinkingSession?
 
+    /// The past drinking day a new drink is being filled in for, when it is
+    /// added from the History day page rather than logged as it happens.
+    ///
+    /// The day is fixed and the time is the question: "15 min ago" means
+    /// nothing about last Friday, so the sheet opens on the time picker,
+    /// limited to that day, and starts where that evening left off.
+    let day: DrinkingDay?
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var template: DrinkTemplate
@@ -36,10 +44,16 @@ struct AddDrinkSheet: View {
     /// existing drink's id, which is what lets `update(_:)` find it.
     @State private var draftID: UUID
 
-    init(store: SessionStore, editing: Drink? = nil, session: DrinkingSession? = nil) {
+    init(
+        store: SessionStore,
+        editing: Drink? = nil,
+        session: DrinkingSession? = nil,
+        day: DrinkingDay? = nil
+    ) {
         self.store = store
         self.editing = editing
         self.session = session
+        self.day = day
 
         let template = editing.map(DrinkCatalog.template(for:)) ?? DrinkCatalog.all[0]
         _template = State(initialValue: template)
@@ -49,14 +63,40 @@ struct AddDrinkSheet: View {
         _drinkingMinutes = State(
             initialValue: editing?.drinkingMinutes ?? template.defaultDrinkingMinutes
         )
-        _consumedAt = State(initialValue: editing?.consumedAt ?? .now)
+        _consumedAt = State(
+            initialValue: editing?.consumedAt
+                ?? day.map { Self.startingTime(on: $0, after: session, now: store.now) }
+                ?? .now
+        )
         _draftID = State(initialValue: editing?.id ?? UUID())
         // "15 min ago" is meaningless when correcting a drink from hours back,
-        // so an edit opens straight on the exact-time picker.
-        _showsTimePicker = State(initialValue: editing != nil)
+        // or when filling in a day that is over, so both open straight on the
+        // exact-time picker.
+        _showsTimePicker = State(initialValue: editing != nil || day != nil)
     }
 
     private var isEditing: Bool { editing != nil }
+
+    /// Filling in a past day is *filling in*: a forgotten evening, or the
+    /// rest of one. So the first drink of an empty day is offered at eight in
+    /// the evening, and a drink added to an evening that already has some
+    /// starts where the last one was finished — the way `add` would have
+    /// timed it had it been logged then.
+    private static func startingTime(on day: DrinkingDay, after session: DrinkingSession?, now: Date) -> Date {
+        let proposed: Date
+        if let last = session?.sortedDrinks.last {
+            proposed = last.consumedAt.addingTimeInterval(last.drinkingMinutes * 60)
+        } else {
+            proposed = day.start.addingTimeInterval(15 * 3600)
+        }
+        return min(max(proposed, day.start), Self.latestTime(on: day, now: now))
+    }
+
+    /// The last moment a drink on this day could have been had: the end of
+    /// the drinking day, or now if the day is still running.
+    private static func latestTime(on day: DrinkingDay, now: Date) -> Date {
+        min(day.end.addingTimeInterval(-60), now)
+    }
 
     /// The simulation is not cheap — six RK4 runs — and the body reads this
     /// from nine places. `SessionStore.project` keeps the last answer, so the
@@ -281,8 +321,27 @@ struct AddDrinkSheet: View {
 
     // MARK: Time
 
+    /// A day being filled in shows which day it is where the quick chips
+    /// would otherwise show the time — the picker below already shows that.
+    private var timeSectionTrailing: String? {
+        if let day {
+            return day.calendarDate.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+        }
+        return showsTimePicker ? nil : consumedAt.hourMinute
+    }
+
+    /// How far the picker may go. A day being filled in is bounded by its
+    /// own drinking day, which lets the date part move only across the
+    /// midnight inside it — a drink at half past one is still that evening's.
+    private var selectableTimes: ClosedRange<Date> {
+        if let day {
+            return day.start...Self.latestTime(on: day, now: store.now)
+        }
+        return .distantPast...Date.now
+    }
+
     private var timeSection: some View {
-        ControlSection("When", trailing: showsTimePicker ? nil : consumedAt.hourMinute) {
+        ControlSection("When", trailing: timeSectionTrailing) {
             VStack(spacing: 10) {
                 if showsTimePicker {
                     // Date as well as time, so a drink can be filled in days
@@ -291,7 +350,7 @@ struct AddDrinkSheet: View {
                     // is open now.
                     DatePicker(
                         selection: $consumedAt,
-                        in: ...Date.now,
+                        in: selectableTimes,
                         displayedComponents: [.date, .hourAndMinute]
                     ) {
                         Text("When")
@@ -308,18 +367,22 @@ struct AddDrinkSheet: View {
                     }
                 }
 
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { showsTimePicker.toggle() }
-                } label: {
-                    if showsTimePicker {
-                        Text("Done")
-                    } else {
-                        Text("Set exact time")
+                // The chips are relative to now, so on a day that is over
+                // there is nothing to toggle back to.
+                if day == nil {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showsTimePicker.toggle() }
+                    } label: {
+                        if showsTimePicker {
+                            Text("Done")
+                        } else {
+                            Text("Set exact time")
+                        }
                     }
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.calm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(Theme.calm)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
