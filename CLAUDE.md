@@ -1039,10 +1039,25 @@ képernyőn zaj volt. Volt egy
 kör, amiben a gomb az itallista alatt ült, egy sornak rajzolva — egy valós
 estén a chart, a stat-sor és a lista a fold alá tolta, pont ott, ahol a
 legtöbb ital van. A mai oldalon ugyanúgy viselkedik, mint a Live-on. Múltbeli napon az `AddDrinkSheet` kapja a
-napot (`day`) és a nap legutóbb indult alkalmát: a lap rögtön az
-időválasztón nyílik, a chipek („15 min ago") nélkül, a választható
-tartomány az ivási nap (a dátum csak a benne lévő éjfélen léphet át), és
-az idő az utolsó ital végénél kezd, üres napon 20:00-kor. A mentés a
+napot (`day`) és a nap legutóbb indult alkalmát: az idő szekció a lap
+**tetejére** kerül, a típusválasztó elé (az 5.10 sorrendje a live esethez
+szól — pótlásnál a típus a szokásos, az idő az egyetlen, amit biztosan be
+kell írni, és négy vezérlő alatt kellett érte görgetni), és rögtön a
+**görgethető** (`.wheel`) választó áll ott, nem a kompakt — az egy
+koppintás a popoverre és utána tekerés, itt egy tekerés. **Csak óra–perc
+kerék, dátumoszlop nélkül:** a napot a mögötte lévő oldal már kimondta, és
+a dátumoszlop egy 01:43-as italra „Today"-t írt volna a Tegnap feliratú
+oldalon — az ivási nap belső éjfél-képe, ami a felhasználót nem érdekli.
+A kerékről vett időt a lap maga helyezi el a napon az 5.6 szabályával
+(`timeOnDay`: 5:00-tól a nap estéje, 5:00 előtt az éjfél utáni rész), a
+„When" fejléc jobb oldalán pedig a kapott naptári dátum áll, ami éjfélen
+át tekerve átvált. A chipek („15 min ago") nincsenek. **A kerék a mostani
+óra-percen áll, a napra helyezve** (tegnap 22:06, ha most 22:06 van) — az
+iOS dátumválasztók konvenciója, és átlátszó szabály. Volt okosabb: az
+utolsó ital vége, üres napon 20:00 — a képernyőn viszont egy 01:13-as
+ital + 30 perc „01:43"-ként jelent meg, levezetés nélkül, és véletlen
+számnak látszott. A kiindulópontnak nem jónak kell lennie, hanem
+nyilvánvalónak. A mentés a
 sima `add`, ami eddig is dátum szerint irányított. **Ami emiatt
 változott a store-ban:** a `project` cél nélkül nem a nyitott alkalomhoz,
 hanem — az `add`-dal azonos szabállyal — az ital napját fedő alkalomhoz

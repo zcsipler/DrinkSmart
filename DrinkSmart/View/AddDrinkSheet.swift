@@ -65,7 +65,7 @@ struct AddDrinkSheet: View {
         )
         _consumedAt = State(
             initialValue: editing?.consumedAt
-                ?? day.map { Self.startingTime(on: $0, after: session, now: store.now) }
+                ?? day.map { Self.startingTime(on: $0, now: store.now) }
                 ?? .now
         )
         _draftID = State(initialValue: editing?.id ?? UUID())
@@ -77,19 +77,33 @@ struct AddDrinkSheet: View {
 
     private var isEditing: Bool { editing != nil }
 
-    /// Filling in a past day is *filling in*: a forgotten evening, or the
-    /// rest of one. So the first drink of an empty day is offered at eight in
-    /// the evening, and a drink added to an evening that already has some
-    /// starts where the last one was finished — the way `add` would have
-    /// timed it had it been logged then.
-    private static func startingTime(on day: DrinkingDay, after session: DrinkingSession?, now: Date) -> Date {
-        let proposed: Date
-        if let last = session?.sortedDrinks.last {
-            proposed = last.consumedAt.addingTimeInterval(last.drinkingMinutes * 60)
-        } else {
-            proposed = day.start.addingTimeInterval(15 * 3600)
-        }
-        return min(max(proposed, day.start), Self.latestTime(on: day, now: now))
+    /// Where the time wheel starts on a day being filled in: the clock time
+    /// right now, placed on that day — the convention every iOS date picker
+    /// follows, and a rule the user can see through at a glance.
+    ///
+    /// It used to be cleverer: the end of the day's last drink, or 20:00 on
+    /// an empty day. Clever read as random — a drink at 01:13 plus its half
+    /// hour offered "01:43" with nothing on screen to say why. A starting
+    /// point for spinning does not have to be a good guess; it has to be
+    /// obvious.
+    private static func startingTime(on day: DrinkingDay, now: Date) -> Date {
+        Self.place(clockTimeOf: now, on: day, now: now)
+    }
+
+    /// A clock time, placed on the drinking day by the rule the whole app
+    /// files evenings under days (5.6): hours from the boundary on are that
+    /// evening, hours before it are the small hours after its midnight.
+    private static func place(clockTimeOf picked: Date, on day: DrinkingDay, now: Date) -> Date {
+        let calendar = Calendar.current
+        let parts = calendar.dateComponents([.hour, .minute], from: picked)
+        let hour = parts.hour ?? 0
+        let anchor = hour >= DrinkingDay.boundaryHour
+            ? day.start
+            : calendar.date(byAdding: .day, value: 1, to: day.start) ?? day.start
+        let placed = calendar.date(
+            bySettingHour: hour, minute: parts.minute ?? 0, second: 0, of: anchor
+        ) ?? picked
+        return min(max(placed, day.start), Self.latestTime(on: day, now: now))
     }
 
     /// The last moment a drink on this day could have been had: the end of
@@ -132,12 +146,23 @@ struct AddDrinkSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 22) {
+                    // Logging as it happens, the time is "now" and the type
+                    // is the question, so the type comes first (5.10).
+                    // Filling in a past day, it is the other way round: the
+                    // drink is most likely the usual one, and the time is the
+                    // one thing that has to be typed — so it leads, instead of
+                    // sitting under four controls that will not be touched.
+                    if day != nil {
+                        timeSection
+                    }
                     typePicker
                     volumeSection
                     abvSection
                     stomachSection
                     paceSection
-                    timeSection
+                    if day == nil {
+                        timeSection
+                    }
                     setDefaultButton
                 }
                 .padding(.horizontal, 20)
@@ -321,13 +346,29 @@ struct AddDrinkSheet: View {
 
     // MARK: Time
 
-    /// A day being filled in shows which day it is where the quick chips
-    /// would otherwise show the time — the picker below already shows that.
+    /// Filling in a day, the header carries the calendar date the chosen time
+    /// falls on — the one thing the time wheel cannot say, and the one that
+    /// changes when the wheel crosses midnight. Otherwise nothing while the
+    /// compact picker is out, since it shows date and time itself.
     private var timeSectionTrailing: String? {
-        if let day {
-            return day.calendarDate.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+        if day != nil {
+            return consumedAt.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
         }
         return showsTimePicker ? nil : consumedAt.hourMinute
+    }
+
+    /// The wheel's view of `consumedAt`: a clock time, placed on the day
+    /// being filled in (`place`). So spinning to 01:43 on the page called
+    /// Yesterday lands on the morning after, without anyone having to know
+    /// that a drinking day starts at five.
+    private var timeOnDay: Binding<Date> {
+        Binding(
+            get: { consumedAt },
+            set: { picked in
+                guard let day else { consumedAt = picked; return }
+                consumedAt = Self.place(clockTimeOf: picked, on: day, now: store.now)
+            }
+        )
     }
 
     /// How far the picker may go. A day being filled in is bounded by its
@@ -343,7 +384,25 @@ struct AddDrinkSheet: View {
     private var timeSection: some View {
         ControlSection("When", trailing: timeSectionTrailing) {
             VStack(spacing: 10) {
-                if showsTimePicker {
+                if day != nil {
+                    // Filling in a past day, the time is the one thing that
+                    // has to be entered, so the wheels are already out: one
+                    // spin, not a tap on a popover and then a spin. Only the
+                    // time: the day was chosen on the page behind, and a date
+                    // column would have said "Today" for a drink at 01:43 on
+                    // the page titled Yesterday — the drinking day's inside
+                    // view of midnight, which is not the user's.
+                    DatePicker(
+                        selection: timeOnDay,
+                        displayedComponents: [.hourAndMinute]
+                    ) {
+                        Text("When")
+                    }
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity)
+                    .tint(Theme.calm)
+                } else if showsTimePicker {
                     // Date as well as time, so a drink can be filled in days
                     // or months later. The store routes it to the session
                     // covering that drinking day rather than to whichever one
