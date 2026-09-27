@@ -349,4 +349,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Pre tento deň nie sú denné záznamy',
     'Monthly total: %@': 'Mesačný súčet: %@',
     'A dry month': 'Suchý mesiac',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Odstrániť %@?',
+    'Remove': 'Odstrániť',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Vymaže posedenia (%@), nápoje (%@) a mesačné súčty (%@). Nedá sa to vrátiť späť.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Vymaže posedenia (%@) a nápoje (%@). Nedá sa to vrátiť späť.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Potiahni hosťa doľava, ak ho chceš odstrániť so všetkým, čo je pri ňom zaznamenané. Teba odstrániť nemožno.',
+    'People': 'Ľudia',
+    'Owner': 'Vlastník',
+    'Everyone this app records. Switch, add, or remove someone.': 'Všetci, ktorých táto aplikácia zaznamenáva. Prepni, pridaj alebo odstráň niekoho.',
 }

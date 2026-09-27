@@ -355,4 +355,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Šiai dienai nėra dienos įrašų',
     'Monthly total: %@': 'Mėnesio suma: %@',
     'A dry month': 'Blaivus mėnuo',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Pašalinti %@?',
+    'Remove': 'Pašalinti',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Ištrina sesijas: %@, gėrimus: %@ ir mėnesio sumas: %@. To atšaukti negalima.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Ištrina sesijas: %@ ir gėrimus: %@. To atšaukti negalima.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Braukite kairėn ant svečio, kad pašalintumėte jį su viskuo, kas jam užfiksuota. Jūsų pašalinti negalima.',
+    'People': 'Žmonės',
+    'Owner': 'Savininkas',
+    'Everyone this app records. Switch, add, or remove someone.': 'Visi, kuriuos fiksuoja ši programa. Perjunkite, pridėkite arba pašalinkite ką nors.',
 }

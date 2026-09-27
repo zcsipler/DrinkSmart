@@ -355,4 +355,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Nu există înregistrări zilnice pentru această zi',
     'Monthly total: %@': 'Total lunar: %@',
     'A dry month': 'O lună fără alcool',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Elimini %@?',
+    'Remove': 'Elimină',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Șterge %@ ocazii, %@ băuturi și %@ totaluri lunare. Nu se poate anula.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Șterge %@ ocazii și %@ băuturi. Nu se poate anula.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Glisează la stânga pe un invitat pentru a-l elimina cu tot ce a fost înregistrat pentru el. Tu nu poți fi eliminat.',
+    'People': 'Persoane',
+    'Owner': 'Proprietar',
+    'Everyone this app records. Switch, add, or remove someone.': 'Toți cei pe care îi înregistrează această aplicație. Schimbă, adaugă sau elimină pe cineva.',
 }

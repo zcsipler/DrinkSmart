@@ -8048,6 +8048,304 @@
         }
       }
     },
+    "Deletes %@ occasions and %@ drinks. This cannot be undone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deletes %@ occasions and %@ drinks. This cannot be undone."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Изтрива сесии: %@ и напитки: %@. Това не може да бъде отменено."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Smaže posezení (%@) a nápoje (%@). Nelze vrátit zpět."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sletter %@ sessioner og %@ drinks. Dette kan ikke fortrydes."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Löscht %@ Sitzungen und %@ Getränke. Das lässt sich nicht rückgängig machen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Διαγράφει %@ βραδιές και %@ ποτά. Δεν αναιρείται."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Borra %@ ocasiones y %@ bebidas. No se puede deshacer."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kustutab joomiskorrad: %@ ja joogid: %@. Seda ei saa tagasi võtta."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Poistaa %@ juomakertaa ja %@ juomaa. Tätä ei voi kumota."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Supprime %@ sessions et %@ verres. Cette action est irréversible."
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scriosann sé %@ ócáid agus %@ deoch. Ní féidir é seo a chealú."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Briše sesije: %@ i pića: %@. Ovo se ne može poništiti."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Töröl %@ alkalmat és %@ italt. Ez nem vonható vissza."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elimina %@ occasioni e %@ drink. Non è possibile annullare."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ištrina sesijas: %@ ir gėrimus: %@. To atšaukti negalima."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dzēš reizes: %@ un dzērienus: %@. To nevar atsaukt."
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Iħassar %@ okkażjonijiet u %@ xarbiet. Dan ma jistax jitreġġa' lura."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wist %@ gelegenheden en %@ drankjes. Dit kan niet ongedaan worden gemaakt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usuwa sesji: %@ i drinków: %@. Tego nie można cofnąć."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Apaga %@ ocasiões e %@ bebidas. Isto não pode ser anulado."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Șterge %@ ocazii și %@ băuturi. Nu se poate anula."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vymaže posedenia (%@) a nápoje (%@). Nedá sa to vrátiť späť."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Izbriše dogodke: %@ in pijače: %@. Tega ni mogoče razveljaviti."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Raderar %@ tillfällen och %@ drycker. Det går inte att ångra."
+          }
+        }
+      }
+    },
+    "Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Изтрива сесии: %@, напитки: %@ и месечни суми: %@. Това не може да бъде отменено."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Smaže posezení (%@), nápoje (%@) a měsíční součty (%@). Nelze vrátit zpět."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sletter %@ sessioner, %@ drinks og %@ månedstotaler. Dette kan ikke fortrydes."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Löscht %@ Sitzungen, %@ Getränke und %@ Monatssummen. Das lässt sich nicht rückgängig machen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Διαγράφει %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα. Δεν αναιρείται."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Borra %@ ocasiones, %@ bebidas y %@ totales mensuales. No se puede deshacer."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kustutab joomiskorrad: %@, joogid: %@ ja kuusummad: %@. Seda ei saa tagasi võtta."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Poistaa %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa. Tätä ei voi kumota."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Supprime %@ sessions, %@ verres et %@ totaux mensuels. Cette action est irréversible."
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scriosann sé %@ ócáid, %@ deoch agus %@ iomlán míosúil. Ní féidir é seo a chealú."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Briše sesije: %@, pića: %@ i mjesečne zbrojeve: %@. Ovo se ne može poništiti."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Töröl %@ alkalmat, %@ italt és %@ havi összeget. Ez nem vonható vissza."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elimina %@ occasioni, %@ drink e %@ totali mensili. Non è possibile annullare."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ištrina sesijas: %@, gėrimus: %@ ir mėnesio sumas: %@. To atšaukti negalima."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dzēš reizes: %@, dzērienus: %@ un mēneša kopsummas: %@. To nevar atsaukt."
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Iħassar %@ okkażjonijiet, %@ xarbiet u %@ totali ta' kull xahar. Dan ma jistax jitreġġa' lura."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wist %@ gelegenheden, %@ drankjes en %@ maandtotalen. Dit kan niet ongedaan worden gemaakt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usuwa sesji: %@, drinków: %@ i sum miesięcznych: %@. Tego nie można cofnąć."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Apaga %@ ocasiões, %@ bebidas e %@ totais mensais. Isto não pode ser anulado."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Șterge %@ ocazii, %@ băuturi și %@ totaluri lunare. Nu se poate anula."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vymaže posedenia (%@), nápoje (%@) a mesačné súčty (%@). Nedá sa to vrátiť späť."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Izbriše dogodke: %@, pijače: %@ in mesečne seštevke: %@. Tega ni mogoče razveljaviti."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Raderar %@ tillfällen, %@ drycker och %@ månadssummor. Det går inte att ångra."
+          }
+        }
+      }
+    },
     "Display": {
       "extractionState": "manual",
       "localizations": {
@@ -9832,6 +10130,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Tom mage"
+          }
+        }
+      }
+    },
+    "Everyone this app records. Switch, add, or remove someone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everyone this app records. Switch, add, or remove someone."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Всички, които това приложение записва. Превключи, добави или премахни някого."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Všichni, které tato aplikace zaznamenává. Přepni, přidej nebo odeber někoho."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alle, som denne app registrerer. Skift, tilføj eller fjern nogen."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alle, die diese App aufzeichnet. Wechseln, hinzufügen oder entfernen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Όλοι όσους καταγράφει αυτή η εφαρμογή. Άλλαξε, πρόσθεσε ή αφαίρεσε κάποιον."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Todas las personas que registra esta app. Cambia, añade o elimina a alguien."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kõik, keda see rakendus salvestab. Vaheta, lisa või eemalda keegi."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaikki, joita tämä sovellus kirjaa. Vaihda, lisää tai poista joku."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toutes les personnes que cette app enregistre. Changer, ajouter ou retirer quelqu'un."
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Gach duine a thaifeadann an aip seo. Athraigh, cuir leis nó bain duine."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Svi koje ova aplikacija bilježi. Prebaci, dodaj ili ukloni nekoga."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindenki, akit ez az app rögzít. Válts, vegyél fel vagy távolíts el valakit."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tutte le persone che questa app registra. Cambia, aggiungi o rimuovi qualcuno."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Visi, kuriuos fiksuoja ši programa. Perjunkite, pridėkite arba pašalinkite ką nors."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Visi, ko šī lietotne ieraksta. Pārslēdz, pievieno vai noņem kādu."
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kulħadd li din l-app tirreġistra. Aqleb, żid jew neħħi lil xi ħadd."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Iedereen die deze app registreert. Wissel, voeg toe of verwijder iemand."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wszyscy, których zapisuje ta aplikacja. Przełącz, dodaj lub usuń kogoś."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Todas as pessoas que esta app regista. Muda, adiciona ou remove alguém."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toți cei pe care îi înregistrează această aplicație. Schimbă, adaugă sau elimină pe cineva."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Všetci, ktorých táto aplikácia zaznamenáva. Prepni, pridaj alebo odstráň niekoho."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vsi, ki jih ta aplikacija beleži. Preklopi, dodaj ali odstrani koga."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alla som den här appen registrerar. Byt, lägg till eller ta bort någon."
           }
         }
       }
@@ -17435,6 +17882,155 @@
         }
       }
     },
+    "Owner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Owner"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Собственик"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vlastník"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ejer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Inhaber"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Κάτοχος"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Titular"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Omanik"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Omistaja"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Propriétaire"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Úinéir"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vlasnik"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tulajdonos"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Titolare"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Savininkas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Īpašnieks"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sid"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Eigenaar"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Właściciel"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Titular"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Proprietar"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vlastník"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lastnik"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ägare"
+          }
+        }
+      }
+    },
     "Peak %@": {
       "extractionState": "manual",
       "localizations": {
@@ -17878,6 +18474,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Toppade omkring %@"
+          }
+        }
+      }
+    },
+    "People": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Хора"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lidé"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Άτομα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personas"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Inimesed"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Henkilöt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personnes"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Daoine"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Osobe"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Személyek"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Persone"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Žmonės"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personas"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Persuni"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Osoby"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pessoas"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Persoane"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ľudia"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Osebe"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Personer"
           }
         }
       }
@@ -19666,6 +20411,304 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Regelbundet drickande höjer den: leverenzymet som gör jobbet induceras av användning. Den är i genomsnitt också något högre hos kvinnor, och lägre på tom mage eller vid leverproblem."
+          }
+        }
+      }
+    },
+    "Remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Премахване"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odebrat"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fjern"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Entfernen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Αφαίρεση"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Eliminar"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Eemalda"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Poista"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Retirer"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bain"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ukloni"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eltávolítás"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rimuovi"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pašalinti"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Noņemt"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Neħħi"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Verwijderen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usuń"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Remover"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elimină"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odstrániť"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odstrani"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ta bort"
+          }
+        }
+      }
+    },
+    "Remove %@?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@?"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Да се премахне ли %@?"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odebrat %@?"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fjern %@?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ entfernen?"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Να αφαιρεθεί ο/η %@;"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "¿Eliminar a %@?"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kas eemaldada %@?"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Poistetaanko %@?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Retirer %@ ?"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bain %@?"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ukloniti %@?"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eltávolítod: %@?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rimuovere %@?"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pašalinti %@?"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vai noņemt %@?"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tneħħi lil %@?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ verwijderen?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usunąć %@?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Remover %@?"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elimini %@?"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odstrániť %@?"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odstranim %@?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ta bort %@?"
           }
         }
       }
@@ -22497,6 +23540,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Styrka"
+          }
+        }
+      }
+    },
+    "Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe left on a guest to remove them with everything recorded under them. You cannot be removed."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Плъзни наляво върху гост, за да го премахнеш с всичко, записано за него. Ти не можеш да бъдеш премахнат."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Přejeď u hosta doleva, chceš-li ho odebrat se vším, co je u něj zaznamenáno. Tebe odebrat nelze."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Stryg til venstre på en gæst for at fjerne dem med alt, der er registreret under dem. Du kan ikke fjernes."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wische bei einem Gast nach links, um ihn mit allem zu entfernen, was unter ihm aufgezeichnet wurde. Du selbst kannst nicht entfernt werden."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Σύρε αριστερά σε έναν επισκέπτη για να τον αφαιρέσεις μαζί με ό,τι έχει καταγραφεί για εκείνον. Εσύ δεν μπορείς να αφαιρεθείς."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desliza a la izquierda sobre un invitado para eliminarlo con todo lo registrado bajo su nombre. A ti no se te puede eliminar."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Libista külalise real vasakule, et ta koos kõige tema all salvestatuga eemaldada. Sind eemaldada ei saa."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pyyhkäise vierasta vasemmalle poistaaksesi hänet ja kaiken hänelle kirjatun. Sinua ei voi poistaa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Balaie vers la gauche sur un invité pour le retirer avec tout ce qui a été enregistré sous son nom. Tu ne peux pas être retiré."
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Svaidhpeáil ar chlé ar aoi chun é a bhaint le gach rud a taifeadadh faoi. Ní féidir tusa a bhaint."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Povuci ulijevo na gostu da ga ukloniš sa svime što je zabilježeno pod njim. Tebe se ne može ukloniti."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Húzd balra a vendéget, hogy eltávolítsd mindennel együtt, amit alatta rögzítettünk. Téged nem lehet eltávolítani."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorri a sinistra su un ospite per rimuoverlo con tutto ciò che è stato registrato a suo nome. Tu non puoi essere rimosso."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Braukite kairėn ant svečio, kad pašalintumėte jį su viskuo, kas jam užfiksuota. Jūsų pašalinti negalima."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pavelc pa kreisi uz viesa, lai noņemtu viņu ar visu, kas ierakstīts zem viņa. Tevi noņemt nevar."
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Iswajpja lejn ix-xellug fuq mistieden biex tneħħih ma' kulma ġie rreġistrat taħtu. Int ma tistax titneħħa."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Veeg naar links op een gast om hen te verwijderen met alles wat onder hen is geregistreerd. Jij kunt niet worden verwijderd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przesuń gościa w lewo, aby usunąć go wraz ze wszystkim, co pod nim zapisano. Ciebie nie można usunąć."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desliza para a esquerda sobre um convidado para o remover com tudo o que foi registado em seu nome. Tu não podes ser removido."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Glisează la stânga pe un invitat pentru a-l elimina cu tot ce a fost înregistrat pentru el. Tu nu poți fi eliminat."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Potiahni hosťa doľava, ak ho chceš odstrániť so všetkým, čo je pri ňom zaznamenané. Teba odstrániť nemožno."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Podrsaj levo na gostu, da ga odstraniš z vsem, kar je zabeleženo pod njim. Tebe ni mogoče odstraniti."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Svep åt vänster på en gäst för att ta bort hen med allt som registrerats under hen. Du kan inte tas bort."
           }
         }
       }

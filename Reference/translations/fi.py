@@ -353,4 +353,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Tältä päivältä ei ole päiväkohtaisia merkintöjä',
     'Monthly total: %@': 'Kuukausisumma: %@',
     'A dry month': 'Kuiva kuukausi',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Poistetaanko %@?',
+    'Remove': 'Poista',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Poistaa %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa. Tätä ei voi kumota.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Poistaa %@ juomakertaa ja %@ juomaa. Tätä ei voi kumota.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Pyyhkäise vierasta vasemmalle poistaaksesi hänet ja kaiken hänelle kirjatun. Sinua ei voi poistaa.',
+    'People': 'Henkilöt',
+    'Owner': 'Omistaja',
+    'Everyone this app records. Switch, add, or remove someone.': 'Kaikki, joita tämä sovellus kirjaa. Vaihda, lisää tai poista joku.',
 }

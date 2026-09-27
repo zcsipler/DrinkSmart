@@ -328,4 +328,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Erről a napról nincs napi adat',
     'Monthly total: %@': 'Havi összeg: %@',
     'A dry month': 'Száraz hónap',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Eltávolítod: %@?',
+    'Remove': 'Eltávolítás',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Töröl %@ alkalmat, %@ italt és %@ havi összeget. Ez nem vonható vissza.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Töröl %@ alkalmat és %@ italt. Ez nem vonható vissza.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Húzd balra a vendéget, hogy eltávolítsd mindennel együtt, amit alatta rögzítettünk. Téged nem lehet eltávolítani.',
+    'People': 'Személyek',
+    'Owner': 'Tulajdonos',
+    'Everyone this app records. Switch, add, or remove someone.': 'Mindenki, akit ez az app rögzít. Válts, vegyél fel vagy távolíts el valakit.',
 }

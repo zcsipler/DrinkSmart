@@ -350,4 +350,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Par šo dienu nav dienas ierakstu',
     'Monthly total: %@': 'Mēneša kopsumma: %@',
     'A dry month': 'Sauss mēnesis',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Vai noņemt %@?',
+    'Remove': 'Noņemt',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Dzēš reizes: %@, dzērienus: %@ un mēneša kopsummas: %@. To nevar atsaukt.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Dzēš reizes: %@ un dzērienus: %@. To nevar atsaukt.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Pavelc pa kreisi uz viesa, lai noņemtu viņu ar visu, kas ierakstīts zem viņa. Tevi noņemt nevar.',
+    'People': 'Personas',
+    'Owner': 'Īpašnieks',
+    'Everyone this app records. Switch, add, or remove someone.': 'Visi, ko šī lietotne ieraksta. Pārslēdz, pievieno vai noņem kādu.',
 }

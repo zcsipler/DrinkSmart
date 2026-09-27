@@ -349,4 +349,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Selle päeva kohta pole päevaseid kirjeid',
     'Monthly total: %@': 'Kuusumma: %@',
     'A dry month': 'Kuiv kuu',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Kas eemaldada %@?',
+    'Remove': 'Eemalda',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Kustutab joomiskorrad: %@, joogid: %@ ja kuusummad: %@. Seda ei saa tagasi võtta.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Kustutab joomiskorrad: %@ ja joogid: %@. Seda ei saa tagasi võtta.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Libista külalise real vasakule, et ta koos kõige tema all salvestatuga eemaldada. Sind eemaldada ei saa.',
+    'People': 'Inimesed',
+    'Owner': 'Omanik',
+    'Everyone this app records. Switch, add, or remove someone.': 'Kõik, keda see rakendus salvestab. Vaheta, lisa või eemalda keegi.',
 }

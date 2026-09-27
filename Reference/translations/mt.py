@@ -356,4 +356,18 @@ TRANSLATIONS = {
     'No daily records for this day': "M'hemmx rekords ta' kuljum għal dan il-jum",
     'Monthly total: %@': 'Total tax-xahar: %@',
     'A dry month': 'Xahar mingħajr alkoħol',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Tneħħi lil %@?',
+    'Remove': 'Neħħi',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        "Iħassar %@ okkażjonijiet, %@ xarbiet u %@ totali ta' kull xahar. Dan ma jistax jitreġġa' lura.",
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': "Iħassar %@ okkażjonijiet u %@ xarbiet. Dan ma jistax jitreġġa' lura.",
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        "Iswajpja lejn ix-xellug fuq mistieden biex tneħħih ma' kulma ġie rreġistrat taħtu. Int ma tistax titneħħa.",
+    'People': 'Persuni',
+    'Owner': 'Sid',
+    'Everyone this app records. Switch, add, or remove someone.': 'Kulħadd li din l-app tirreġistra. Aqleb, żid jew neħħi lil xi ħadd.',
 }

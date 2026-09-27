@@ -358,4 +358,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Δεν υπάρχουν ημερήσιες εγγραφές για αυτή τη μέρα',
     'Monthly total: %@': 'Μηνιαίο σύνολο: %@',
     'A dry month': 'Ένας μήνας χωρίς αλκοόλ',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Να αφαιρεθεί ο/η %@;',
+    'Remove': 'Αφαίρεση',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Διαγράφει %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα. Δεν αναιρείται.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Διαγράφει %@ βραδιές και %@ ποτά. Δεν αναιρείται.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Σύρε αριστερά σε έναν επισκέπτη για να τον αφαιρέσεις μαζί με ό,τι έχει καταγραφεί για εκείνον. Εσύ δεν μπορείς να αφαιρεθείς.',
+    'People': 'Άτομα',
+    'Owner': 'Κάτοχος',
+    'Everyone this app records. Switch, add, or remove someone.': 'Όλοι όσους καταγράφει αυτή η εφαρμογή. Άλλαξε, πρόσθεσε ή αφαίρεσε κάποιον.',
 }

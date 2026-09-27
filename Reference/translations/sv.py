@@ -351,4 +351,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Inga dagliga poster för den här dagen',
     'Monthly total: %@': 'Månadssumma: %@',
     'A dry month': 'En torr månad',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Ta bort %@?',
+    'Remove': 'Ta bort',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Raderar %@ tillfällen, %@ drycker och %@ månadssummor. Det går inte att ångra.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Raderar %@ tillfällen och %@ drycker. Det går inte att ångra.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Svep åt vänster på en gäst för att ta bort hen med allt som registrerats under hen. Du kan inte tas bort.',
+    'People': 'Personer',
+    'Owner': 'Ägare',
+    'Everyone this app records. Switch, add, or remove someone.': 'Alla som den här appen registrerar. Byt, lägg till eller ta bort någon.',
 }

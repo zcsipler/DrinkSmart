@@ -352,4 +352,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Няма дневни записи за този ден',
     'Monthly total: %@': 'Месечна сума: %@',
     'A dry month': 'Сух месец',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Да се премахне ли %@?',
+    'Remove': 'Премахване',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Изтрива сесии: %@, напитки: %@ и месечни суми: %@. Това не може да бъде отменено.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Изтрива сесии: %@ и напитки: %@. Това не може да бъде отменено.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Плъзни наляво върху гост, за да го премахнеш с всичко, записано за него. Ти не можеш да бъдеш премахнат.',
+    'People': 'Хора',
+    'Owner': 'Собственик',
+    'Everyone this app records. Switch, add, or remove someone.': 'Всички, които това приложение записва. Превключи, добави или премахни някого.',
 }

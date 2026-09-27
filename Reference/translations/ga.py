@@ -358,4 +358,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Níl aon taifead laethúil don lá seo',
     'Monthly total: %@': 'Iomlán míosúil: %@',
     'A dry month': 'Mí thirim',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Bain %@?',
+    'Remove': 'Bain',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Scriosann sé %@ ócáid, %@ deoch agus %@ iomlán míosúil. Ní féidir é seo a chealú.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Scriosann sé %@ ócáid agus %@ deoch. Ní féidir é seo a chealú.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Svaidhpeáil ar chlé ar aoi chun é a bhaint le gach rud a taifeadadh faoi. Ní féidir tusa a bhaint.',
+    'People': 'Daoine',
+    'Owner': 'Úinéir',
+    'Everyone this app records. Switch, add, or remove someone.': 'Gach duine a thaifeadann an aip seo. Athraigh, cuir leis nó bain duine.',
 }

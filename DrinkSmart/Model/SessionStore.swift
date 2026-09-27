@@ -123,6 +123,65 @@ final class SessionStore {
         return new
     }
 
+    /// What removing someone would take with them, worked out before
+    /// anything is deleted so the confirmation can say it.
+    struct RemovalPlan {
+        let person: Person
+        let sessions: Int
+        let drinks: Int
+        let monthlyTotals: Int
+    }
+
+    /// Nil for the owner: the app's own person is never removed, the way
+    /// `Person` documents it — the store is built around there being one.
+    func removalPlan(for target: Person) -> RemovalPlan? {
+        guard !target.isOwner else { return nil }
+        let sessions = target.sessions ?? []
+        return RemovalPlan(
+            person: target,
+            sessions: sessions.count,
+            drinks: sessions.reduce(0) { $0 + ($1.drinks?.count ?? 0) },
+            monthlyTotals: monthlyTotals(of: target.id).count
+        )
+    }
+
+    /// Removes a guest with everything recorded under them.
+    ///
+    /// Sessions and drinks go by the cascade rules on the relationships;
+    /// monthly totals are keyed by id rather than related, so they are
+    /// deleted here by hand. If they were the active person, the owner takes
+    /// over, the same landing as every other way of losing the active person
+    /// (`restoreActivePerson`). Refused for the owner: `removalPlan` says no,
+    /// and this checks again rather than trusting a caller's plan.
+    ///
+    /// No undo. The confirmation that precedes this is the safeguard, and it
+    /// is the caller's job to show one built from `removalPlan(for:)`.
+    func removePerson(_ target: Person) {
+        guard !target.isOwner else { return }
+
+        // The backfill may be holding this person's sessions across an await.
+        // It is not cancelled — a cancelled task only clears `backfill` when
+        // it exits, and nothing would restart it until the next foreground —
+        // it checks `isDeleted` before writing instead.
+
+        if target.id == person.id {
+            person = owner
+            settings.clearActivePerson()
+        }
+
+        for total in monthlyTotals(of: target.id) {
+            context.delete(total)
+        }
+        context.delete(target)
+        save()
+        refreshFromStore()
+    }
+
+    private func monthlyTotals(of personID: UUID) -> [MonthlyTotal] {
+        let descriptor = FetchDescriptor<MonthlyTotal>(predicate: #Predicate { $0.personID == personID })
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
     /// The first colour nobody is using, so two people are told apart at a
     /// glance without anyone being asked to pick a colour in a bar.
     private func nextAccent() -> PersonAccent {
@@ -321,7 +380,10 @@ final class SessionStore {
                     inputs.map { engine.simulateBand(profile: $0.profile, drinks: $0.drinks) }
                 }.value
 
-                for (item, band) in zip(work, bands) {
+                // A session can be deleted while the batch is away — its
+                // person removed, its last drink taken out — and writing to
+                // a deleted model is a crash, not a no-op.
+                for (item, band) in zip(work, bands) where !item.target.isDeleted {
                     item.target.store(summary(for: item.target, band: band))
                 }
                 save()

@@ -1,5 +1,7 @@
 import Foundation
+import SwiftData
 import Testing
+import BACKit
 @testable import DrinkSmart
 
 /// Who the app is recording when it is opened again.
@@ -80,6 +82,59 @@ struct ActivePersonTests {
 
         #expect(store.settings.activePersonID == nil)
         #expect(store.person.id == owner.id)
+    }
+
+    // MARK: Removing a person
+
+    @Test("Removing a guest takes their occasions, drinks and monthly totals, and lands on the owner")
+    func removingAGuestCascades() throws {
+        let context = try makeContext()
+        let store = SessionStore(context: context, settings: makeSettings())
+        let guest = store.addPerson(name: "Guest", profile: .test, frequency: .occasional, limit: 0.8)
+        store.add(.beer(at: .now.addingTimeInterval(-3600)))
+        store.add(.beer(at: .now.addingTimeInterval(-1800)))
+        context.insert(MonthlyTotal(personID: guest.id, year: 2025, month: 6, gramsEthanol: 400))
+        try context.save()
+
+        let plan = try #require(store.removalPlan(for: guest))
+        #expect(plan.sessions == 1)
+        #expect(plan.drinks == 2)
+        #expect(plan.monthlyTotals == 1)
+        #expect(store.person.id == guest.id)
+
+        store.removePerson(guest)
+
+        #expect(store.person.id == store.owner.id)
+        #expect(store.settings.activePersonID == nil)
+        #expect(store.people.count == 1)
+        #expect(try context.fetch(FetchDescriptor<DrinkingSession>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<DrinkRecord>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<MonthlyTotal>()).isEmpty)
+        #expect(store.drinks.isEmpty)
+    }
+
+    @Test("Removing a guest who is not active leaves the active person alone")
+    func removingAnotherGuestKeepsTheActiveOne() throws {
+        let store = try makeStore()
+        let first = store.addPerson(name: "First", profile: .test, frequency: .occasional, limit: 0.8)
+        let second = store.addPerson(name: "Second", profile: .test, frequency: .occasional, limit: 0.8)
+        #expect(store.person.id == second.id)
+
+        store.removePerson(first)
+
+        #expect(store.person.id == second.id)
+        #expect(store.people.map(\.id) == [store.owner.id, second.id])
+    }
+
+    @Test("The owner cannot be removed")
+    func ownerIsNeverRemoved() throws {
+        let store = try makeStore()
+        #expect(store.removalPlan(for: store.owner) == nil)
+
+        store.removePerson(store.owner)
+
+        #expect(store.people.count == 1)
+        #expect(store.people.first?.isOwner == true)
     }
 
     // MARK: Helpers

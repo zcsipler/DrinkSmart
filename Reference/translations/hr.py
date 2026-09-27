@@ -349,4 +349,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Za ovaj dan nema dnevnih zapisa',
     'Monthly total: %@': 'Mjesečni zbroj: %@',
     'A dry month': 'Suh mjesec',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Ukloniti %@?',
+    'Remove': 'Ukloni',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Briše sesije: %@, pića: %@ i mjesečne zbrojeve: %@. Ovo se ne može poništiti.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Briše sesije: %@ i pića: %@. Ovo se ne može poništiti.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Povuci ulijevo na gostu da ga ukloniš sa svime što je zabilježeno pod njim. Tebe se ne može ukloniti.',
+    'People': 'Osobe',
+    'Owner': 'Vlasnik',
+    'Everyone this app records. Switch, add, or remove someone.': 'Svi koje ova aplikacija bilježi. Prebaci, dodaj ili ukloni nekoga.',
 }

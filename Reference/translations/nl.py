@@ -353,4 +353,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Geen dagelijkse registraties voor deze dag',
     'Monthly total: %@': 'Maandtotaal: %@',
     'A dry month': 'Een droge maand',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': '%@ verwijderen?',
+    'Remove': 'Verwijderen',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Wist %@ gelegenheden, %@ drankjes en %@ maandtotalen. Dit kan niet ongedaan worden gemaakt.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Wist %@ gelegenheden en %@ drankjes. Dit kan niet ongedaan worden gemaakt.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Veeg naar links op een gast om hen te verwijderen met alles wat onder hen is geregistreerd. Jij kunt niet worden verwijderd.',
+    'People': 'Personen',
+    'Owner': 'Eigenaar',
+    'Everyone this app records. Switch, add, or remove someone.': 'Iedereen die deze app registreert. Wissel, voeg toe of verwijder iemand.',
 }

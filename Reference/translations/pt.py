@@ -352,4 +352,18 @@ TRANSLATIONS = {
     'No daily records for this day': 'Sem registos diários para este dia',
     'Monthly total: %@': 'Total mensal: %@',
     'A dry month': 'Um mês sem álcool',
+
+    # --- RemovePersonSection ---
+    'Remove %@?': 'Remover %@?',
+    'Remove': 'Remover',
+    'Deletes %@ occasions, %@ drinks and %@ monthly totals. This cannot be undone.':
+        'Apaga %@ ocasiões, %@ bebidas e %@ totais mensais. Isto não pode ser anulado.',
+    'Deletes %@ occasions and %@ drinks. This cannot be undone.': 'Apaga %@ ocasiões e %@ bebidas. Isto não pode ser anulado.',
+
+    # --- PeopleView ---
+    'Swipe left on a guest to remove them with everything recorded under them. You cannot be removed.':
+        'Desliza para a esquerda sobre um convidado para o remover com tudo o que foi registado em seu nome. Tu não podes ser removido.',
+    'People': 'Pessoas',
+    'Owner': 'Titular',
+    'Everyone this app records. Switch, add, or remove someone.': 'Todas as pessoas que esta app regista. Muda, adiciona ou remove alguém.',
 }

@@ -644,7 +644,7 @@ EU-nyelvet ismeri. Alapból azt választja, amit az iOS nyelvi beállítása ké
 felhasználó ettől eltérhet a Profil fül Nyelv sorával, ami a Beállításokban az
 app saját „Előnyben részesített nyelv" sorára visz (`LanguageSection`).
 
-- `DrinkSmart/Localizable.xcstrings` — 214 kulcs, 24 nyelven. Generált fájl,
+- `DrinkSmart/Localizable.xcstrings` — 222 kulcs, 24 nyelven. Generált fájl,
   kézzel nem szerkesztjük.
 - `Reference/translations/<kód>.py` — nyelvenként egy modul, mindegyikben egy
   `TRANSLATIONS` szótár az angol forrásszövegtől az adott nyelvig.
@@ -1313,10 +1313,32 @@ kontextusra kötve ✔ — 5. tesztek: **hátravan**. A 2. fázis pont az a kód
 11.8 és a 12. szerint **adatot tud veszíteni**, és ma nincs rá app-szintű teszt
 target.
 
+**Személyek listája és vendég eltávolítása (`PeopleView`,
+`SessionStore.removePerson`).** A Profil fülön egy „Személyek" sor (a
+létszámmal) nyit egy listát: a tulajdonos az élén, „Tulajdonos" felirattal,
+alatta a vendégek, pipa a kiválasztotton; koppintásra vált, a lista alján
+„Új személy". Egy vendég **balra húzással vagy Edit módban** távolítható el; a
+tulajdonos során nincs húzás (`deleteDisabled`), mert egy gesztus, ami mindig
+nemet mond, rosszabb, mint a hiánya. Nem a váltó menüjében: az mindhárom tabon
+ott van, egy hüvelykujjnyira a nevektől, és egy destruktív menüpont ott egy
+véletlen koppintásra visz el egy évet. Egy első változat egy sor volt a
+Profil alján a kiválasztott vendégre — elvetve, mert több vendégnél nem
+skálázik, és a lista a Kontaktok-féle törlés ismert távolsága. A húzás nem
+töröl, hanem kérdez: a megerősítő ablak (`removalPlan(for:)`) kimondja, mi
+megy vele — alkalmak, italok, havi összegek —, mert „Eltávolítod: Nada?"
+önmagában olyan következményt kérne elfogadni, amit senki nem mutatott meg,
+és visszavonás nincs. A törlés **cascade**: alkalmak és italok a relációk
+szabályán, a havi összegek kézzel (azok id-vel hivatkoznak, nem relációval).
+Ha az aktív személyt töröljük, a tulajdonos veszi át, ugyanoda érkezünk, mint
+minden más módon elvesztett aktív személynél. A háttérben futó backfill
+`isDeleted`-et ellenőriz írás előtt, mert egy adag közben törölt alkalomra
+írni nem no-op, hanem crash. Külön archiválás nem készült: aki a vendég
+adatait meg akarja tartani, előtte exportál — a mentés minden személyt visz.
+Tesztek: `ActivePersonTests` (3 új).
+
 **Nyitva maradt:** a vendég határa app-alapértelmezés legyen-e vagy a tiéd
 másolva (az első a javaslat — a határ személyes döntés, nem háztartási
-beállítás), és hogy a személy törlése cascade-del vigye-e az alkalmait, vagy
-legyen külön archiválás.
+beállítás).
 
 ### 11.6 Józan napok streak
 
