@@ -324,10 +324,7 @@ TRANSLATIONS = {
     "Import": "Tuo",
     "Everything in this backup is already here.":
         "Kaikki tässä varmuuskopiossa on jo tallennettu.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Lisää %@ juomakertaa ja %@ juomaa. Mitään jo tallennettua ei muuteta eikä poisteta.",
     "Import finished": "Tuonti valmis",
-    "Added %@ occasions and %@ drinks.": "Lisätty %@ juomakertaa ja %@ juomaa.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -345,4 +342,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Tämä varmuuskopio on tehty DrinkSmartin uudemmalla versiolla. Päivitä sovellus ja "
         "yritä uudelleen.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Lisää %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa. Mitään jo tallennettua ei muuteta eikä poisteta.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Lisätty %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa.',
+    'months as totals': 'kuukautta vain summina',
+    'by month only': 'vain kuukausitasolla',
+    'monthly total': 'kuukausisumma',
+    'No daily records for this day': 'Tältä päivältä ei ole päiväkohtaisia merkintöjä',
+    'Monthly total: %@': 'Kuukausisumma: %@',
+    'A dry month': 'Kuiva kuukausi',
 }

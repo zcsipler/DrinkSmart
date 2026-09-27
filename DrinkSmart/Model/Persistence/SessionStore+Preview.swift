@@ -11,7 +11,7 @@ extension SessionStore {
     /// data.
     @MainActor
     static var preview: SessionStore {
-        let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self])
+        let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self, MonthlyTotal.self])
         let container = try! ModelContainer(
             for: schema,
             configurations: ModelConfiguration(

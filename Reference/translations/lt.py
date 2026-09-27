@@ -326,10 +326,7 @@ TRANSLATIONS = {
     "Import this backup?": "Importuoti šią atsarginę kopiją?",
     "Import": "Importuoti",
     "Everything in this backup is already here.": "Viskas iš šios atsarginės kopijos jau yra.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Bus pridėta sesijų: %@, gėrimų: %@. Niekas, kas jau yra, nebus pakeista ar pašalinta.",
     "Import finished": "Importavimas baigtas",
-    "Added %@ occasions and %@ drinks.": "Pridėta sesijų: %@, gėrimų: %@.",
     "OK": "Gerai",
 
     # --- LanguageSection: the app's language ---
@@ -347,4 +344,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Ši atsarginė kopija sukurta naujesne „DrinkSmart“ versija. Atnaujink programėlę ir "
         "bandyk dar kartą.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Bus pridėta sesijų: %@, gėrimų: %@ ir mėnesio sumų: %@. Niekas, kas jau yra, nebus pakeista ar pašalinta.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Pridėta: %@ sesijos, %@ gėrimai ir %@ mėnesio sumos.',
+    'months as totals': 'mėn. tik kaip sumos',
+    'by month only': 'tik pagal mėnesį',
+    'monthly total': 'mėnesio suma',
+    'No daily records for this day': 'Šiai dienai nėra dienos įrašų',
+    'Monthly total: %@': 'Mėnesio suma: %@',
+    'A dry month': 'Blaivus mėnuo',
 }

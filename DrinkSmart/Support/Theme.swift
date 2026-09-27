@@ -39,6 +39,48 @@ enum Theme {
         interpolate(levelRamp, at: bac / max(limit, 0.05))
     }
 
+    // MARK: Amount scale
+
+    /// The colour of an amount on the history's amount chart — a day, a week
+    /// or a month of drinking — by how much it was, per day it covers.
+    ///
+    /// The level scale above cannot serve here: a week's or a month's bar has
+    /// no single peak, and colouring it by its worst evening would paint a
+    /// light month red for one bad night. So the amount chart colours by
+    /// amount, and the peak chart underneath it keeps the level scale.
+    ///
+    /// Two anchors, stated for a month and scaled by days for everything
+    /// else: under 100 g in a month is next to nothing and fully calm; 2 500 g
+    /// is fully alarmed, and it darkens from there. In between the ramp is
+    /// continuous, like the level scale. Unlike the level scale this is not
+    /// the person's own number — it is a fixed yardstick, the same for
+    /// everyone — which is what makes two people's, or two years', charts
+    /// comparable.
+    ///
+    /// - Parameter days: the days the amount covers — the bar's *known* days,
+    ///   not its calendar length, so a half-recorded month is judged on the
+    ///   half that was recorded rather than read as a quiet one.
+    static func tint(forGrams grams: Double, overDays days: Int) -> Color {
+        let perDay = grams / Double(max(days, 1))
+        return interpolate(amountRamp, at: perDay / amountAlarmGramsPerDay)
+    }
+
+    /// 100 g a month: the calm end.
+    static let amountCalmGramsPerDay = 100.0 / 30
+    /// 2 500 g a month: the alarm end.
+    static let amountAlarmGramsPerDay = 2500.0 / 30
+
+    /// Stops as a fraction of the alarm amount.
+    private static var amountRamp: [(at: Double, color: Color)] {
+        [
+            (amountCalmGramsPerDay / amountAlarmGramsPerDay, calm),
+            (0.40, caution),
+            (0.70, elevated),
+            (1.00, alarm),
+            (1.60, critical),
+        ]
+    }
+
     /// Stops as a fraction of the limit.
     private static var levelRamp: [(at: Double, color: Color)] {
         [

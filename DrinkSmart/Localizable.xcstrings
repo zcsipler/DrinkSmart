@@ -1790,6 +1790,155 @@
         }
       }
     },
+    "A dry month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A dry month"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сух месец"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suchý měsíc"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "En tør måned"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ein trockener Monat"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ένας μήνας χωρίς αλκοόλ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Un mes sin alcohol"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kuiv kuu"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kuiva kuukausi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Un mois sans alcool"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mí thirim"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suh mjesec"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Száraz hónap"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Un mese senza alcol"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Blaivus mėnuo"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sauss mēnesis"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Xahar mingħajr alkoħol"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Een droge maand"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miesiąc bez alkoholu"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Um mês sem álcool"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O lună fără alcool"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suchý mesiac"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suh mesec"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "En torr månad"
+          }
+        }
+      }
+    },
     "A few occasions a year": {
       "extractionState": "manual",
       "localizations": {
@@ -3429,300 +3578,300 @@
         }
       }
     },
-    "Added %@ occasions and %@ drinks.": {
+    "Added %@ occasions, %@ drinks and %@ monthly totals.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Added %@ occasions and %@ drinks."
+            "value": "Added %@ occasions, %@ drinks and %@ monthly totals."
           }
         },
         "bg": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Добавени сесии: %@, напитки: %@."
+            "value": "Добавени: %@ сесии, %@ напитки и %@ месечни суми."
           }
         },
         "cs": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Přidána posezení (%@) a nápoje (%@)."
+            "value": "Přidáno: %@ posezení, %@ nápojů a %@ měsíčních součtů."
           }
         },
         "da": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tilføjede %@ sessioner og %@ drinks."
+            "value": "Tilføjede %@ sessioner, %@ drinks og %@ månedstotaler."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "%@ Sitzungen und %@ Getränke hinzugefügt."
+            "value": "%@ Sitzungen, %@ Getränke und %@ Monatssummen hinzugefügt."
           }
         },
         "el": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Προστέθηκαν %@ βραδιές και %@ ποτά."
+            "value": "Προστέθηκαν %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Se han añadido %@ ocasiones y %@ bebidas."
+            "value": "Se añadieron %@ ocasiones, %@ bebidas y %@ totales mensuales."
           }
         },
         "et": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lisatud joomiskorrad: %@, joogid: %@."
+            "value": "Lisatud: %@ joomiskorda, %@ jooki ja %@ kuusummat."
           }
         },
         "fi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lisätty %@ juomakertaa ja %@ juomaa."
+            "value": "Lisätty %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "%@ sessions et %@ verres ajoutés."
+            "value": "%@ sessions, %@ verres et %@ totaux mensuels ajoutés."
           }
         },
         "ga": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cuireadh %@ ócáid agus %@ deoch leis."
+            "value": "Cuireadh %@ ócáid, %@ deoch agus %@ iomlán míosúil leis."
           }
         },
         "hr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodano — sesije: %@, pića: %@."
+            "value": "Dodano: %@ sesija, %@ pića i %@ mjesečnih zbrojeva."
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hozzáadva %@ alkalom és %@ ital."
+            "value": "Hozzáadva: %@ alkalom, %@ ital és %@ havi összeg."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Aggiunte %@ occasioni e %@ drink."
+            "value": "Aggiunti %@ occasioni, %@ drink e %@ totali mensili."
           }
         },
         "lt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Pridėta sesijų: %@, gėrimų: %@."
+            "value": "Pridėta: %@ sesijos, %@ gėrimai ir %@ mėnesio sumos."
           }
         },
         "lv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Pievienotas reizes: %@. Pievienoti dzērieni: %@."
+            "value": "Pievienots: %@ reizes, %@ dzērieni un %@ mēneša kopsummas."
           }
         },
         "mt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Okkażjonijiet miżjuda: %@. Xarbiet miżjuda: %@."
+            "value": "Żdiedu %@ okkażjonijiet, %@ xarbiet u %@ totali ta' kull xahar."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "%@ gelegenheden en %@ drankjes toegevoegd."
+            "value": "%@ gelegenheden, %@ drankjes en %@ maandtotalen toegevoegd."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodano sesji: %@, drinków: %@."
+            "value": "Dodano: %@ sesji, %@ drinków i %@ sum miesięcznych."
           }
         },
         "pt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Adicionadas %@ ocasiões e %@ bebidas."
+            "value": "Adicionadas %@ ocasiões, %@ bebidas e %@ totais mensais."
           }
         },
         "ro": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ocazii adăugate: %@. Băuturi adăugate: %@."
+            "value": "Adăugate: %@ ocazii, %@ băuturi și %@ totaluri lunare."
           }
         },
         "sk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Doplnené: posedenia (%@), nápoje (%@)."
+            "value": "Doplnené: %@ posedení, %@ nápojov a %@ mesačných súčtov."
           }
         },
         "sl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodani dogodki: %@, dodane pijače: %@."
+            "value": "Dodano: %@ dogodkov, %@ pijač in %@ mesečnih seštevkov."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lade till %@ tillfällen och %@ drycker."
+            "value": "Lade till %@ tillfällen, %@ drycker och %@ månadssummor."
           }
         }
       }
     },
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.": {
+    "Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed."
+            "value": "Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed."
           }
         },
         "bg": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ще добави сесии: %@, напитки: %@. Нищо, което вече е тук, не се променя и не се премахва."
+            "value": "Ще добави сесии: %@, напитки: %@ и месечни суми: %@. Нищо, което вече е тук, не се променя и не се премахва."
           }
         },
         "cs": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Přidá posezení (%@) a nápoje (%@). Nic, co už tu je, se nezmění ani neodstraní."
+            "value": "Přidá posezení (%@), nápoje (%@) a měsíční součty (%@). Nic, co už tu je, se nezmění ani neodstraní."
           }
         },
         "da": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tilføjer %@ sessioner og %@ drinks. Intet af det, der allerede er her, ændres eller fjernes."
+            "value": "Tilføjer %@ sessioner, %@ drinks og %@ månedstotaler. Intet af det, der allerede er her, ændres eller fjernes."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Fügt %@ Sitzungen und %@ Getränke hinzu. Vorhandenes wird nicht geändert oder entfernt."
+            "value": "Fügt %@ Sitzungen, %@ Getränke und %@ Monatssummen hinzu. Vorhandenes wird nicht geändert oder entfernt."
           }
         },
         "el": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Προσθέτει %@ βραδιές και %@ ποτά. Τίποτα από όσα υπάρχουν ήδη δεν αλλάζει ούτε αφαιρείται."
+            "value": "Προσθέτει %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα. Τίποτα από όσα υπάρχουν ήδη δεν αλλάζει ούτε αφαιρείται."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Añade %@ ocasiones y %@ bebidas. No se modifica ni se elimina nada de lo que ya hay aquí."
+            "value": "Añade %@ ocasiones, %@ bebidas y %@ totales mensuales. No se modifica ni se elimina nada de lo que ya hay aquí."
           }
         },
         "et": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lisatavad joomiskorrad: %@, joogid: %@. Midagi siinolevast ei muudeta ega eemaldata."
+            "value": "Lisatavad joomiskorrad: %@, joogid: %@, kuusummad: %@. Midagi siinolevast ei muudeta ega eemaldata."
           }
         },
         "fi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lisää %@ juomakertaa ja %@ juomaa. Mitään jo tallennettua ei muuteta eikä poisteta."
+            "value": "Lisää %@ juomakertaa, %@ juomaa ja %@ kuukausisummaa. Mitään jo tallennettua ei muuteta eikä poisteta."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ajoute %@ sessions et %@ verres. Rien de ce qui est déjà là n'est modifié ni supprimé."
+            "value": "Ajoute %@ sessions, %@ verres et %@ totaux mensuels. Rien de ce qui est déjà là n'est modifié ni supprimé."
           }
         },
         "ga": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cuirfidh sé seo %@ ócáid agus %@ deoch leis. Ní athrófar agus ní bhainfear aon rud atá anseo cheana."
+            "value": "Cuirfidh sé seo %@ ócáid, %@ deoch agus %@ iomlán míosúil leis. Ní athrófar agus ní bhainfear aon rud atá anseo cheana."
           }
         },
         "hr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodaje — sesije: %@, pića: %@. Ništa što je već ovdje ne mijenja se niti uklanja."
+            "value": "Dodaje — sesije: %@, pića: %@, mjesečni zbrojevi: %@. Ništa što je već ovdje ne mijenja se niti uklanja."
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hozzáad %@ alkalmat és %@ italt. A meglévő adatok nem változnak és nem vesznek el."
+            "value": "Hozzáad %@ alkalmat, %@ italt és %@ havi összeget. A meglévő adatok nem változnak és nem vesznek el."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Aggiunge %@ occasioni e %@ drink. Nulla di quanto è già qui viene modificato o rimosso."
+            "value": "Aggiunge %@ occasioni, %@ drink e %@ totali mensili. Nulla di quanto è già qui viene modificato o rimosso."
           }
         },
         "lt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Bus pridėta sesijų: %@, gėrimų: %@. Niekas, kas jau yra, nebus pakeista ar pašalinta."
+            "value": "Bus pridėta sesijų: %@, gėrimų: %@ ir mėnesio sumų: %@. Niekas, kas jau yra, nebus pakeista ar pašalinta."
           }
         },
         "lv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tiks pievienotas reizes: %@. Tiks pievienoti dzērieni: %@. Nekas no jau esošā netiek mainīts vai dzēsts."
+            "value": "Tiks pievienotas reizes: %@, dzērieni: %@ un mēneša kopsummas: %@. Nekas no jau esošā netiek mainīts vai dzēsts."
           }
         },
         "mt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Okkażjonijiet li se jiżdiedu: %@. Xarbiet: %@. Xejn minn dak li diġà hawn ma jinbidel jew jitneħħa."
+            "value": "Okkażjonijiet li se jiżdiedu: %@. Xarbiet: %@. Totali ta' kull xahar: %@. Xejn minn dak li diġà hawn ma jinbidel jew jitneħħa."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Voegt %@ gelegenheden en %@ drankjes toe. Er wordt niets veranderd of verwijderd wat er al staat."
+            "value": "Voegt %@ gelegenheden, %@ drankjes en %@ maandtotalen toe. Er wordt niets veranderd of verwijderd wat er al staat."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodaje sesji: %@, drinków: %@. Nic z tego, co już tu jest, nie zostanie zmienione ani usunięte."
+            "value": "Dodaje sesji: %@, drinków: %@ i sum miesięcznych: %@. Nic z tego, co już tu jest, nie zostanie zmienione ani usunięte."
           }
         },
         "pt": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Adiciona %@ ocasiões e %@ bebidas. Nada do que já está aqui é alterado ou removido."
+            "value": "Adiciona %@ ocasiões, %@ bebidas e %@ totais mensais. Nada do que já está aqui é alterado ou removido."
           }
         },
         "ro": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ocazii de adăugat: %@. Băuturi de adăugat: %@. Nimic din ce există deja nu este modificat sau șters."
+            "value": "Ocazii de adăugat: %@. Băuturi: %@. Totaluri lunare: %@. Nimic din ce există deja nu este modificat sau șters."
           }
         },
         "sk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Doplní: posedenia (%@), nápoje (%@). Nič, čo tu už je, sa nezmení ani neodstráni."
+            "value": "Doplní: posedenia (%@), nápoje (%@), mesačné súčty (%@). Nič, čo tu už je, sa nezmení ani neodstráni."
           }
         },
         "sl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dodani bodo dogodki: %@, pijače: %@. Nič od tega, kar je že tu, ne bo spremenjeno ali odstranjeno."
+            "value": "Dodani bodo dogodki: %@, pijače: %@ in mesečni seštevki: %@. Nič od tega, kar je že tu, ne bo spremenjeno ali odstranjeno."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lägger till %@ tillfällen och %@ drycker. Inget som redan finns här ändras eller tas bort."
+            "value": "Lägger till %@ tillfällen, %@ drycker och %@ månadssummor. Inget som redan finns här ändras eller tas bort."
           }
         }
       }
@@ -15051,6 +15200,155 @@
         }
       }
     },
+    "Monthly total: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly total: %@"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Месечна сума: %@"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Měsíční součet: %@"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Månedstotal: %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Monatssumme: %@"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Μηνιαίο σύνολο: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Total mensual: %@"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kuusumma: %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kuukausisumma: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Total mensuel : %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Iomlán míosúil: %@"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mjesečni zbroj: %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Havi összeg: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Totale mensile: %@"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mėnesio suma: %@"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mēneša kopsumma: %@"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Total tax-xahar: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Maandtotaal: %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suma miesięczna: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Total mensal: %@"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Total lunar: %@"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mesačný súčet: %@"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mesečni seštevek: %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Månadssumma: %@"
+          }
+        }
+      }
+    },
     "Multiple people": {
       "extractionState": "manual",
       "localizations": {
@@ -15643,6 +15941,155 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Inget pågående tillfälle"
+          }
+        }
+      }
+    },
+    "No daily records for this day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No daily records for this day"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Няма дневни записи за този ден"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pro tento den nejsou denní záznamy"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ingen daglige optegnelser for denne dag"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Keine Tagesaufzeichnungen für diesen Tag"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Δεν υπάρχουν ημερήσιες εγγραφές για αυτή τη μέρα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No hay registros diarios de este día"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Selle päeva kohta pole päevaseid kirjeid"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tältä päivältä ei ole päiväkohtaisia merkintöjä"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aucun relevé quotidien pour ce jour"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Níl aon taifead laethúil don lá seo"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Za ovaj dan nema dnevnih zapisa"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erről a napról nincs napi adat"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nessuna registrazione giornaliera per questo giorno"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Šiai dienai nėra dienos įrašų"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Par šo dienu nav dienas ierakstu"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "M'hemmx rekords ta' kuljum għal dan il-jum"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Geen dagelijkse registraties voor deze dag"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Brak dziennych zapisów dla tego dnia"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sem registos diários para este dia"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nu există înregistrări zilnice pentru această zi"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pre tento deň nie sú denné záznamy"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Za ta dan ni dnevnih zapisov"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Inga dagliga poster för den här dagen"
           }
         }
       }
@@ -28908,6 +29355,155 @@
         }
       }
     },
+    "by month only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "by month only"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "само по месеци"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "jen po měsících"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "kun pr. måned"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "nur monatsweise"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "μόνο ανά μήνα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "solo por mes"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ainult kuu kaupa"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "vain kuukausitasolla"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "par mois seulement"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "de réir míosa amháin"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "samo po mjesecu"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "csak havi szinten"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "solo per mese"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "tik pagal mėnesį"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "tikai pa mēnešiem"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "skont ix-xahar biss"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "alleen per maand"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "tylko w skali miesiąca"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "só por mês"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "doar pe lună"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "len po mesiacoch"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "le po mesecih"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "bara per månad"
+          }
+        }
+      }
+    },
     "cm": {
       "extractionState": "manual",
       "localizations": {
@@ -29947,6 +30543,304 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "kg"
+          }
+        }
+      }
+    },
+    "monthly total": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "monthly total"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "месечна сума"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "měsíční součet"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "månedstotal"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Monatssumme"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "μηνιαίο σύνολο"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "total mensual"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "kuusumma"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "kuukausisumma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "total mensuel"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iomlán míosúil"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mjesečni zbroj"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "havi összeg"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "totale mensile"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mėnesio suma"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mēneša kopsumma"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "total tax-xahar"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "maandtotaal"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "suma miesięczna"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "total mensal"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "total lunar"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mesačný súčet"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mesečni seštevek"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "månadssumma"
+          }
+        }
+      }
+    },
+    "months as totals": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "months as totals"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "месеца само като суми"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "měsíců jen jako součet"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "måneder kun som totaler"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Monate nur als Summe"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "μήνες μόνο ως σύνολα"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "meses solo como totales"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "kuud ainult summana"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "kuukautta vain summina"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mois en totaux seulement"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mí mar iomláin amháin"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mjeseci samo kao zbroj"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hónap csak összegként"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mesi solo come totali"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mėn. tik kaip sumos"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mēneši tikai kā kopsummas"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "xhur bħala totali biss"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "maanden alleen als totaal"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mies. tylko jako sumy"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "meses só como totais"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "luni doar ca totaluri"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mesiacov len ako súčet"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "mesecev le kot seštevek"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "månader bara som summor"
           }
         }
       }

@@ -322,11 +322,7 @@ TRANSLATIONS = {
     "Import this backup?": "Importēt šo dublējumu?",
     "Import": "Importēt",
     "Everything in this backup is already here.": "Viss no šī dublējuma jau ir šeit.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Tiks pievienotas reizes: %@. Tiks pievienoti dzērieni: %@. Nekas no jau esošā netiek "
-        "mainīts vai dzēsts.",
     "Import finished": "Importēšana pabeigta",
-    "Added %@ occasions and %@ drinks.": "Pievienotas reizes: %@. Pievienoti dzērieni: %@.",
     "OK": "Labi",
 
     # --- LanguageSection: the app's language ---
@@ -343,4 +339,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Šis dublējums ir izveidots jaunākā DrinkSmart versijā. Atjaunini lietotni un mēģini "
         "vēlreiz.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Tiks pievienotas reizes: %@, dzērieni: %@ un mēneša kopsummas: %@. Nekas no jau esošā netiek mainīts vai dzēsts.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Pievienots: %@ reizes, %@ dzērieni un %@ mēneša kopsummas.',
+    'months as totals': 'mēneši tikai kā kopsummas',
+    'by month only': 'tikai pa mēnešiem',
+    'monthly total': 'mēneša kopsumma',
+    'No daily records for this day': 'Par šo dienu nav dienas ierakstu',
+    'Monthly total: %@': 'Mēneša kopsumma: %@',
+    'A dry month': 'Sauss mēnesis',
 }

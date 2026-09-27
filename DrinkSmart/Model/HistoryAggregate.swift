@@ -21,13 +21,36 @@ import BACKit
 ///   `.dry`. Dry days are counted, unknown days are not.
 enum HistoryAggregate {
 
-    /// The days from the earlier of `trackingStartedAt` and the first occasion
-    /// up to and including the day containing `now`, oldest first.
+    /// The days from the earliest of `trackingStartedAt`, the first occasion
+    /// and the first month known by total, up to and including the day
+    /// containing `now`, oldest first.
     ///
     /// Continuous on purpose: a dry day is a row too. A chart that only knew
     /// the days you drank could not show the ones you did not.
+    ///
+    /// ## Months known only as a total
+    ///
+    /// A `KnownMonth` (from `MonthlyTotal`) says how much was drunk in a month
+    /// and nothing about which days. It applies to the days **before records
+    /// began** — the ones that would otherwise be `.unknown` — and those days
+    /// stay unknown: not dry, we were not looking. But each carries the month
+    /// as a `SummarizedMonth`, so a bar or a figure built over them can show
+    /// the sum. The rules:
+    ///
+    /// - `recordsBegan` — where `.unknown` turns into `.dry` — is still the
+    ///   earlier of the stored start and the first occasion. Totals extend
+    ///   how far back the list goes, not how far back records were kept.
+    /// - A month that has both a total and occasions (records began partway
+    ///   through it, or a drink was filled in on one of its days) keeps the
+    ///   total: the occasions are the days we know, and what the total has
+    ///   left over is the unknown days' share. Nothing is counted twice, and
+    ///   filling in one evening never makes the month's figure disappear.
+    /// - A month recorded as **zero** makes its unknown days `.dry`: that the
+    ///   sum is nothing is the same as every day being nothing, and it is the
+    ///   one inference from monthly to daily that holds.
     static func days(
         from occasions: [HistoryOccasion],
+        knownMonths: [KnownMonth] = [],
         trackingStartedAt: Date,
         now: Date = .now,
         calendar: Calendar = .current
@@ -50,22 +73,74 @@ enum HistoryAggregate {
         // earlier of the stored start and the first occasion, and the days we
         // were not looking are always one run at the front, never a gap
         // between two evenings.
-        let firstDay = ([trackingDay] + byDay.keys).min { $0.start < $1.start } ?? today
-        let recordsBegan = firstDay
+        let recordsBegan = ([trackingDay] + byDay.keys).min { $0.start < $1.start } ?? today
+
+        // Which month a drinking day is filed under, by the day's own date
+        // (the 05:00 start), the same way `HistoryPeriod` files it.
+        func monthStart(of day: DrinkingDay) -> Date {
+            calendar.dateInterval(of: .month, for: day.calendarDate)?.start ?? day.calendarDate
+        }
+
+        // Totals that apply: a real month, with at least one day before
+        // records began — a month entirely inside the recorded span has
+        // nothing left to explain. Keyed by the month's first day; when the
+        // same month is listed twice the first one wins, as in the import.
+        var totalByMonth: [Date: KnownMonth] = [:]
+        for known in knownMonths {
+            guard let interval = known.interval(calendar: calendar),
+                  interval.start < recordsBegan.calendarDate,
+                  totalByMonth[interval.start] == nil
+            else { continue }
+            totalByMonth[interval.start] = known
+        }
+
+        let firstKnownMonth = totalByMonth.keys.min().map {
+            DrinkingDay.containing($0.addingTimeInterval(Double(DrinkingDay.boundaryHour) * 3600), calendar: calendar)
+        }
+        let firstDay = [recordsBegan, firstKnownMonth].compactMap { $0 }.min { $0.start < $1.start } ?? today
         guard firstDay.start <= today.start else { return [] }
+
+        // First pass: what each month's occasions add up to, and how many of
+        // its days are unknown — the two numbers a `SummarizedMonth` needs.
+        var occasionUnits: [Date: Double] = [:]
+        var unknownDayCount: [Date: Int] = [:]
+        do {
+            var day = firstDay
+            while day.start <= today.start {
+                let month = monthStart(of: day)
+                if let dayOccasions = byDay[day] {
+                    occasionUnits[month, default: 0] += dayOccasions.reduce(0) { $0 + $1.totalUnits }
+                } else if day.start < recordsBegan.start {
+                    unknownDayCount[month, default: 0] += 1
+                }
+                day = day.offset(by: 1, calendar: calendar)
+            }
+        }
+        let summarized: [Date: SummarizedMonth] = totalByMonth.reduce(into: [:]) { result, entry in
+            let (start, known) = entry
+            result[start] = SummarizedMonth(
+                month: known,
+                unknownDays: unknownDayCount[start] ?? 0,
+                remainderUnits: max(0, known.totalUnits - (occasionUnits[start] ?? 0))
+            )
+        }
 
         var result: [DayBucket] = []
         var day = firstDay
         while day.start <= today.start {
             let occasions = (byDay[day] ?? []).sorted { $0.startedAt < $1.startedAt }
+            let beforeRecords = day.start < recordsBegan.start
+            let month = beforeRecords ? summarized[monthStart(of: day)] : nil
             let state: DayBucket.State = if !occasions.isEmpty {
                 .drank
-            } else if day.start < recordsBegan.start {
+            } else if let month, month.isZero {
+                .dry
+            } else if beforeRecords {
                 .unknown
             } else {
                 .dry
             }
-            result.append(DayBucket(day: day, state: state, occasions: occasions))
+            result.append(DayBucket(day: day, state: state, occasions: occasions, summarizedMonth: month))
             day = day.offset(by: 1, calendar: calendar)
         }
         return result
@@ -168,8 +243,18 @@ struct DayBucket: Identifiable, Hashable, Sendable {
     let state: State
     let occasions: [HistoryOccasion]
 
+    /// The month's total, on a day before records began that such a total
+    /// covers. Nil on every recorded day. Set on `.dry` days too when the
+    /// month was recorded as zero — the day is dry *because* of the total,
+    /// and a view may want to say so.
+    var summarizedMonth: SummarizedMonth? = nil
+
     var id: Date { day.id }
 
+    /// Units from this day's occasions. A day covered by a month's total
+    /// contributes nothing here — its share of the month is not known — and
+    /// the month's remainder is added once, by `[DayBucket].totalUnits`, when
+    /// the list holds all of that month's unknown days.
     var totalUnits: Double { occasions.reduce(0) { $0 + $1.totalUnits } }
     var drinkCount: Int { occasions.reduce(0) { $0 + $1.drinkCount } }
 
@@ -189,6 +274,82 @@ struct DayBucket: Identifiable, Hashable, Sendable {
     var limit: Double? { occasions.map(\.limit).min() }
 }
 
+/// A month's total as it applies to the days before records began — what a
+/// `DayBucket` in such a month carries. Built by `HistoryAggregate.days`.
+struct SummarizedMonth: Hashable, Sendable {
+    let month: KnownMonth
+
+    /// How many of the month's days are before records began — the days the
+    /// total speaks for. The whole month, usually; fewer when records began
+    /// partway through it.
+    let unknownDays: Int
+
+    /// What the total has left after the month's occasions: the unknown days'
+    /// share. The whole total when there are no occasions; never negative —
+    /// a total smaller than what was logged is a stale figure, and the
+    /// occasions are believed.
+    let remainderUnits: Double
+
+    var gramsEthanol: Double { month.gramsEthanol }
+    var isZero: Bool { month.gramsEthanol <= 0 }
+}
+
+// MARK: - Sums over days
+
+extension Array where Element == DayBucket {
+
+    /// The summarized months these days touch, each once, in order. Zero
+    /// months included: their days are dry days *and* a summarized month.
+    var summarizedMonths: [SummarizedMonth] {
+        var seen: Set<SummarizedMonth> = []
+        return compactMap { day in
+            guard let month = day.summarizedMonth, seen.insert(month).inserted else { return nil }
+            return month
+        }
+    }
+
+    /// The summarized months all of whose unknown days are in this list —
+    /// the only ones whose remainder may be added to a sum over these days.
+    /// A week straddling such a month knows the month's total but not the
+    /// week's share of it, and must not claim the whole.
+    var wholeSummarizedMonths: [SummarizedMonth] {
+        var counts: [SummarizedMonth: Int] = [:]
+        for day in self {
+            if let month = day.summarizedMonth { counts[month, default: 0] += 1 }
+        }
+        return summarizedMonths.filter { counts[$0] == $0.unknownDays }
+    }
+
+    /// Units from monthly totals, whole months only.
+    var coarseUnits: Double {
+        wholeSummarizedMonths.reduce(0) { $0 + $1.remainderUnits }
+    }
+
+    /// Days spoken for by a whole summarized month — unknown day by day, but
+    /// accounted for by the month. Zero months are not here: their days are
+    /// `.dry`, and already counted as recorded.
+    var coarseDays: Int {
+        let whole = Set(wholeSummarizedMonths)
+        return filter { day in
+            guard day.state == .unknown, let month = day.summarizedMonth else { return false }
+            return whole.contains(month)
+        }.count
+    }
+
+    /// Units from occasions plus the remainders of whole summarized months.
+    /// The two never overlap: a remainder is the total *after* the month's
+    /// occasions (see `HistoryAggregate.days`).
+    var totalUnits: Double {
+        reduce(0) { $0 + $1.totalUnits } + coarseUnits
+    }
+
+    /// Whether anything at all is known about these days — an occasion, a dry
+    /// day, or a month's total.
+    var isRecorded: Bool {
+        contains { $0.state != .unknown || $0.summarizedMonth != nil }
+    }
+}
+
 /// A week, month or year of days — or a single day, for the day view.
 struct PeriodBucket: Identifiable, Hashable, Sendable {
     let period: HistoryPeriod
@@ -197,20 +358,29 @@ struct PeriodBucket: Identifiable, Hashable, Sendable {
 
     var id: Date { interval.start }
 
-    var totalUnits: Double { days.reduce(0) { $0 + $1.totalUnits } }
+    var totalUnits: Double { days.totalUnits }
     var drinkCount: Int { days.reduce(0) { $0 + $1.drinkCount } }
 
     var drinkingDays: Int { days.filter { $0.state == .drank }.count }
     var dryDays: Int { days.filter { $0.state == .dry }.count }
     var unknownDays: Int { days.filter { $0.state == .unknown }.count }
 
+    /// Months in this period known only by total. Their days are among the
+    /// unknown ones, but the period is not blank — see `totalUnits`.
+    var summarizedMonths: [SummarizedMonth] { days.summarizedMonths }
+
     /// Days we know something about — the denominator for any average.
     var recordedDays: Int { days.count - unknownDays }
 
     /// Units per recorded day. Nil when nothing about the period is known,
     /// so a caller cannot mistake "no data" for zero.
+    ///
+    /// Months known only by total count with all their days: the sum is
+    /// theirs, so the denominator must be theirs too, or a year of totals
+    /// with one week of records would read as a week of heavy drinking.
     var unitsPerRecordedDay: Double? {
-        recordedDays > 0 ? totalUnits / Double(recordedDays) : nil
+        let denominator = recordedDays + days.coarseDays
+        return denominator > 0 ? totalUnits / Double(denominator) : nil
     }
 
     /// The highest peak of the period, and whether every day contributed.
@@ -223,7 +393,7 @@ struct PeriodBucket: Identifiable, Hashable, Sendable {
     /// Change in total units against another period, as a fraction: +0.25 is a
     /// quarter more. Nil when the other period has nothing to compare against.
     func unitsChange(from previous: PeriodBucket) -> Double? {
-        guard previous.recordedDays > 0, previous.totalUnits > 0 else { return nil }
+        guard previous.days.isRecorded, previous.totalUnits > 0 else { return nil }
         return (totalUnits - previous.totalUnits) / previous.totalUnits
     }
 }

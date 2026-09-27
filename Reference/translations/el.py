@@ -329,11 +329,7 @@ TRANSLATIONS = {
     "Import": "Εισαγωγή",
     "Everything in this backup is already here.":
         "Όλα όσα περιέχει αυτό το αντίγραφο ασφαλείας υπάρχουν ήδη εδώ.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Προσθέτει %@ βραδιές και %@ ποτά. Τίποτα από όσα υπάρχουν ήδη δεν αλλάζει ούτε "
-        "αφαιρείται.",
     "Import finished": "Η εισαγωγή ολοκληρώθηκε",
-    "Added %@ occasions and %@ drinks.": "Προστέθηκαν %@ βραδιές και %@ ποτά.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -351,4 +347,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Αυτό το αντίγραφο ασφαλείας δημιουργήθηκε από νεότερη έκδοση του DrinkSmart. "
         "Ενημέρωσε την εφαρμογή και δοκίμασε ξανά.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Προσθέτει %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα. Τίποτα από όσα υπάρχουν ήδη δεν αλλάζει ούτε αφαιρείται.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Προστέθηκαν %@ βραδιές, %@ ποτά και %@ μηνιαία σύνολα.',
+    'months as totals': 'μήνες μόνο ως σύνολα',
+    'by month only': 'μόνο ανά μήνα',
+    'monthly total': 'μηνιαίο σύνολο',
+    'No daily records for this day': 'Δεν υπάρχουν ημερήσιες εγγραφές για αυτή τη μέρα',
+    'Monthly total: %@': 'Μηνιαίο σύνολο: %@',
+    'A dry month': 'Ένας μήνας χωρίς αλκοόλ',
 }

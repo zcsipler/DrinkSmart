@@ -80,6 +80,11 @@ struct HistoryBar: Identifiable, Hashable, Sendable {
         case drank, dry, unknown
         /// After today. Drawn as empty space, never as a dry day.
         case future
+        /// Inside a month known only by total (`MonthlyTotal`). Not unknown —
+        /// the month's sum is known — and not drank: no day is. In the year
+        /// view the bar *is* the month and carries its total; in the week and
+        /// month views a day bar of this state has no height of its own.
+        case summarized
     }
 
     let interval: DateInterval
@@ -88,8 +93,15 @@ struct HistoryBar: Identifiable, Hashable, Sendable {
 
     var id: Date { interval.start }
 
-    var totalUnits: Double { days.reduce(0) { $0 + $1.totalUnits } }
+    /// Occasion units, plus a month's total when the bar holds the whole
+    /// month — which is the year view's case and nobody else's.
+    var totalUnits: Double { days.totalUnits }
     var drinkCount: Int { days.reduce(0) { $0 + $1.drinkCount } }
+
+    /// The month this bar is known by total for, when it is one. The day
+    /// bars of the week and month views carry it too, so a tap can name the
+    /// figure that does exist.
+    var summarizedMonth: SummarizedMonth? { days.summarizedMonths.first }
 
     var peakRange: ClosedRange<Double>? {
         days.compactMap(\.peakRange).max { $0.upperBound < $1.upperBound }
@@ -101,6 +113,13 @@ struct HistoryBar: Identifiable, Hashable, Sendable {
     var limit: Double? { days.compactMap(\.limit).min() }
 
     var recordedDays: Int { days.filter { $0.state != .unknown }.count }
+
+    /// Days the bar's amount speaks for: recorded ones, plus the unknown days
+    /// a whole month's total covers. What the amount colour is scaled by —
+    /// a bar drawn for half a month is judged on that half. Never zero: a
+    /// bar with an amount has at least one day behind it, and one is what a
+    /// day bar has.
+    var knownDays: Int { max(1, recordedDays + days.coarseDays) }
 }
 
 /// The numbers on the figures card, for any run of days — a paged window or
@@ -119,14 +138,28 @@ struct HistoryFigures: Hashable, Sendable {
     /// Nil when there is nothing to compare against.
     let unitsChange: Double?
 
+    /// Months known only by total, whole in this span — counted in
+    /// `totalUnits`, not in any day count. Zero months are not among them:
+    /// their days are dry days, and dry days need no footnote.
+    let summarizedMonths: Int
+
+    /// Days inside those months. Among `unknownDays` as far as the day is
+    /// concerned, but not "before records" — the card says which is which.
+    let coarseDays: Int
+
     var recordedDays: Int { drinkingDays + dryDays }
 
+    /// Unknown days that are unknown for the old reason: before records.
+    var unrecordedDays: Int { unknownDays - coarseDays }
+
     init(days: [DayBucket], previousUnits: Double? = nil) {
-        totalUnits = days.reduce(0) { $0 + $1.totalUnits }
+        totalUnits = days.totalUnits
         drinkCount = days.reduce(0) { $0 + $1.drinkCount }
         drinkingDays = days.filter { $0.state == .drank }.count
         dryDays = days.filter { $0.state == .dry }.count
         unknownDays = days.filter { $0.state == .unknown }.count
+        summarizedMonths = days.wholeSummarizedMonths.filter { !$0.isZero }.count
+        coarseDays = days.coarseDays
         peakRange = days.compactMap(\.peakRange).max { $0.upperBound < $1.upperBound }
         limit = days.compactMap(\.limit).min()
         if let previousUnits, previousUnits > 0 {
@@ -156,8 +189,14 @@ struct HistoryWindow: Hashable, Sendable {
 
     var days: [DayBucket] { bars.flatMap(\.days) }
 
-    var totalUnits: Double { bars.reduce(0) { $0 + $1.totalUnits } }
+    /// Over the days, not the bars: a month known by total is whole in the
+    /// month window even though its day bars each carry nothing.
+    var totalUnits: Double { days.totalUnits }
     var drinkCount: Int { bars.reduce(0) { $0 + $1.drinkCount } }
+
+    /// Months known only by total on this page. One in the month view when
+    /// the page is such a month; up to twelve in the year view.
+    var summarizedMonths: [SummarizedMonth] { days.summarizedMonths }
 
     var drinkingDays: Int { days.filter { $0.state == .drank }.count }
     var dryDays: Int { days.filter { $0.state == .dry }.count }
@@ -224,10 +263,14 @@ struct HistoryWindow: Hashable, Sendable {
                 day = day.offset(by: 1, calendar: calendar)
             }
 
+            // Dry before summarized: a zero month's days are dry days with
+            // the month attached, and dry is the stronger statement.
             let state: HistoryBar.State = if found.contains(where: { $0.state == .drank }) {
                 .drank
             } else if found.contains(where: { $0.state == .dry }) {
                 .dry
+            } else if found.contains(where: { $0.summarizedMonth != nil }) {
+                .summarized
             } else if found.isEmpty && sawFuture {
                 .future
             } else {
@@ -243,8 +286,7 @@ struct HistoryWindow: Hashable, Sendable {
         let previousDays = days.filter {
             $0.day.calendarDate >= previous.start && $0.day.calendarDate < previous.end
         }
-        let previousRecorded = previousDays.contains { $0.state != .unknown }
-        let previousUnits = previousRecorded ? previousDays.reduce(0) { $0 + $1.totalUnits } : nil
+        let previousUnits = previousDays.isRecorded ? previousDays.totalUnits : nil
 
         return HistoryWindow(
             range: range, offset: offset, interval: interval, bars: bars, previousUnits: previousUnits

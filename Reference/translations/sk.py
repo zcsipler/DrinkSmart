@@ -320,10 +320,7 @@ TRANSLATIONS = {
     "Import this backup?": "Importovať túto zálohu?",
     "Import": "Importovať",
     "Everything in this backup is already here.": "Všetko z tejto zálohy tu už je.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Doplní: posedenia (%@), nápoje (%@). Nič, čo tu už je, sa nezmení ani neodstráni.",
     "Import finished": "Import dokončený",
-    "Added %@ occasions and %@ drinks.": "Doplnené: posedenia (%@), nápoje (%@).",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -341,4 +338,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Táto záloha pochádza z novšej verzie DrinkSmart. Aktualizuj aplikáciu a skús to "
         "znova.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Doplní: posedenia (%@), nápoje (%@), mesačné súčty (%@). Nič, čo tu už je, sa nezmení ani neodstráni.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Doplnené: %@ posedení, %@ nápojov a %@ mesačných súčtov.',
+    'months as totals': 'mesiacov len ako súčet',
+    'by month only': 'len po mesiacoch',
+    'monthly total': 'mesačný súčet',
+    'No daily records for this day': 'Pre tento deň nie sú denné záznamy',
+    'Monthly total: %@': 'Mesačný súčet: %@',
+    'A dry month': 'Suchý mesiac',
 }

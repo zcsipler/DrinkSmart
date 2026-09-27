@@ -328,11 +328,7 @@ TRANSLATIONS = {
     "Import this backup?": "Zaimportować tę kopię zapasową?",
     "Import": "Importuj",
     "Everything in this backup is already here.": "Wszystko z tej kopii zapasowej już tu jest.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Dodaje sesji: %@, drinków: %@. Nic z tego, co już tu jest, nie zostanie zmienione ani "
-        "usunięte.",
     "Import finished": "Import zakończony",
-    "Added %@ occasions and %@ drinks.": "Dodano sesji: %@, drinków: %@.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -350,4 +346,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Ta kopia zapasowa została utworzona w nowszej wersji aplikacji DrinkSmart. "
         "Zaktualizuj aplikację i spróbuj ponownie.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Dodaje sesji: %@, drinków: %@ i sum miesięcznych: %@. Nic z tego, co już tu jest, nie zostanie zmienione ani usunięte.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Dodano: %@ sesji, %@ drinków i %@ sum miesięcznych.',
+    'months as totals': 'mies. tylko jako sumy',
+    'by month only': 'tylko w skali miesiąca',
+    'monthly total': 'suma miesięczna',
+    'No daily records for this day': 'Brak dziennych zapisów dla tego dnia',
+    'Monthly total: %@': 'Suma miesięczna: %@',
+    'A dry month': 'Miesiąc bez alkoholu',
 }

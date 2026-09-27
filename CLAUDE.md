@@ -290,6 +290,49 @@ a rögzítés kezdete elé. A megkülönböztetés maga érvényes, csak nincs h
 látszódnia: az Előzmény tabra tartozik, a tartományválasztóval együtt (12.).
 A `trackingStartedAt` addig is karban van tartva.
 
+**Van egy harmadik tudásszint is: a havi összeg.** Aki az app előtt táblázatban
+vezette a fogyasztását, az a hónapok összegét tudja behozni, az estéket nem.
+Erre a `MonthlyTotal` entitás való (személy, év, hónap, gramm; az archívumban a
+`monthlyTotals` kulcs, opcionális, a `schemaVersion` marad 1). A szabályok,
+amelyeket a `HistoryAggregate.days` érvényesít és a `MonthlyTotalTests` őriz:
+
+- A havi összeg **a rögzítés kezdete előtti napokra** vonatkozik, és azok a
+  napok `.unknown`-ok maradnak — nem tudjuk, melyik napon ittál —, de mindegyik
+  viszi a hónapját (`DayBucket.summarizedMonth`, egy `SummarizedMonth` érték).
+  A `trackingStartedAt` jelentése nem változik: az a napi szintű rögzítés
+  kezdete. A havi összeg azt tolja hátra, meddig lapozható a lista, nem azt,
+  mióta vannak feljegyzések.
+- Egy hónap összege **csak egészben** adódik hozzá egy időszakhoz: a
+  `[DayBucket].totalUnits` akkor számolja bele, ha az adott hónap minden
+  ismeretlen napja a listában van (`wholeSummarizedMonths`). Egy hét, ami
+  belelóg egy ilyen hónapba, tudja a hónap összegét, de a hét részét nem — nem
+  állíthatja a magáénak.
+- Ha egy hónapban összeg **és** alkalmak is vannak (a rögzítés a hónap közepén
+  indult, vagy valaki utólag beírt egy estét), az összeg megmarad, és ami az
+  alkalmak után **marad belőle**, az az ismeretlen napoké
+  (`SummarizedMonth.remainderUnits`, sosem negatív). Semmi nem számolódik
+  kétszer, és egy este beírása sosem tünteti el a hónap számát.
+- A **nullás hónap** az egyetlen eset, amikor havi tudásból napi tudás lesz: ha
+  az összeg nulla, minden napja `.dry`, és a józan napok közé számít.
+- Józan és ivós napot havi összeg soha nem termel. A számkártyán az összeg
+  beleszámol a mennyiségbe és a változásba; a napok alá lábjegyzet kerül
+  („N hónap csak összegként", „N nap csak havi szinten"), a
+  `HistoryFigures.summarizedMonths` / `coarseDays` alapján; a régi „a rögzítés
+  előtt" lábjegyzet az `unrecordedDays`-t mondja, nem az összes ismeretlent.
+- Megjelenítés: az Év nézetben a hónap egy `.summarized` állapotú oszlop,
+  csúcs nélkül; a Hét és a Hónap nézet ezeket a napokat egy feliratos sávval
+  mutatja („Havi összeg: X g"), a Nap nézet üres állapota pedig kimondja, hogy
+  napi adat nincs, havi van. A Trend kihagyja őket, mert napi bontás nélkül
+  nincs mit simítani.
+- **Az oszlop színe a mennyiség-chart közös, abszolút skálája** (5.14,
+  `Theme.tint(forGrams:overDays:)`), az ismert napok számára vetítve; csúcs
+  nincs, amit a határhoz lehetne mérni.
+- Import: `(personID, year, month)` szerinti merge, meglévő hónap marad. A
+  fájlban duplán szereplő hónapnál az első nyer, az érvénytelen hónap (13.)
+  kimarad. A megerősítő és az eredmény-ablak **akkor is** kiírja a havi
+  összegek számát, ha nulla: egy exportált fájl visszatöltésénél ez mondja meg,
+  hogy nincs benne mit betölteni, és nem az, hogy már mind megvan.
+
 ### 5.8 Egy szám alapból, tartomány ha a user kéri
 
 A motor mindig sávot számol (5.1). Hogy ez számként egy érték vagy tartomány,
@@ -524,6 +567,25 @@ határ.
 sör is vörösre viszi a görbét. Ez a skála működése, nem hibája — de ha a határ
 alsó vége miatt zavaró lesz, a megállók az egyetlen hangolandó dolog.
 
+**Az Előzmény mennyiség-chartja más tengelyen színez: mennyiség szerint,
+rögzített skálán.** Eredetileg a mennyiség-oszlop is a csúcs színét viselte
+(„hosszú nyugodt este vs. rövid éles"), és ez napi szinten működött is — de
+egy heti vagy havi oszlopnak nincs egyetlen csúcsa, és a hónap legrosszabb
+estéje pirosra festett volna egy könnyű hónapot. Ezért mindkét chart azt
+színezi, amit rajzol: a csúcs-chart a `tint(for:limit:)`-tel a saját határhoz,
+a mennyiség-chart a `Theme.tint(forGrams:overDays:)`-szel egy **abszolút**
+skálán. Két horgony, hónapra kimondva és napokra arányosítva minden más
+tartományra: **100 g/hónap** alatt teljesen nyugodt, **2500 g/hónap** a teljes
+vörös, fölötte sötétedik (megállók a vörös hányadában: 0,04 türkiz → 0,40
+borostyán → 0,70 korall → 1,00 vörös → 1,60 bíbor). Az oszlop skálája mindig az
+oszlop **ismert** napjaival arányos (`HistoryBar.knownDays`: rögzített napok +
+a havi összegből ismert napok), hogy egy félig ismert hónap ne látsszon
+csendesnek a hiány miatt. Ez a skála tudatosan *nem* a felhasználó saját száma
+— ettől lesz két ember vagy két év chartja összevethető; a saját szokásos
+hónaphoz mérés (medián) egy körig élt, és azért esett ki, mert az
+egészségről semmit nem mondott. A havi összegből ismert hónapok is ezt a skálát
+kapják, az Év nézetben oszlopként, a Hét és Hónap nézetben halvány sávként.
+
 ## 6. Validáció
 
 A `Reference/bac_model.py` a numerikus referencia. A Swift tesztek konkrét
@@ -582,7 +644,7 @@ EU-nyelvet ismeri. Alapból azt választja, amit az iOS nyelvi beállítása ké
 felhasználó ettől eltérhet a Profil fül Nyelv sorával, ami a Beállításokban az
 app saját „Előnyben részesített nyelv" sorára visz (`LanguageSection`).
 
-- `DrinkSmart/Localizable.xcstrings` — 208 kulcs, 24 nyelven. Generált fájl,
+- `DrinkSmart/Localizable.xcstrings` — 214 kulcs, 24 nyelven. Generált fájl,
   kézzel nem szerkesztjük.
 - `Reference/translations/<kód>.py` — nyelvenként egy modul, mindegyikben egy
   `TRANSLATIONS` szótár az angol forrásszövegtől az adott nyelvig.
@@ -854,10 +916,25 @@ figyelni kell, hogy a cache-elt összesítő a `BACEngine.version`-höz van köt
   megvan, és hogy hogyan nyílik. StoreKit nélkül a gomb debugban a flag
   override-ját állítja, release-ben „Coming soon".
 - **A cache háttérben töltődik vissza:** `SessionStore.backfillStaleSummaries`
-  a `refreshFromStore` végén, ötösével, `Task.yield`-del.
-- Tesztek: `HistoryWindowTests` (11) a `HistoryAggregateTests` (16) mellett;
-  Linuxon futtatva egy ideiglenes csomagban, Swift 6 módban, figyelmeztetés
-  nélkül.
+  a `refreshFromStore` végén, ötvenes adagokban. A szimuláció maga
+  `Task.detached`-ben fut (a modellből `BodyProfile` + `[Drink]` Sendable
+  bemenet készül a main actoron, csak a visszaírás nyúl a contexthez), egy
+  adag után egy `save()`. Korábban ötösével, a main actoron futott: egy
+  hatéves import (~1300 alkalom) ~260 mentést és ugyanannyi teljes
+  History-újraaggregálást jelentett, az app percekig szaggatott.
+- **A History napi aggregátuma cache-elt:** `HistoryAggregateCache` a
+  `HistoryView` `@State`-jében, kulcsa `SessionStore.revision` (minden
+  `save()` és `refreshFromStore()` lépteti) + személy + `trackingStartedAt`
+  + az aktuális ivási nap. A `snapshot` korábban minden body-kiértékelésnél
+  végigment az összes alkalmon és azok `drinks` relációján — pár száz
+  alkalomnál észrevétlen, importált évekkel görgetésenként újraszámolt.
+- Tesztek: `HistoryWindowTests` (11) a `HistoryAggregateTests` (16) mellett,
+  és `MonthlyTotalTests` (18, ebből 2 SwiftData-s: az import merge és az
+  archívum körbejárás, ezek csak Xcode-ban futnak); Linuxon futtatva egy
+  ideiglenes csomagban (`HistoryAggregate`, `HistoryWindow`, `HistoryTrend`,
+  `DrinkingDay`, `KnownMonth`, `FeatureFlags` + a BACKit, egy
+  `LocalizedStringResource` és `ClosedRange.midpoint` shimmel), Swift 6
+  módban, figyelmeztetés nélkül.
 
 - **Ugrás tetszőleges időszakra: a fejléc dátuma gomb** (`HistoryJumpSheet`),
   a Naptár app mintájára. A chevronok maradnak a szomszédos oldalra — a
@@ -1111,8 +1188,10 @@ A megvalósítás:
   metaadatokat, és verziók között nem stabil. A fájl fejlécében `schemaVersion`
   és `exportedAt`.
 - **Amit exportálunk:** `Person`, `DrinkingSession` (a profil-pillanatképpel) és
-  `DrinkRecord` minden tárolt mezője. Ugyanaz az elv, mint 5.5-nél: a bemenet
-  megy bele, nem a görbe.
+  `DrinkRecord` minden tárolt mezője, továbbá a `MonthlyTotal` sorok a
+  `monthlyTotals` kulcs alatt (5.7). Ugyanaz az elv, mint 5.5-nél: a bemenet
+  megy bele, nem a görbe. A `monthlyTotals` opcionális: régi fájlból nil-re
+  dekódolódik, régi build a kulcsot átlépi — ezért maradhat a `schemaVersion` 1.
 - **Amit nem:** a `cachedPeak*` / `cachedSoberAt` / `cachedEngineVersion` mezők.
   Újraszámolhatók, és a `BACEngine.version`-höz kötöttek — egy másik verziójú
   buildbe importálva hazudnának. Az `AppSettings` sem, az a készüléké.

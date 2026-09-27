@@ -301,10 +301,7 @@ TRANSLATIONS = {
     "Import this backup?": "Visszatöltöd ezt a mentést?",
     "Import": "Visszatöltés",
     "Everything in this backup is already here.": "A mentés minden eleme már megvan.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Hozzáad %@ alkalmat és %@ italt. A meglévő adatok nem változnak és nem vesznek el.",
     "Import finished": "A visszatöltés kész",
-    "Added %@ occasions and %@ drinks.": "Hozzáadva %@ alkalom és %@ ital.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -320,4 +317,15 @@ TRANSLATIONS = {
         "Ez a fájl nem a DrinkSmart mentése, vagy megsérült.",
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Ezt a mentést a DrinkSmart újabb verziója készítette. Frissítsd az appot, és próbáld újra.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Hozzáad %@ alkalmat, %@ italt és %@ havi összeget. A meglévő adatok nem változnak és nem vesznek el.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Hozzáadva: %@ alkalom, %@ ital és %@ havi összeg.',
+    'months as totals': 'hónap csak összegként',
+    'by month only': 'csak havi szinten',
+    'monthly total': 'havi összeg',
+    'No daily records for this day': 'Erről a napról nincs napi adat',
+    'Monthly total: %@': 'Havi összeg: %@',
+    'A dry month': 'Száraz hónap',
 }

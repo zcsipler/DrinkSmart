@@ -50,16 +50,25 @@ struct DataArchive: Codable, Equatable {
     var people: [ArchivedPerson]
     var sessions: [ArchivedSession]
 
+    /// Months known only as a total (`MonthlyTotal`). Optional, and that is
+    /// what keeps `schemaVersion` at 1: a file written before this existed
+    /// decodes to nil, and an older build reading a newer file skips the key.
+    /// Encoded as an empty list rather than omitted when there are none, so
+    /// two exports of the same data are the same file.
+    var monthlyTotals: [ArchivedMonthlyTotal]?
+
     init(
         schemaVersion: Int = DataArchive.currentVersion,
         exportedAt: Date = .now,
         people: [ArchivedPerson],
-        sessions: [ArchivedSession]
+        sessions: [ArchivedSession],
+        monthlyTotals: [ArchivedMonthlyTotal] = []
     ) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
         self.people = people
         self.sessions = sessions
+        self.monthlyTotals = monthlyTotals
     }
 
     var drinkCount: Int {
@@ -181,6 +190,18 @@ struct ArchivedDrink: Codable, Equatable {
     var drinkingMinutes: Double
     var stomachRaw: String
     var templateID: String
+}
+
+/// One month known only as a total — see `MonthlyTotal`.
+///
+/// No `id`: the identity of a month is the person, the year and the month,
+/// and that is what the import matches on. A file written by hand (which is
+/// how these usually arrive) should not have to invent UUIDs.
+struct ArchivedMonthlyTotal: Codable, Equatable {
+    var personID: UUID
+    var year: Int
+    var month: Int
+    var gramsEthanol: Double
 }
 
 /// Why an archive could not be used.

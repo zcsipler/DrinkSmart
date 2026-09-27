@@ -328,11 +328,7 @@ TRANSLATIONS = {
     "Import this backup?": "Timporta dan il-backup?",
     "Import": "Importa",
     "Everything in this backup is already here.": "Kollox f'dan il-backup diġà jinsab hawn.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Okkażjonijiet li se jiżdiedu: %@. Xarbiet: %@. Xejn minn dak li diġà hawn ma jinbidel "
-        "jew jitneħħa.",
     "Import finished": "L-importazzjoni lestiet",
-    "Added %@ occasions and %@ drinks.": "Okkażjonijiet miżjuda: %@. Xarbiet miżjuda: %@.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -349,4 +345,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Dan il-backup sar b'verżjoni aktar ġdida ta' DrinkSmart. Aġġorna l-app u erġa' "
         "pprova.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        "Okkażjonijiet li se jiżdiedu: %@. Xarbiet: %@. Totali ta' kull xahar: %@. Xejn minn dak li diġà hawn ma jinbidel jew jitneħħa.",
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': "Żdiedu %@ okkażjonijiet, %@ xarbiet u %@ totali ta' kull xahar.",
+    'months as totals': 'xhur bħala totali biss',
+    'by month only': 'skont ix-xahar biss',
+    'monthly total': 'total tax-xahar',
+    'No daily records for this day': "M'hemmx rekords ta' kuljum għal dan il-jum",
+    'Monthly total: %@': 'Total tax-xahar: %@',
+    'A dry month': 'Xahar mingħajr alkoħol',
 }

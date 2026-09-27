@@ -320,10 +320,7 @@ TRANSLATIONS = {
     "Import this backup?": "Uvesti ovu sigurnosnu kopiju?",
     "Import": "Uvezi",
     "Everything in this backup is already here.": "Sve iz ove sigurnosne kopije već je ovdje.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Dodaje — sesije: %@, pića: %@. Ništa što je već ovdje ne mijenja se niti uklanja.",
     "Import finished": "Uvoz završen",
-    "Added %@ occasions and %@ drinks.": "Dodano — sesije: %@, pića: %@.",
     "OK": "U redu",
 
     # --- LanguageSection: the app's language ---
@@ -341,4 +338,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Ova sigurnosna kopija napravljena je novijom verzijom aplikacije DrinkSmart. Ažuriraj "
         "aplikaciju i pokušaj ponovno.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Dodaje — sesije: %@, pića: %@, mjesečni zbrojevi: %@. Ništa što je već ovdje ne mijenja se niti uklanja.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Dodano: %@ sesija, %@ pića i %@ mjesečnih zbrojeva.',
+    'months as totals': 'mjeseci samo kao zbroj',
+    'by month only': 'samo po mjesecu',
+    'monthly total': 'mjesečni zbroj',
+    'No daily records for this day': 'Za ovaj dan nema dnevnih zapisa',
+    'Monthly total: %@': 'Mjesečni zbroj: %@',
+    'A dry month': 'Suh mjesec',
 }

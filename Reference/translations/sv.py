@@ -323,11 +323,7 @@ TRANSLATIONS = {
     "Import": "Importera",
     "Everything in this backup is already here.":
         "Allt i den här säkerhetskopian finns redan här.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Lägger till %@ tillfällen och %@ drycker. Inget som redan finns här ändras eller tas "
-        "bort.",
     "Import finished": "Importen klar",
-    "Added %@ occasions and %@ drinks.": "Lade till %@ tillfällen och %@ drycker.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -344,4 +340,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Den här säkerhetskopian skapades av en nyare version av DrinkSmart. Uppdatera appen "
         "och försök igen.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Lägger till %@ tillfällen, %@ drycker och %@ månadssummor. Inget som redan finns här ändras eller tas bort.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Lade till %@ tillfällen, %@ drycker och %@ månadssummor.',
+    'months as totals': 'månader bara som summor',
+    'by month only': 'bara per månad',
+    'monthly total': 'månadssumma',
+    'No daily records for this day': 'Inga dagliga poster för den här dagen',
+    'Monthly total: %@': 'Månadssumma: %@',
+    'A dry month': 'En torr månad',
 }

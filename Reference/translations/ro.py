@@ -326,11 +326,7 @@ TRANSLATIONS = {
     "Import": "Importă",
     "Everything in this backup is already here.":
         "Tot ce se află în această copie de rezervă există deja aici.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Ocazii de adăugat: %@. Băuturi de adăugat: %@. Nimic din ce există deja nu este "
-        "modificat sau șters.",
     "Import finished": "Import finalizat",
-    "Added %@ occasions and %@ drinks.": "Ocazii adăugate: %@. Băuturi adăugate: %@.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -348,4 +344,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Această copie de rezervă a fost creată cu o versiune mai nouă a DrinkSmart. "
         "Actualizează aplicația și încearcă din nou.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Ocazii de adăugat: %@. Băuturi: %@. Totaluri lunare: %@. Nimic din ce există deja nu este modificat sau șters.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Adăugate: %@ ocazii, %@ băuturi și %@ totaluri lunare.',
+    'months as totals': 'luni doar ca totaluri',
+    'by month only': 'doar pe lună',
+    'monthly total': 'total lunar',
+    'No daily records for this day': 'Nu există înregistrări zilnice pentru această zi',
+    'Monthly total: %@': 'Total lunar: %@',
+    'A dry month': 'O lună fără alcool',
 }

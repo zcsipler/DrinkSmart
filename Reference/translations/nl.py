@@ -324,11 +324,7 @@ TRANSLATIONS = {
     "Import this backup?": "Deze back-up importeren?",
     "Import": "Importeren",
     "Everything in this backup is already here.": "Alles in deze back-up staat er al.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Voegt %@ gelegenheden en %@ drankjes toe. Er wordt niets veranderd of verwijderd wat "
-        "er al staat.",
     "Import finished": "Importeren voltooid",
-    "Added %@ occasions and %@ drinks.": "%@ gelegenheden en %@ drankjes toegevoegd.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -346,4 +342,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Deze back-up is gemaakt met een nieuwere versie van DrinkSmart. Werk de app bij en "
         "probeer het opnieuw.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Voegt %@ gelegenheden, %@ drankjes en %@ maandtotalen toe. Er wordt niets veranderd of verwijderd wat er al staat.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': '%@ gelegenheden, %@ drankjes en %@ maandtotalen toegevoegd.',
+    'months as totals': 'maanden alleen als totaal',
+    'by month only': 'alleen per maand',
+    'monthly total': 'maandtotaal',
+    'No daily records for this day': 'Geen dagelijkse registraties voor deze dag',
+    'Monthly total: %@': 'Maandtotaal: %@',
+    'A dry month': 'Een droge maand',
 }

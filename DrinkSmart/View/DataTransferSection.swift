@@ -71,7 +71,11 @@ struct DataTransferSection: View {
             if plan.changesNothing {
                 Text("Everything in this backup is already here.")
             } else {
-                Text("Adds \(count(plan.sessionsToAdd)) occasions and \(count(plan.drinksToAdd)) drinks. Nothing already here is changed or removed.")
+                // The monthly count is printed even when it is zero. A file
+                // that carries no totals — an export of an app that had none
+                // — looks exactly like one whose totals are all here already,
+                // and "0 monthly totals" is what tells them apart.
+                Text("Adds \(count(plan.sessionsToAdd)) occasions, \(count(plan.drinksToAdd)) drinks and \(count(plan.monthsToAdd)) monthly totals. Nothing already here is changed or removed.")
             }
         }
         .alert(
@@ -81,7 +85,7 @@ struct DataTransferSection: View {
         ) { _ in
             Button("OK") {}
         } message: { outcome in
-            Text("Added \(count(outcome.sessionsAdded)) occasions and \(count(outcome.drinksAdded)) drinks.")
+            Text("Added \(count(outcome.sessionsAdded)) occasions, \(count(outcome.drinksAdded)) drinks and \(count(outcome.monthsAdded)) monthly totals.")
         }
         .alert(
             Text("Could not import"),

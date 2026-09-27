@@ -35,8 +35,20 @@ enum ArchiveImport {
         let newPeopleIDs: Set<UUID>
         let newSessionIDs: Set<UUID>
 
+        /// Months in the file that are not here yet, by their identity —
+        /// person, year, month. A month already present is left as it is,
+        /// same as a session: nothing records which figure is the newer one.
+        let newMonthKeys: Set<MonthKey>
+
+        struct MonthKey: Hashable {
+            let personID: UUID
+            let year: Int
+            let month: Int
+        }
+
         var peopleToAdd: Int { newPeopleIDs.count }
         var sessionsToAdd: Int { newSessionIDs.count }
+        var monthsToAdd: Int { newMonthKeys.count }
 
         var drinksToAdd: Int {
             archive.sessions
@@ -52,7 +64,7 @@ enum ArchiveImport {
         }
 
         var changesNothing: Bool {
-            newPeopleIDs.isEmpty && newSessionIDs.isEmpty
+            newPeopleIDs.isEmpty && newSessionIDs.isEmpty && newMonthKeys.isEmpty
         }
     }
 
@@ -65,6 +77,7 @@ enum ArchiveImport {
         let peopleAdded: Int
         let sessionsAdded: Int
         let drinksAdded: Int
+        let monthsAdded: Int
     }
 
     // MARK: Planning
@@ -76,11 +89,21 @@ enum ArchiveImport {
         let existingSessions = Set(
             ((try? context.fetch(FetchDescriptor<DrinkingSession>())) ?? []).map(\.id)
         )
+        let existingMonths = Set(
+            ((try? context.fetch(FetchDescriptor<MonthlyTotal>())) ?? [])
+                .map { Plan.MonthKey(personID: $0.personID, year: $0.year, month: $0.month) }
+        )
+        let archivedMonths = Set(
+            (archive.monthlyTotals ?? [])
+                .filter { (1...12).contains($0.month) && $0.gramsEthanol >= 0 }
+                .map { Plan.MonthKey(personID: $0.personID, year: $0.year, month: $0.month) }
+        )
 
         return Plan(
             archive: archive,
             newPeopleIDs: Set(archive.people.map(\.id)).subtracting(existingPeople),
-            newSessionIDs: Set(archive.sessions.map(\.id)).subtracting(existingSessions)
+            newSessionIDs: Set(archive.sessions.map(\.id)).subtracting(existingSessions),
+            newMonthKeys: archivedMonths.subtracting(existingMonths)
         )
     }
 
@@ -90,6 +113,7 @@ enum ArchiveImport {
     static func apply(_ plan: Plan, in context: ModelContext) -> Outcome {
         let inserted = insertPeople(plan, in: context)
         let (sessions, drinks) = insertSessions(plan, people: inserted, in: context)
+        let months = insertMonthlyTotals(plan, people: inserted, in: context)
 
         try? context.save()
 
@@ -97,8 +121,47 @@ enum ArchiveImport {
             owner: resolveOwnerConflict(in: context),
             peopleAdded: inserted.count,
             sessionsAdded: sessions,
-            drinksAdded: drinks
+            drinksAdded: drinks,
+            monthsAdded: months
         )
+    }
+
+    /// - Returns: how many months were inserted.
+    private static func insertMonthlyTotals(
+        _ plan: Plan,
+        people created: [UUID: Person],
+        in context: ModelContext
+    ) -> Int {
+        guard !plan.newMonthKeys.isEmpty else { return 0 }
+
+        // Same landing rule as for sessions: a month whose person is in
+        // neither place goes to the owner rather than nowhere.
+        var owners = created
+        for person in (try? context.fetch(FetchDescriptor<Person>())) ?? [] {
+            owners[person.id] = person
+        }
+        let fallback = owners.values.first(where: \.isOwner)
+
+        var count = 0
+        var seen: Set<Plan.MonthKey> = []
+        for archived in plan.archive.monthlyTotals ?? [] {
+            let key = Plan.MonthKey(personID: archived.personID, year: archived.year, month: archived.month)
+            // `seen` guards against the same month listed twice in one file;
+            // the first occurrence wins, like everywhere else in the merge.
+            guard plan.newMonthKeys.contains(key), seen.insert(key).inserted else { continue }
+            guard let person = owners[archived.personID] ?? fallback else { continue }
+
+            context.insert(
+                MonthlyTotal(
+                    personID: person.id,
+                    year: archived.year,
+                    month: archived.month,
+                    gramsEthanol: archived.gramsEthanol
+                )
+            )
+            count += 1
+        }
+        return count
     }
 
     /// - Returns: the people this import created, by id.

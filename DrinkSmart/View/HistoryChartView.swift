@@ -1,16 +1,25 @@
 import SwiftUI
 import Charts
+import BACKit
 
 /// One bar per day (or per month, in the year view), for one of two metrics.
 ///
-/// **Amount**: the bar says how much; its colour says how high it went, read
-/// against the limit in force that day (5.14) — so a long quiet evening and a
-/// short sharp one look different even at the same height. **Peak**: the bar
-/// is the day's highest level, with the limit drawn across as a dashed line,
-/// the same way the live chart draws it. Two cards rather than a toggle, so
-/// the two can be read against each other without switching. A bar with no valid cached
-/// peak is drawn neutral rather than guessed at; the store fills the cache in
-/// the background and the colour arrives with it.
+/// **Amount**: the bar says how much, and so does its colour — by grams per
+/// day the bar covers, on one fixed scale for every range
+/// (`Theme.tint(forGrams:overDays:)`), so a heavy week and a heavy month are
+/// the same red. **Peak**: the bar is the day's highest level, coloured
+/// against the limit in force that day (5.14), with the limit drawn across as
+/// a dashed line, the same way the live chart draws it. Two cards rather than
+/// a toggle, so the two can be read against each other without switching.
+///
+/// The amount chart used to borrow the peak's colour, so that a long quiet
+/// evening and a short sharp one looked different at the same height. That
+/// held for a day and broke for a month: a month bar has no single peak, and
+/// its worst evening would have painted a light month red. Each chart now
+/// colours by the thing it draws, and the pair says what the one could not.
+/// A peak bar with no valid cached peak is drawn neutral rather than guessed
+/// at; the store fills the cache in the background and the colour arrives
+/// with it.
 ///
 /// Days before records began are shaded, not left blank: blank is what a dry
 /// day looks like, and the two are not the same thing (5.7). The shading says
@@ -87,15 +96,34 @@ struct HistoryChartView: View {
     /// The bar's height in the unit on screen. Nil when there is nothing to
     /// draw: a peak whose cache has not been refilled yet is not zero, it is
     /// not known, and a bar of zero would say otherwise.
+    ///
+    /// A month known only by total has an amount and nothing else — a bar on
+    /// the amount chart when the bar is the whole month (the year view), no
+    /// bar on the peak chart, and no bar for a single day of it.
     private func value(_ bar: HistoryBar) -> Double? {
-        guard bar.state == .drank else { return nil }
-        switch metric {
-        case .amount:
+        switch (bar.state, metric) {
+        case (.drank, .amount):
             return amountUnit.convert(standardUnits: bar.totalUnits)
-        case .peak:
+        case (.drank, .peak):
             return bar.peakRange.map { unit.convert($0.midpoint) }
+        case (.summarized, .amount) where bar.totalUnits > 0:
+            return amountUnit.convert(standardUnits: bar.totalUnits)
+        default:
+            return nil
         }
     }
+
+    /// The fill of a region that stands for a month's total in the week and
+    /// month views: the month's colour on the amount scale, over all its
+    /// known days, faded so the bars of recorded days beside it stay the
+    /// foreground. The legend's swatch is the neutral version.
+    static func summarizedTint(for month: SummarizedMonth) -> Color {
+        Theme.tint(forGrams: month.gramsEthanol, overDays: max(1, month.unknownDays))
+    }
+
+    /// The legend's swatch for a summarized month, which cannot pick one
+    /// month's colour to stand for all.
+    static let neutralSummarizedTint = Theme.secondaryText.opacity(0.35)
 
     /// What the value bubble says. The peak is printed as a range where the
     /// band is wide (5.8) — the bar can only stand at its midpoint.
@@ -128,6 +156,36 @@ struct HistoryChartView: View {
         return Double(window.bars.prefix { $0.state == .unknown }.count) / Double(window.bars.count)
     }
 
+    /// Runs of day bars covered by a month's total, one region per month —
+    /// the week and month views' way of showing a month that has a sum but
+    /// no days. Empty in the year view, where such a month is a bar. A week
+    /// can straddle two such months, hence a list.
+    private struct SummarizedRegion: Identifiable {
+        let interval: DateInterval
+        let month: SummarizedMonth
+        let barCount: Int
+        var id: Date { interval.start }
+    }
+
+    private var summarizedRegions: [SummarizedRegion] {
+        guard window.range.barPeriod == .day else { return [] }
+        var regions: [SummarizedRegion] = []
+        for bar in window.bars {
+            guard bar.state == .summarized, let month = bar.summarizedMonth else { continue }
+            let plot = plotInterval(bar.interval)
+            if let last = regions.last, last.month == month, last.interval.end == plot.start {
+                regions[regions.count - 1] = SummarizedRegion(
+                    interval: DateInterval(start: last.interval.start, end: plot.end),
+                    month: month,
+                    barCount: last.barCount + 1
+                )
+            } else {
+                regions.append(SummarizedRegion(interval: plot, month: month, barCount: 1))
+            }
+        }
+        return regions
+    }
+
     private var axisTitle: LocalizedStringResource {
         switch metric {
         case .amount: amountUnit.shortLabel
@@ -151,6 +209,29 @@ struct HistoryChartView: View {
                 .annotation(position: .overlay, alignment: .center) {
                     if unknownShare >= 0.3 {
                         Text("No data before \(recordsBegan.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.system(size: 10, design: .rounded))
+                            .foregroundStyle(Theme.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(3)
+                            .padding(.horizontal, 6)
+                    }
+                }
+            }
+
+            // A month known by total, seen day by day: shaded like the
+            // pre-record run but in its own tint, and named with the figure
+            // that does exist when the run is wide enough to carry a label.
+            ForEach(summarizedRegions) { region in
+                RectangleMark(
+                    xStart: .value("Period", region.interval.start),
+                    xEnd: .value("Period", region.interval.end),
+                    yStart: .value("Units", 0),
+                    yEnd: .value("Units", yMaximum)
+                )
+                .foregroundStyle(Self.summarizedTint(for: region.month).opacity(0.22))
+                .annotation(position: .overlay, alignment: .center) {
+                    if Double(region.barCount) / Double(max(1, window.bars.count)) >= 0.3 {
+                        Text("Monthly total: \(amountUnit.formatted(standardUnits: region.month.month.totalUnits))")
                             .font(.system(size: 10, design: .rounded))
                             .foregroundStyle(Theme.secondaryText)
                             .multilineTextAlignment(.center)
@@ -241,13 +322,24 @@ struct HistoryChartView: View {
 
     // MARK: Colour
 
-    /// Peak against the limit of that day. Dry bars are not drawn at all, and
-    /// a bar whose peak is still being recomputed stays neutral.
+    /// Each chart by its own metric. Amount: grams over the bar's known
+    /// days, one scale for every range, which is what lets a summarized
+    /// month sit beside recorded ones without a second colour system. Peak:
+    /// against the limit of that day; dry bars are not drawn at all, and a
+    /// bar whose peak is still being recomputed stays neutral.
     private func tint(for bar: HistoryBar) -> Color {
-        guard let peak = bar.peakRange, let limit = bar.limit else {
-            return Theme.calm.opacity(0.45)
+        switch metric {
+        case .amount:
+            return Theme.tint(
+                forGrams: bar.totalUnits * Physiology.gramsPerStandardUnit,
+                overDays: bar.knownDays
+            )
+        case .peak:
+            guard let peak = bar.peakRange, let limit = bar.limit else {
+                return Theme.calm.opacity(0.45)
+            }
+            return Theme.tint(for: peak.midpoint, limit: limit)
         }
-        return Theme.tint(for: peak.midpoint, limit: limit)
     }
 
     // MARK: Axes

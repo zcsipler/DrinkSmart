@@ -54,7 +54,7 @@ struct DrinkSmartApp: App {
     /// worse outcome than one that does not sync — but trips an assertion, so a
     /// debug build says so instead of pretending.
     private static func makeContainer() -> ModelContainer {
-        let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self])
+        let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self, MonthlyTotal.self])
 
         if BuildCapabilities.cloudSync {
             do {

@@ -12,8 +12,33 @@ enum ArchiveExport {
         DataArchive(
             exportedAt: date,
             people: people(in: context),
-            sessions: sessions(in: context)
+            sessions: sessions(in: context),
+            monthlyTotals: monthlyTotals(in: context)
         )
+    }
+
+    private static func monthlyTotals(in context: ModelContext) -> [ArchivedMonthlyTotal] {
+        let descriptor = FetchDescriptor<MonthlyTotal>(
+            sortBy: [SortDescriptor(\.year), SortDescriptor(\.month)]
+        )
+        let stored = (try? context.fetch(descriptor)) ?? []
+
+        // Year and month sort in the descriptor; the person does not, being a
+        // UUID, so the file's order is settled here. See `drinks(of:)`.
+        return stored
+            .sorted { lhs, rhs in
+                if lhs.personID != rhs.personID { return lhs.personID.uuidString < rhs.personID.uuidString }
+                if lhs.year != rhs.year { return lhs.year < rhs.year }
+                return lhs.month < rhs.month
+            }
+            .map {
+                ArchivedMonthlyTotal(
+                    personID: $0.personID,
+                    year: $0.year,
+                    month: $0.month,
+                    gramsEthanol: $0.gramsEthanol
+                )
+            }
     }
 
     private static func people(in context: ModelContext) -> [ArchivedPerson] {

@@ -329,11 +329,7 @@ TRANSLATIONS = {
     "Import this backup?": "An cúltaca seo a iompórtáil?",
     "Import": "Iompórtáil",
     "Everything in this backup is already here.": "Tá gach rud sa chúltaca seo anseo cheana.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Cuirfidh sé seo %@ ócáid agus %@ deoch leis. Ní athrófar agus ní bhainfear aon rud "
-        "atá anseo cheana.",
     "Import finished": "Iompórtáil críochnaithe",
-    "Added %@ occasions and %@ drinks.": "Cuireadh %@ ócáid agus %@ deoch leis.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -351,4 +347,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Rinneadh an cúltaca seo le leagan níos nuaí de DrinkSmart. Nuashonraigh an aip agus "
         "bain triail eile as.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Cuirfidh sé seo %@ ócáid, %@ deoch agus %@ iomlán míosúil leis. Ní athrófar agus ní bhainfear aon rud atá anseo cheana.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Cuireadh %@ ócáid, %@ deoch agus %@ iomlán míosúil leis.',
+    'months as totals': 'mí mar iomláin amháin',
+    'by month only': 'de réir míosa amháin',
+    'monthly total': 'iomlán míosúil',
+    'No daily records for this day': 'Níl aon taifead laethúil don lá seo',
+    'Monthly total: %@': 'Iomlán míosúil: %@',
+    'A dry month': 'Mí thirim',
 }

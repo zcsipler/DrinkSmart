@@ -40,6 +40,10 @@ struct HistoryView: View {
     @Query(sort: \DrinkingSession.startedAt, order: .reverse)
     private var allSessions: [DrinkingSession]
 
+    /// Months known only by total, everyone's; filtered by person like the
+    /// sessions. A few dozen rows at most.
+    @Query private var allMonthlyTotals: [MonthlyTotal]
+
     @State private var segment: HistorySegment = .week
     @State private var offset = 0
 
@@ -56,6 +60,11 @@ struct HistoryView: View {
     /// The day a drink is being filled in for, while the add sheet is up.
     @State private var addingOn: DrinkingDay?
 
+    /// The day aggregate, kept between body evaluations. Rebuilt only when
+    /// the store's `revision`, the person, their tracking start or the
+    /// drinking day changes — not on every scroll or clock tick.
+    @State private var aggregate = HistoryAggregateCache()
+
     private var flags: FeatureFlags { .shared }
 
     /// Filtered in memory for the same reason as in `LiveView`: a `@Query`
@@ -67,8 +76,9 @@ struct HistoryView: View {
     }
 
     /// Everything the screen derives, built once per body evaluation. The
-    /// aggregate walks every day since records began; cheap, but not something
-    /// to redo in each subview that needs a number from it.
+    /// day aggregate inside it comes from `aggregate`, which rebuilds it only
+    /// when the data changed; the rest — the paged window, the sessions in
+    /// it — is a pass over a few hundred days or sessions and is redone here.
     private struct Snapshot {
         let days: [DayBucket]
         /// The paged window, or nil on the trend segment.
@@ -89,11 +99,19 @@ struct HistoryView: View {
 
     private var snapshot: Snapshot {
         let now = store.now
-        let sessions = self.sessions
-        let days = HistoryAggregate.days(
-            from: sessions.map(\.historyOccasion),
-            trackingStartedAt: store.person.trackingStartedAt,
-            now: now
+        let person = store.person
+        let key = HistoryAggregateCache.Key(
+            revision: store.revision,
+            personID: person.id,
+            trackingStartedAt: person.trackingStartedAt,
+            today: DrinkingDay.containing(now).start
+        )
+        let days = aggregate.days(
+            for: key,
+            trackingStartedAt: person.trackingStartedAt,
+            now: now,
+            sessions: { self.sessions },
+            monthlyTotals: { self.allMonthlyTotals.filter { $0.personID == person.id } }
         )
         let recordsBegan = days.first { $0.state != .unknown }?.day.calendarDate
 
@@ -112,8 +130,16 @@ struct HistoryView: View {
         }
 
         let window = HistoryWindow.make(range: range, offset: offset, days: days, now: now)
+        // The 05:00 boundary can file a session under the day before its
+        // clock date, so the cheap date comparison is widened by a day on each
+        // side and only the survivors pay for the calendar arithmetic.
+        let slack: TimeInterval = 24 * 3600
+        let roughStart = window.interval.start - slack
+        let roughEnd = window.interval.end + slack
         let inWindow = sessions.filter { session in
-            guard session.endedAt != nil else { return false }
+            guard session.endedAt != nil,
+                  session.startedAt >= roughStart, session.startedAt < roughEnd
+            else { return false }
             let filedUnder = DrinkingDay.containing(session.startedAt).calendarDate
             return filedUnder >= window.interval.start && filedUnder < window.interval.end
         }
@@ -373,7 +399,7 @@ struct HistoryView: View {
         let window = snapshot.figures
         return VStack(spacing: 12) {
             HStack(alignment: .top, spacing: 0) {
-                stat(store.amountUnit.shortLabel, store.amountUnit.format(standardUnits: window.totalUnits))
+                amount(window)
                 divider
                 stat("Drinks", window.drinkCount.formatted())
                 divider
@@ -448,11 +474,40 @@ struct HistoryView: View {
         }
     }
 
+    /// The total, and where part of it comes from when part of it comes from
+    /// somewhere else: months known only by total have no drinks, no days
+    /// and no peak on this card, only their sum — and a sum that does not
+    /// match the drinks beside it needs the reason printed under it.
+    private func amount(_ window: HistoryFigures) -> some View {
+        VStack(spacing: 4) {
+            Text(store.amountUnit.shortLabel)
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .textCase(.uppercase)
+                .foregroundStyle(Theme.secondaryText)
+            Text(verbatim: store.amountUnit.format(standardUnits: window.totalUnits))
+                .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                .foregroundStyle(Theme.primaryText)
+            if window.summarizedMonths > 0 {
+                (Text(verbatim: "\(window.summarizedMonths.formatted()) ") + Text("months as totals"))
+                    .font(.system(size: 9, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText.opacity(0.8))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     /// Sober days out of the days we were keeping records. When the window
     /// reaches back before records began, the denominator is smaller than
     /// the calendar — "4 / 9" in a year view needs a reason, and the reason
     /// is printed under it. It disappears on its own once a full window has
     /// been recorded.
+    ///
+    /// Days covered by a month's total are not "before records" in the sense
+    /// the footnote means — something is known about them — but they are
+    /// not in the denominator either, and the footnote says which kind of
+    /// missing they are.
     private func soberDays(_ window: HistoryFigures) -> some View {
         VStack(spacing: 4) {
             Text("Sober days")
@@ -462,8 +517,14 @@ struct HistoryView: View {
             Text(verbatim: "\(window.dryDays.formatted()) / \(window.recordedDays.formatted())")
                 .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
                 .foregroundStyle(Theme.primaryText)
-            if window.unknownDays > 0 {
-                (Text(verbatim: "\(window.unknownDays.formatted()) ") + Text("before records"))
+            if window.unrecordedDays > 0 {
+                (Text(verbatim: "\(window.unrecordedDays.formatted()) ") + Text("before records"))
+                    .font(.system(size: 9, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText.opacity(0.8))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            } else if window.coarseDays > 0 {
+                (Text(verbatim: "\(window.coarseDays.formatted()) ") + Text("by month only"))
                     .font(.system(size: 9, design: .rounded))
                     .foregroundStyle(Theme.secondaryText.opacity(0.8))
                     .lineLimit(1)
@@ -557,12 +618,25 @@ struct HistoryView: View {
     /// records began. Bars and their colours are the chart itself.
     @ViewBuilder
     private func legend(_ window: HistoryWindow) -> some View {
-        if window.unknownDays > 0 {
-            HStack(spacing: 6) {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Theme.surfaceRaised.opacity(0.45))
-                    .frame(width: 16, height: 9)
-                Text("before records")
+        let figures = window.figures
+        if figures.unrecordedDays > 0 || figures.coarseDays > 0 {
+            HStack(spacing: 14) {
+                if figures.unrecordedDays > 0 {
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Theme.surfaceRaised.opacity(0.45))
+                            .frame(width: 16, height: 9)
+                        Text("before records")
+                    }
+                }
+                if figures.coarseDays > 0 {
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(HistoryChartView.neutralSummarizedTint)
+                            .frame(width: 16, height: 9)
+                        Text("monthly total")
+                    }
+                }
             }
             .font(.system(size: 10, design: .rounded))
             .foregroundStyle(Theme.secondaryText)
@@ -660,17 +734,35 @@ struct HistoryView: View {
     /// records too: a drink filled in there is evidence we were already
     /// keeping records, and the store moves the start back for it.
     private func dayEmptyState(_ window: HistoryWindow, recordsBegan: Date?, day: DrinkingDay) -> some View {
-        let unknown = window.days.first?.state == .unknown
+        let first = window.days.first
+        let unknown = first?.state == .unknown
+        let summarized = first?.summarizedMonth
         return VStack(spacing: 12) {
             Image(systemName: unknown ? "calendar.badge.minus" : "face.smiling")
                 .font(.system(size: 42, weight: .thin))
                 .foregroundStyle(unknown ? Theme.secondaryText.opacity(0.6) : Theme.calm.opacity(0.75))
 
-            if unknown {
+            if let summarized, unknown {
+                // The third kind of nothing: the day is not known, the month
+                // is. Saying only "no data" here would contradict the year
+                // view, which shows a bar for this month.
+                Text("No daily records for this day")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.primaryText)
+                    .multilineTextAlignment(.center)
+                Text("Monthly total: \(store.amountUnit.formatted(standardUnits: summarized.month.totalUnits))")
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundStyle(Theme.secondaryText)
+                    .multilineTextAlignment(.center)
+            } else if unknown {
                 Text("No data before \((recordsBegan ?? store.now).formatted(date: .abbreviated, time: .omitted))")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.primaryText)
                     .multilineTextAlignment(.center)
+            } else if let summarized, summarized.isZero {
+                Text("A dry month")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.primaryText)
             } else if window.offset == 0 {
                 Text("Nothing logged today")
                     .font(.system(size: 16, weight: .medium, design: .rounded))

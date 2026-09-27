@@ -10,7 +10,7 @@ import BACKit
 /// history is a test nobody dares run twice.
 @MainActor
 func makeContext() throws -> ModelContext {
-    let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self])
+    let schema = Schema([Person.self, DrinkingSession.self, DrinkRecord.self, MonthlyTotal.self])
     let container = try ModelContainer(
         for: schema,
         configurations: ModelConfiguration(

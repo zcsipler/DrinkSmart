@@ -321,10 +321,7 @@ TRANSLATIONS = {
     "Import this backup?": "Kas importida see varukoopia?",
     "Import": "Impordi",
     "Everything in this backup is already here.": "Kõik selles varukoopias on juba siin.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Lisatavad joomiskorrad: %@, joogid: %@. Midagi siinolevast ei muudeta ega eemaldata.",
     "Import finished": "Importimine lõpetatud",
-    "Added %@ occasions and %@ drinks.": "Lisatud joomiskorrad: %@, joogid: %@.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -341,4 +338,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "See varukoopia on tehtud DrinkSmarti uuema versiooniga. Uuenda rakendust ja proovi "
         "uuesti.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Lisatavad joomiskorrad: %@, joogid: %@, kuusummad: %@. Midagi siinolevast ei muudeta ega eemaldata.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Lisatud: %@ joomiskorda, %@ jooki ja %@ kuusummat.',
+    'months as totals': 'kuud ainult summana',
+    'by month only': 'ainult kuu kaupa',
+    'monthly total': 'kuusumma',
+    'No daily records for this day': 'Selle päeva kohta pole päevaseid kirjeid',
+    'Monthly total: %@': 'Kuusumma: %@',
+    'A dry month': 'Kuiv kuu',
 }

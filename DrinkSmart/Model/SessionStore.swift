@@ -38,6 +38,17 @@ final class SessionStore {
     /// The current time. Refreshed every half minute.
     var now: Date = .now
 
+    /// Bumped whenever the stored data may have changed: on every save here,
+    /// and on every refresh (launch, foreground, remote change, import).
+    ///
+    /// Not a version of anything in particular — a cache key. History derives
+    /// its day aggregate from every session of the person, and a `@Query`
+    /// says only "something changed", so a screen that rebuilt the aggregate
+    /// on each body evaluation redid the whole walk on every scroll and tick.
+    /// Keying the aggregate on this instead rebuilds it once per actual change
+    /// (`HistoryAggregateCache`).
+    private(set) var revision = 0
+
     init(context: ModelContext, settings: AppSettings) {
         self.context = context
         self.settings = settings
@@ -207,6 +218,7 @@ final class SessionStore {
     /// Called on launch and when returning to the foreground, not only when a
     /// drink is logged — otherwise a forgotten session would stay open for days.
     func refreshFromStore() {
+        revision &+= 1
         closeEndedSessions()
         session = fetchOpenSession()
         rebuild()
@@ -239,16 +251,32 @@ final class SessionStore {
     @ObservationIgnored
     private var backfill: Task<Void, Never>?
 
-    /// Recomputes the cached summary of every closed session whose cache
-    /// predates the current engine, a few at a time, yielding in between.
+    /// How many sessions one round of the backfill simulates before it
+    /// writes them back and saves.
     ///
-    /// After a `BACEngine.version` bump every session's cache is stale at
-    /// once. History reads quantity straight from the drinks and treats the
-    /// peak as missing until this has caught up (11.3) — so a year of history
-    /// opens instantly and gets its colours a moment later, instead of running
-    /// a few hundred simulations on the way to the screen. A batch of five is
-    /// ~30 ms release, ~370 ms debug (6.): visible in debug, and still better
-    /// than one long stall.
+    /// Every save invalidates the `@Query` behind History and Live, and each
+    /// of those re-derives its screen from every session. So the number of
+    /// saves, not the number of simulations, is what the user feels: an
+    /// imported six-year history is ~1300 sessions, which used to mean ~260
+    /// saves and as many full re-aggregations. Fifty per save is about 30
+    /// rounds for the same file, and a round's worth of simulation runs off
+    /// the main actor anyway.
+    private static let backfillBatchSize = 50
+
+    /// Recomputes the cached summary of every closed session whose cache
+    /// predates the current engine, a batch at a time.
+    ///
+    /// After a `BACEngine.version` bump — or an import, which never carries
+    /// the cache (`DataArchive`) — every session's cache is stale at once.
+    /// History reads quantity straight from the drinks and treats the peak as
+    /// missing until this has caught up (11.3), so a year of history opens
+    /// instantly and gets its colours a moment later.
+    ///
+    /// The simulation itself is pure and runs on a background task: the
+    /// models are read on the main actor into `Sendable` inputs (`BodyProfile`,
+    /// `[Drink]`), the bands come back, and only the writes touch the context.
+    /// Before this the whole loop ran on the main actor, ~370 ms per five
+    /// sessions in debug (6.), and a large import stuttered for minutes.
     ///
     /// Sessions, not `SessionSummary` values, are what SwiftData observes, so
     /// each `store(_:)` invalidates exactly the rows that read it.
@@ -260,27 +288,53 @@ final class SessionStore {
             guard let self else { return }
 
             // Fetched inside the task, so nothing that is not `Sendable`
-            // crosses into it.
+            // crosses into it. Only `summary` is checked here — four scalar
+            // columns. Whether a session has drinks is settled batch by
+            // batch below, because reading `drinks` faults the relationship,
+            // and doing that for every session up front is one long stall
+            // before the first batch even starts.
             let descriptor = FetchDescriptor<DrinkingSession>(
                 predicate: #Predicate { $0.endedAt != nil }
             )
             let stale = ((try? context.fetch(descriptor)) ?? [])
-                .filter { $0.summary == nil && !($0.drinks ?? []).isEmpty }
+                .filter { $0.summary == nil }
             guard !stale.isEmpty else { return }
 
-            for (index, target) in stale.enumerated() {
+            let engine = self.engine
+            var start = 0
+            while start < stale.count {
                 guard !Task.isCancelled else { return }
-                let drinks = target.sortedDrinks
-                let computed = engine.simulateBand(profile: target.profile, drinks: drinks)
-                target.store(summary(for: target, band: computed))
+                let batch = Array(stale[start..<min(start + Self.backfillBatchSize, stale.count)])
+                start += batch.count
 
-                if index % 5 == 4 {
-                    save()
-                    await Task.yield()
+                // A closed session with no drinks has nothing to summarize;
+                // it is skipped here and stays out of History anyway.
+                let work: [(target: DrinkingSession, input: BackfillInput)] = batch.compactMap {
+                    let drinks = $0.sortedDrinks
+                    guard !drinks.isEmpty else { return nil }
+                    return ($0, BackfillInput(profile: $0.profile, drinks: drinks))
                 }
+                guard !work.isEmpty else { continue }
+
+                let inputs = work.map(\.input)
+                let bands = await Task.detached(priority: .utility) {
+                    inputs.map { engine.simulateBand(profile: $0.profile, drinks: $0.drinks) }
+                }.value
+
+                for (item, band) in zip(work, bands) {
+                    item.target.store(summary(for: item.target, band: band))
+                }
+                save()
+                await Task.yield()
             }
-            save()
         }
+    }
+
+    /// What one simulation needs, lifted off the model so it can leave the
+    /// main actor.
+    private struct BackfillInput: Sendable {
+        let profile: BodyProfile
+        let drinks: [Drink]
     }
 
     private func fetchOpenSession() -> DrinkingSession? {
@@ -973,6 +1027,7 @@ final class SessionStore {
     }
 
     private func save() {
+        revision &+= 1
         do {
             try context.save()
         } catch {

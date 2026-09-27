@@ -323,11 +323,7 @@ TRANSLATIONS = {
     "Import": "Importer",
     "Everything in this backup is already here.":
         "Alt i denne sikkerhedskopi findes allerede her.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Tilføjer %@ sessioner og %@ drinks. Intet af det, der allerede er her, ændres eller "
-        "fjernes.",
     "Import finished": "Import afsluttet",
-    "Added %@ occasions and %@ drinks.": "Tilføjede %@ sessioner og %@ drinks.",
     "OK": "OK",
 
     # --- LanguageSection: the app's language ---
@@ -344,4 +340,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Denne sikkerhedskopi er lavet af en nyere version af DrinkSmart. Opdater appen, og "
         "prøv igen.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Tilføjer %@ sessioner, %@ drinks og %@ månedstotaler. Intet af det, der allerede er her, ændres eller fjernes.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Tilføjede %@ sessioner, %@ drinks og %@ månedstotaler.',
+    'months as totals': 'måneder kun som totaler',
+    'by month only': 'kun pr. måned',
+    'monthly total': 'månedstotal',
+    'No daily records for this day': 'Ingen daglige optegnelser for denne dag',
+    'Monthly total: %@': 'Månedstotal: %@',
+    'A dry month': 'En tør måned',
 }

@@ -323,11 +323,7 @@ TRANSLATIONS = {
     "Import this backup?": "Да се импортира ли това резервно копие?",
     "Import": "Импортирай",
     "Everything in this backup is already here.": "Всичко от това резервно копие вече е тук.",
-    "Adds %@ occasions and %@ drinks. Nothing already here is changed or removed.":
-        "Ще добави сесии: %@, напитки: %@. Нищо, което вече е тук, не се променя и не се "
-        "премахва.",
     "Import finished": "Импортирането завърши",
-    "Added %@ occasions and %@ drinks.": "Добавени сесии: %@, напитки: %@.",
     "OK": "Добре",
 
     # --- LanguageSection: the app's language ---
@@ -345,4 +341,15 @@ TRANSLATIONS = {
     "This backup was made by a newer version of DrinkSmart. Update the app and try again.":
         "Това резервно копие е направено с по-нова версия на DrinkSmart. Обнови приложението и "
         "опитай отново.",
+
+    # --- History: months known only by total (MonthlyTotal) ---
+    'Adds %@ occasions, %@ drinks and %@ monthly totals. Nothing already here is changed or removed.':
+        'Ще добави сесии: %@, напитки: %@ и месечни суми: %@. Нищо, което вече е тук, не се променя и не се премахва.',
+    'Added %@ occasions, %@ drinks and %@ monthly totals.': 'Добавени: %@ сесии, %@ напитки и %@ месечни суми.',
+    'months as totals': 'месеца само като суми',
+    'by month only': 'само по месеци',
+    'monthly total': 'месечна сума',
+    'No daily records for this day': 'Няма дневни записи за този ден',
+    'Monthly total: %@': 'Месечна сума: %@',
+    'A dry month': 'Сух месец',
 }
